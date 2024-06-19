@@ -16,3 +16,4 @@ six==1.16.0
 sqlparse==0.5.0
 tenacity==8.4.1
 tzdata==2024.1
+whitenoise==6.7.0
