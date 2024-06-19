@@ -1,0 +1,46 @@
+.btn {
+    font-size: 14px; /* Adjust the font size to your preference */
+}
+
+table {
+    font-size: 14px; /* Adjust the font size to your preference */
+}
+
+
+
+
+.form-floating {
+    position: relative;
+}
+
+
+.form-floating label {
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    padding: 0.25rem 0.5rem;
+    transition: all 0.3s;
+    pointer-events: none;
+}
+
+.page-link {
+    font-size: 11px; /* Adjust the font size to your preference */
+    color: #C94890;
+    border: None;
+}
+
+.pagination .active a {
+    background-color: #C94890; /* Change to your desired color */
+    color: #fff; /* Change to your desired color */
+}
+
+.btn-primary {
+    background-color: #C94890; /* Change to your desired color */
+    border: None;
+    
+}
+
+a {
+    color: #C94890;
+    text-decoration: none;
+}
