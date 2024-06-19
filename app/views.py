@@ -1125,48 +1125,54 @@ def dashboardView(request):
     users = User.objects.all()
     experiments = Experiment.objects.all()
     my_experiments = Experiment.objects.filter(author=request.user)
-    Y = []
-    X = []
-    user = []
 
-    # Iterate through Stack objects to collect data
-    if Stack.objects.all():
-        for stack in Stack.objects.all():
+    stacks = Stack.objects.all()
+    if not stacks:
+        # Handle case where there are no stacks
+        # For example, you can set default values for X, Y, and user lists
+        X = []
+        Y = []
+        user = []
+    else:
+        # Initialize lists to store data for plotting
+        X = []
+        Y = []
+        user = []
+
+        # Iterate through Stack objects to collect data
+        for stack in stacks:
             Y.append(stack.hero_device_pce)
-            created = stack.created
-            # Strip the time from the date
-            created = created.strftime("%Y-%m-%d")
+            created = stack.created.strftime("%Y-%m-%d")
             X.append(created)
-
-            user.append(stack.author.first_name + ' ' + stack.author.last_name)
-
-    # Plotting chart using Plotly Express
-    fig = px.scatter(
-        x=X,
-        y=Y,
-        title="Stacks Hero Device vs Date Created",
-        labels=dict(x="Date Created", y="Power Conversion Efficiency (%)"),
-        template="simple_white",
-    )
-
-    fig.update_traces(
-        hovertemplate="<b>Date:</b> %{x}<br><b>PCE:</b> %{y}%<br><b>Author:</b> %{text}",
-        text=user,  # Provide URLs for each data point
-        marker=dict(
-            size=10,  # Adjust the marker size as needed
-            color='navy',  # Marker color (optional)
-            symbol='circle',  # Marker symbol (optional)
-            # Marker border settings (optional)
-            line=dict(width=2, color='navy'),
+            user.append(f"{stack.author.first_name} {stack.author.last_name}")
+    
+    if not stacks:
+        # Provide default data or message to display
+        X = []
+        Y = []
+        user = []
+        pce_chart = "<p>No data available</p>"
+    else:
+        # Proceed with plotting logic as before
+        fig = px.scatter(
+            x=X,
+            y=Y,
+            title="Stacks Hero Device vs Date Created",
+            labels=dict(x="Date Created", y="Power Conversion Efficiency (%)"),
+            template="simple_white",
         )
-
-    )
-
-    # Convert the figure to HTML
-    pce_chart = fig.to_html()
-    # fig.update_xaxes(rangeslider_visible=True)
-
-    pce_chart = fig.to_html()
+        fig.update_traces(
+            hovertemplate="<b>Date:</b> %{x}<br><b>PCE:</b> %{y}%<br><b>Author:</b> %{text}",
+            text=user,
+            marker=dict(
+                size=10,
+                color='navy',
+                symbol='circle',
+                line=dict(width=2, color='navy'),
+            )
+        )
+        pce_chart = fig.to_html()
+  
 
     context = {'users': users, 'experiments': experiments, 'my_experiments': my_experiments,
                'pce_chart': pce_chart, 'stacks': Stack.objects.all()}
