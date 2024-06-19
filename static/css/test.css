@@ -1,0 +1,69 @@
+.container {
+    max-width: 1200px;
+  }
+  
+  .form-floating {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+  
+  .form-floating > input,
+  .form-floating > select,
+  .form-floating > textarea {
+    height: calc(3.5rem + 2px);
+    padding: 1rem 0.75rem;
+  }
+  
+  .form-floating > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding: 1rem 0.75rem;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+  
+  .form-floating > input:focus,
+  .form-floating > select:focus,
+  .form-floating > textarea:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  
+  .form-floating > input:focus ~ label,
+  .form-floating > select:focus ~ label,
+  .form-floating > textarea:focus ~ label,
+  .form-floating > input:not(:placeholder-shown) ~ label,
+  .form-floating > select:not(:placeholder-shown) ~ label,
+  .form-floating > textarea:not(:placeholder-shown) ~ label {
+    padding-top: calc(0.25rem + 1px);
+    padding-bottom: calc(0.25rem + 1px);
+    font-size: 0.75rem;
+    color: #495057;
+    top: -1rem;
+    left: 0.75rem;
+  }
+  
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .pagination {
+    margin-top: 1rem;
+  }
+  
+  .btn-link {
+    padding: 0;
+    color: #007bff;
+    font-weight: 400;
+  }
+  
+  .btn-link:hover {
+    text-decoration: underline;
+  }
+  

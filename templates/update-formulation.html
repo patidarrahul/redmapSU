@@ -1,0 +1,176 @@
+{% extends 'base.html'%} {% load static %} {% block content %}
+
+<div class="container mt-1">
+  <div class="row">
+    <h5 class="mb-4">Add Formulation</h5>
+    <form method="POST">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6 mt-2 mb-2">
+          <div class="form-floating">
+            <input type="text" class="form-control" id="formulation-name" name="formulation-name" value="{{formulation.name}}" required />
+            <label for="formulation-name">Formulation Name</label>
+          </div>
+        </div>
+        <div class="col-md-3 mt-2 mb-2">
+          <div class="form-floating">
+            <select class="form-select" id="atmosphere" name="atmosphere" required>
+              <option selected value="{{formulation.atmosphere}}">{{formulation.atmosphere}}</option>
+              <option value="N2">N<sub>2</sub></option>
+              <option value="Air">Air</option>
+            </select>
+            <label for="atmosphere">Atmosphere Made In</label>
+          </div>
+        </div>
+        <div class="col-md-3 mt-2 mb-2">
+          <div class="form-floating">
+            <input type="date" class="form-control" id="formulation-created" name="formulation-created" value="{{formulation.created|date:'Y-m-d'}}" required />
+            <label for="formulation-created">Date Created</label>
+          </div>
+        </div>
+        <div>
+          <button type="button" class="btn btn-outline-success add-material-button">Add More</button>
+        </div>
+        {% for component in formulation_components %}
+        <div id="formulation-info">
+          <div class="row">
+            <div class="col-md-4 mt-2 mb-2">
+              <div class="form-floating">
+                <select class="form-select" id="inventory-name" name="inventory-name[]" required>
+                  <option selected value="{{component.ingredient.id}}">{{component.ingredient.name}} ({{component.ingredient.batch}})</option>
+                  {% for inventory in inventory_list %}
+                  <option value="{{inventory.id}}">{{inventory.name}} ({{inventory.batch}})</option>
+                  {% endfor %}
+                </select>
+                <label for="inventoryName">inventory Name</label>
+              </div>
+            </div>
+
+            <div class="col-md-2 mt-2 mb-2">
+              <div class="form-floating">
+                <input type="number" step="0.01" class="form-control" id="quantity" name="quantity[]" value="{{component.quantity}}" required />
+                <label for="quantity">Quantity</label>
+              </div>
+            </div>
+
+            <div class="col-md-2 mt-2 mb-2">
+              <div class="form-floating">
+                <select class="form-select" id="measuremnt-unit" name="measurement-unit[]" required>
+                  <option selected value="{{component.measurement_unit.id}}">{{component.measurement_unit.short_name}}</option>
+                  {% for measurement_unit in measurement_units %}
+                  <option value="{{measurement_unit.id}}">{{ measurement_unit.short_name}}</option>
+                  {% endfor %}
+                </select>
+                <label for="measurementUnit">Unit</label>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <button class="btn btn-danger remove-material-button mt-2" type="button" style="padding-left: 25px; padding-right: 25px; height: 58px; width: 118px">Remove</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        <div id="add-ingredient"></div>
+        <div class="col-md-6 mt-2 mb-2">
+          <div class="form-floating">
+            <input type="text" class="form-control" id="notes" name="notes" />
+            <label for="notes">Notes</label>
+          </div>
+        </div>
+        <div class="col-md-7">
+          <button class="btn btn-outline-primary mt-3 mb-3 w-120" type="submit" style="padding-left: 25px; padding-right: 25px" value="update" name="action">Update</button>
+          <button class="btn btn-outline-primary mt-3 mb-3 w-120" type="submit" style="padding-left: 25px; padding-right: 25px" value="save-as-new" name="action">Save as New</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="{% static 'js/formulation.js' %}"></script>
+
+<script>
+  $(document).ready(function () {
+    const materialInfoContainer = $("#add-ingredient");
+
+    $(".add-material-button").on("click", function () {
+      const newMaterialInfo = `
+        <div class="row">
+            
+            <div class="col-md-4 mt-2 mb-2">
+              <div class="form-floating">
+                <select
+                  class="form-select"
+                  id="inventory-name"
+                  name="inventory-name[]"
+                 
+                  required
+                >
+                
+                {% for inventory in inventory_list %}
+                  <option value="{{inventory.id}}">{{inventory.name}} ({{inventory.batch}})</option>
+                  {% endfor %}
+                </select>
+                <label for="inventory-name">inventory Name</label>
+              </div>
+            </div>
+            <div class="col-md-2 mt-2 mb-2">
+              <div class="form-floating">
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  id="quantity"
+                  name="quantity[]"
+                 
+                  required
+                />
+                <label for="quantity">Quantity</label>
+              </div>
+            </div>
+
+            <div class="col-md-2 mt-2 mb-2">
+              <div class="form-floating">
+                <select
+                  class="form-select"
+                  id="measuremnt-unit"
+                  name="measurement-unit[]"
+              
+                  required
+                >
+                  {% for measurement_unit in measurement_units %}
+                  <option value="{{measurement_unit.id}}">
+                    {{measurement_unit.short_name}}
+                  </option>
+                  {% endfor %}
+                </select>
+                <label for="measurementUnit">Unit</label>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <button
+                class="btn btn-danger mt-2 remove-material-button" style="
+                  padding-left: 25px;
+                  padding-right: 25px;
+                  height: 58px;
+                  width: 118px;
+                "
+                type="button"
+                
+              >
+                Remove
+              </button>
+            </div>
+        `;
+      materialInfoContainer.append(newMaterialInfo);
+    });
+
+    materialInfoContainer.on("click", ".remove-material-button", function () {
+      $(this).closest(".row").remove();
+    });
+  });
+</script>
+
+{% endblock content %}

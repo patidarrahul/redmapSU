@@ -1,0 +1,117 @@
+{% extends 'base.html' %} {% load static %} {% load widget_tweaks %} {% load crispy_forms_tags %}
+<!--  -->
+{% block extrastyle %}
+<style>
+  .form-group {
+    margin-top: 10px;
+  }
+  .form-check {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .select2-container .select2-selection--multiple {
+    min-height: calc(3rem + calc(var(--bs-border-width) * 2));
+    height: auto;
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-border-color);
+  }
+  .form-group input {
+    margin-top: 5px;
+    min-height: calc(3rem + calc(var(--bs-border-width) * 2));
+    height: auto;
+    border-radius: var(--bs-border-radius, 0.25rem); /* Default border radius */
+    border: 1px solid var(--bs-border-color, #ced4da); /* Default border color */
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+<div class="container mt-1" x-data="{showStepsDiv : false}">
+  <div class="row d-flex justify-content-center">
+    <form method="post" class="col-md-6">
+      {% csrf_token %}
+      <!--  -->
+      {% if action == 'update' %}
+      <h4 class="mb-4" style="color: #7b7b7b">Update Spin Conditions</h4>
+      {% else %}
+      <h4 class="mb-4" style="color: #7b7b7b">Add Spin Conditions</h4>
+      {% endif %}
+
+      <div class="col form-group">
+        <label for="{{ form.name.id_for_label }}">Name</label>
+        {{ form.name }}
+      </div>
+      <div class="col mt-2">
+        <div id="steps-field">
+          <span class="d-flex justify-content-between">
+            <label for="{{ form.steps.id_for_label }}" class="mb-2"> Steps:</label>
+            <label>
+              <a href="#" class="ml-4" style="color: #7b7b7b; text-decoration: none" @click="showStepsDiv = true">Add</a>
+            </label>
+          </span>
+          {{form.steps}}
+        </div>
+      </div>
+
+      <div class="form-check">
+        {{ form.antisolvent_used }}
+        <label class="form-check-label" for="{{ form.antisolvent_used.id_for_label }}"> Antisolvent Used </label>
+      </div>
+
+      <div id="antisolvent-fields" style="display: none">
+        <div class="col form-group">
+          <label for="{{ form.antisolvent.id_for_label }}">Antisolvent</label>
+          {{ form.antisolvent }}
+        </div>
+
+        <div class="col form-group">
+          <label for="{{ form.antisolvent_volume.id_for_label }}">Antisolvent Volume</label>
+          {{ form.antisolvent_volume }}
+        </div>
+
+        <div class="col form-group">
+          <label for="{{ form.antisolvent_drop_time.id_for_label }}">Antisolvent Drop Time</label>
+          {{ form.antisolvent_drop_time }}
+        </div>
+      </div>
+      {% if action == 'update' %}
+      <button type="submit" class="btn btn-primary">Update</button>
+      {% else %}
+      <button type="submit" class="btn btn-primary">Save</button>
+      {% endif %}
+    </form>
+    <div class="col-md-6" id="add-step" x-show="showStepsDiv">
+      <form method="post" x-target="steps-field" action="{% url 'spin_step' %}">
+        {% csrf_token %} {{ spin_step_form | crispy}}
+        <button type="submit" class="btn btn-primary" @click="showStepsDiv = false">Add Step</button>
+        <button type="submit" class="btn btn-secondary" id="cancle-step-btn" @click="showStepsDiv = false">Cancle</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %} {% block extrascripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var antisolventCheckbox = document.querySelector('input[name="antisolvent_used"]');
+    var antisolventFields = document.getElementById("antisolvent-fields");
+
+    function toggleAntisolventFields() {
+      if (antisolventCheckbox.checked) {
+        antisolventFields.style.display = "block";
+      } else {
+        antisolventFields.style.display = "none";
+      }
+    }
+
+    antisolventCheckbox.addEventListener("change", toggleAntisolventFields);
+    toggleAntisolventFields(); // Initial check on page load
+  });
+</script>
+
+<script>
+  $("#id_steps").select2({
+    placeholder: "Add steps",
+    theme: "classic",
+  });
+</script>
+
+{% endblock extrascripts %}

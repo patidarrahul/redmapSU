@@ -1,0 +1,65 @@
+{% extends 'base.html' %} {% load static %} {% block extrastyle %}
+<style>
+  .form-group {
+    margin-top: 10px;
+  }
+
+  .form-group label {
+    margin-bottom: 5px;
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+<div class="container mt-1">
+  <div class="row justify-content-center">
+    {% if action == 'update' %}
+    <h3 class="mb-4" style="color: #7b7b7b">Update Experiment</h3>
+    {% else %}
+    <h3 class="mb-4" style="color: #7b7b7b">Add an Experiment</h3>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-2 form-group">
+          <label for="{{ form.serial_number.id_for_label }}">{{ form.serial_number.label }}</label>
+          {{ form.serial_number }}
+        </div>
+        <div class="col-md-4 form-group">
+          <label for="{{ form.project.id_for_label }}">{{ form.project.label }}</label>
+          {{ form.project }}
+        </div>
+        <div class="col-md-2 form-group">
+          <label for="{{ form.number_of_variables.id_for_label }}">{{ form.number_of_variables.label }}</label>
+          {{ form.number_of_variables }}
+        </div>
+
+        <div class="col-md-2 form-group">
+          <label for="{{ form.created.id_for_label }}">{{ form.created.label }}</label>
+          {{ form.created }}
+        </div>
+
+        <div class="col-md-12 form-group">
+          <label for="{{ form.objective.id_for_label }}">{{ form.objective.label }}</label>
+          {{ form.objective }}
+        </div>
+        <div class="col-md-12 form-group">
+          <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+          {{ form.notes }}
+        </div>
+        <div class="col-md-12 form-group">
+          <label for="{{ form.data_dir.id_for_label }}">Data Directory</label>
+          {{ form.data_dir }}
+          <p class="card-text" style="color: #7b7b7b; font-size: 12px">
+            Please make a directory using the file manager and paste the address of the directory here. All the data of this experiment will be stored in this directory.
+          </p>
+        </div>
+      </div>
+      {% if action == 'update' %}
+      <button type="submit" class="btn btn-primary mt-4">Update</button>
+      {% else %}
+      <button type="submit" class="btn btn-primary mt-4">Save</button>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+{% endblock content %}

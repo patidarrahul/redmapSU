@@ -1,0 +1,63 @@
+{% extends 'base.html' %} {% load static %} {% block extrastyle %} {% load widget_tweaks %}
+<style>
+  .form-group {
+    margin-top: 10px;
+  }
+
+  .form-group label {
+    margin-bottom: 5px;
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+
+<div class="container mt-1">
+  <div class="row justify-content-center">
+    {% if action == 'update' %}
+    <h3 class="mb-4" style="color: #7b7b7b">Update Stack</h3>
+    {% else %}
+    <h3 class="mb-4" style="color: #7b7b7b">Stack</h3>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-3 form-group">
+          <label for="{{ form.experiment.id_for_label }}">Experiment</label>
+          {{ form.experiment }}
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="{{ form.name.id_for_label }}">Name</label>
+          {% render_field form.name type="text" pattern="[a-zA-Z0-9.-_ ]*" title="Only alphanumeric characters are allowed (no slashes)" %}
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="{{ form.substrate.id_for_label }}">Substrate</label>
+          {{ form.substrate }}
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="{{ form.geometry.id_for_label }}">Geometry</label>
+          {{ form.geometry }}
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="{{ form.number_of_layers.id_for_label }}">Number of Layers</label>
+          {{ form.number_of_layers }}
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="{{ form.number_of_devices.id_for_label }}">Number of Devices</label>
+          {{ form.number_of_devices }}
+        </div>
+
+        <div class="col-md-3 form-group">
+          <label for="{{ form.created.id_for_label }}">Created</label>
+          {{ form.created }}
+        </div>
+      </div>
+      {% if action == 'update' %}
+      <button type="submit" class="btn btn-primary">Update</button>
+      <button type="submit" name="save_as_new" value="save_as_new" class="btn btn-secondary">Save As New</button>
+      {% else %}
+      <button type="submit" class="btn btn-primary mt-5">Save</button>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+{% endblock content %} {% block extrascripts %} {% endblock extrascripts %}

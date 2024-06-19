@@ -1,0 +1,189 @@
+{% extends 'base.html' %} {% load static %}
+<!--  -->
+{% block extrastyle %}
+<link href="{% static 'css/file-manager.css' %}" rel="stylesheet" />
+{% endblock extrastyle %} {% block content %}
+<div class="container w-75">
+  <div class="row mb-3">
+    <ol class="breadcrumb text-big py-3 m-0">
+      {% for crumb_name, crumb_url in breadcrumb_data %}
+
+      <li class="breadcrumb-item">
+        <a href="{% url 'file_manager' crumb_url %}" style="text-decoration: none">{{ crumb_name }}</a>
+      </li>
+
+      {% endfor %}
+    </ol>
+
+    <hr class="m-0" />
+  </div>
+  <div class="row mb-3">
+    <div class="col-sm d-flex justify-content-start">
+      <a type="button" class="btn btn-primary mr-2" data-bs-toggle="modal" data-bs-target="#uploadModal" id="uploadButton"><i class="bi bi-upload"></i>&nbsp; Upload</a>
+      <a type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newFolderModal" id="newFolderButton"><i class="bi bi-folder-plus"></i>&nbsp; New Folder</a>
+    </div>
+    <div class="col-sm d-flex justify-content-end">
+      <div class="btn-group mr-2">
+        <button type="button" class="btn dropdown-toggle px-2" data-bs-toggle="dropdown">Action</button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="javascript:void(0)">Move</a>
+          <a class="dropdown-item" href="javascript:void(0)">Copy</a>
+          <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#renameModal">Rename</a>
+          <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</a>
+        </div>
+      </div>
+    </div>
+
+    <hr class="mt-3" />
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- <div class="modal-header">
+              <h1 class="modal-title fs-5" id="uploadModalLabel">Choose Files</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> -->
+        <div class="modal-body">
+          <form method="post" action="{% url 'upload_files' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="current_directory" value="{{ current_directory }}" />
+
+            <input type="file" class="form-control" name="files" multiple />
+            <button type="submit" class="btn btn-primary">Upload</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- new folder Modal -->
+  <div class="modal fade" id="newFolderModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- <div class="modal-header">
+            <h1 class="modal-title fs-5" id="uploadModalLabel">Choose Files</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div> -->
+        <div class="modal-body">
+          <form method="post" action="{% url 'new_folder' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="current_directory" value="{{ current_directory }}" />
+            <p>New Folder Name</p>
+            <input name="new_folder_name" class="form-control mb-3 mt-3" type="text" pattern="[a-zA-Z0-9 ]*" title="Only alphanumeric characters are allowed (no slashes)" />
+            <button type="submit" class="btn btn-primary">Create</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- <div class="modal-header">
+              <h1 class="modal-title fs-5" id="uploadModalLabel">Choose Files</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> -->
+        <div class="modal-body">
+          <form method="post" action="{% url 'delete_files' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="current_directory" value="{{ current_directory }}" />
+            <input type="hidden" name="selected_items" id="selected_items_input_delete" />
+
+            <h4>Are you sure you want to delete these files?</h4>
+            <button type="submit" class="btn btn-primary">Delete</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- <div class="modal-header">
+              <h1 class="modal-title fs-5" id="uploadModalLabel">Choose Files</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> -->
+        <div class="modal-body">
+          <form method="post" action="{% url 'rename' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="current_directory" value="{{ current_directory }}" />
+            <input type="hidden" name="selected_items_rename" id="selected_items_input_rename" />
+
+            <input type="text" name="new_name" class="form-control" placeholder="New name" />
+
+            <button type="submit" class="btn btn-primary">Rename</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="file-manager-container file-manager-col-view">
+    {% for directory in directory_list %}
+    <div class="file-item mx-1">
+      <div class="file-item-select-bg bg-primary"></div>
+
+      <label class="file-item-checkbox custom-control custom-checkbox">
+        <input type="checkbox" value="{{ directory.name }}" class="custom-control-input" />
+        <span class="custom-control-label"></span>
+      </label>
+      <a
+        href="{% url 'copy_path' %}?name={{ directory.name }}&current_directory={{ current_directory }}"
+        style="text-decoration: none; color: black; position: absolute; top: 5px; right: 5px"
+        title="Copy Path"
+      >
+        <i class="bi bi-copy"></i
+      ></a>
+      <div class="file-item-icon bi bi-folder text-secondary"></div>
+      <a href="{% url 'file_manager' directory.path %}" class="file-item-name" style="color: black"> {{ directory.name }} </a>
+    </div>
+
+    {% endfor %} {% for file in files_list %}
+    <div class="file-item">
+      <div class="file-item-select-bg bg-primary"></div>
+      <label class="file-item-checkbox custom-control custom-checkbox">
+        <input type="checkbox" value="{{ file.name }}" class="custom-control-input" />
+        <span class="custom-control-label"></span>
+      </label>
+      <div class="file-item-icon bi bi-file-earmark-fill text-secondary"></div>
+      <a href="" class="file-item-name" style="color: black"> {{ file.name }} </a>
+    </div>
+
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %} {% block extrascripts %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  // Assuming you're using jQuery for simplicity
+  $("input[type=checkbox]").change(function () {
+    var selectedItems = [];
+    $("input[type=checkbox]:checked").each(function () {
+      selectedItems.push($(this).val());
+    });
+    $("#selected_items_input_rename").val(selectedItems.join(","));
+
+    $("#selected_items_input_delete").val(selectedItems.join(","));
+  });
+</script>
+
+{% endblock extrascripts %}

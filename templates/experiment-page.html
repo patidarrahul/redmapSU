@@ -1,0 +1,272 @@
+{% extends 'base.html' %} {% load static %} {% block extrastyle %}
+<style>
+  .stack-container {
+    border-radius: 20px;
+    box-shadow: inset 0 0 5px #a29f9f;
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+  }
+  .layer-container {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .layer {
+    border: 1px solid #cac9c9;
+    border-radius: 5px;
+    width: 100%;
+    padding: 10px;
+
+    background-color: #f0f0f0; /* Set background color of the layer */
+  }
+
+  .treatment {
+    border: 1px solid #e3ff55;
+    border-radius: 5px;
+    width: 100%;
+
+    height: 14px;
+    background-color: #e3ff55; /* Set background color of the layer */
+  }
+
+  .treatment label {
+    font-size: 10px;
+    text-align: center;
+  }
+  .layer-name {
+    text-decoration: none; /* Remove default hyperlink styling */
+    color: #333; /* Set text color */
+    display: flex;
+    justify-content: center;
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 55%;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+  }
+
+  .layer:hover .dropdown-menu {
+    display: block;
+  }
+
+  .layer-containers-container {
+    display: flex;
+    flex-direction: column-reverse; /* Stack the containers in reverse order */
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12 mx-auto">
+      <div class="row">
+        <div class="col-12 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+          <h2 class="card-title text-center">{{ experiment.title }}</h2>
+          <p class="card-text mb-2">{{ experiment.description }}</p>
+          <p class="card-text">{{ experiment.author.first_name }}{{ experiment.author.last_name }}</p>
+          <p class="card-text">{{ experiment.created | date }}</p>
+          <p class="card-text">Total Stacks: {{ experiment.stack_set.all.count }}</p>
+        </div>
+
+        <div class="col-12 mt-4 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+          <div class="row">
+            <h2 class="card-title text-start">Stacks</h2>
+            <p class="card-text mb-2">Stacks Used</p>
+
+            {% for stack in experiment.stack_set.all %}
+            <div class="stack-container col-md-4 d-flex justify-content-center mx-auto">
+              <div style="width: 80%">
+                <a
+                  class="mb-4 d-flex justify-content-center"
+                  href="{% url 'update_stack' stack.id %}"
+                  style="text-decoration: None; color: #000; font-weight: bold; font-size: 20px; text-align: center; margin-bottom: 10px"
+                  >{{ stack.name }}</a
+                >
+                <div class="layer-containers-container">
+                  {% for layer in stack.layer_set.all %}
+                  <div class="layer-container">
+                    {% if layer.treatment %}
+                    <div class="treatment">
+                      <label class="d-flex justify-content-center">{{ layer.treatment }}</label>
+                    </div>
+                    {% endif %}
+                    <div class="layer">
+                      <a href="" class="layer-name" data-bs-toggle="dropdown" aria-expanded="false"> {{ layer.name }} </a>
+                      <div class="dropdown-menu" aria-labelledby="dropdownLayer">
+                        <a class="dropdown-item" href="{% url 'update_layer' layer.id %}">Update</a>
+                        {% if layer.coating_parameters %} {% if layer.coating_method == 'Spin Coating' %}
+                        <a class="dropdown-item" href="{% url 'update_spin_coating' layer.id %}">Update Coating Condition</a>
+                        {% endif %} {% else %}
+                        <a class="dropdown-item" href="">Add Coating Condition</a>
+                        {% endif %} {% if layer.formulation %}
+
+                        <a class="dropdown-item" href="{% url 'update_formulation' layer.formulation.id %}">Update Formulation</a>
+
+                        {% else %}
+
+                        <a class="dropdown-item" href="{% url 'formulation' %}">Add Formulation</a>
+
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                <div class="layer-container">
+                  <div class="layer">
+                    <a class="layer-name">{{stack.substrate}}</a>
+                  </div>
+                </div>
+
+                <p class="card-text mt-4 d-flex justify-content-center" style="color: #c94890; font-weight: bold; font-size: 15px; text-align: center">Best PCE: {{ stack.hero_device_pce }}</p>
+                <br />
+              </div>
+            </div>
+
+            {% endfor %}
+          </div>
+        </div>
+        <!-- Result Section -->
+        <div class="col-12 mt-4 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+          <h2 class="card-title text-start">Results</h2>
+          <hr class="mt-4" />
+          <h4>JV Data</h4>
+          <div class="row justify-content-center mx-auto">
+            <div class="col-md-6 d-flex justify-content-center">{{ pce_chart|safe }}</div>
+            <div class="col-md-6 d-flex justify-content-center">{{ jv_chart|safe }}</div>
+            <div class="col-md-6 d-flex justify-content-center">{{ voc_chart|safe }}</div>
+            <div class="col-md-6 d-flex justify-content-center">{{ ff_chart|safe }}</div>
+          </div>
+        </div>
+
+        <!-- Method Section -->
+        <div class="col-12 mt-4 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+          <h2 class="card-title text-start">Methods</h2>
+
+          <p class="card-text mb-2">Methods Used</p>
+          <div class="row justify-content-center">
+            <div class="col-12 d-flex justify-content-center">
+              <table class="table col-12">
+                <thead>
+                  <tr>
+                    <th scope="col">Stack</th>
+                    <th scope="col">Layer</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Thickness</th>
+                    <th scope="col">WFT</th>
+                    <th scope="col">RT</th>
+                    <th scope="col">RH</th>
+                    <th scope="col">Volume</th>
+                    <th scope="col">Drying Method</th>
+                    <th scope="col">Temperature</th>
+                    <th scope="col">Time</th>
+                    <th scope="col">Atmosphere</th>
+                    <th scope="col">Coating Method</th>
+                    <th scope="col">Coating Parameters</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for stack in experiment.stack_set.all %} {% for layer in stack.layer_set.all %}
+                  <tr>
+                    {% if forloop.first %}
+                    <!-- Display stack name only once for the first layer -->
+                    <td rowspan="{{ stack.layer_set.count }}">{{ stack.name }}</td>
+                    {% endif %}
+                    <!-- Display layer details for each layer -->
+                    <td>{{ layer.name }}</td>
+                    <td>{{ layer.layer_type }}</td>
+                    <td>{{ layer.dry_film_thickness }}</td>
+                    <td>{{ layer.wet_film_thickness }}</td>
+                    <td>{{ layer.room_temperature }}</td>
+                    <td>{{ layer.room_humidity }}</td>
+                    <td>{{ layer.formulation_volume }}</td>
+                    <td>{{ layer.drying_type }}</td>
+                    <td>{{ layer.drying_temperature }}</td>
+                    <td>{{ layer.drying_time }}</td>
+                    <td>{{ layer.atmosphere }}</td>
+                    <td>{{ layer.coating_method }}</td>
+                    <td>
+                      {% if layer.coating_parameters %}
+                      <!-- Add link to coating condition if spin coating exists -->
+                      {% if layer.coating_method == 'Spin Coating' %} {% for step in layer.coating_parameters.spin_coating.steps.all %}
+                      <!--  -->
+                      Step {{forloop.counter}}. Spin Speed: {{step.spin_speed}}
+                      <br />
+                      <!--  -->
+                      Spin Acc: {{step.spin_acceleration}}
+                      <br />
+                      <!--  -->
+                      Spin Time: {{step.spin_time}}
+                      <br />
+                      {% endfor %} {% elif layer.coating_method == 'Thermal Evaporation' %}
+                      <!--  -->
+                      {{ layer.coating_parameters.thermal_evaporation }} {% for step in layer.coating_parameters.thermal_evaporation.steps.all %}
+                      <!--  -->
+                      Step {{forloop.counter}}. Evap Rate: {{step.rate}}
+                      <br />
+                      <!--  -->
+                      Evap Time: {{step.time}}
+                      <br />
+                      <!--  -->
+                      {% endfor %} {% endif %}
+                      <!-- Add link to coating condition if thermal evaporation exists -->
+                      <!--  -->
+
+                      <!--  -->
+                      {% elif not layer.coating_parameters %}
+                      <!-- Add link to add coating condition if no spin coating exists -->
+                      <a href="{% url 'spin_coating' %}" style="text-decoration: None">Add</a>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %} {% endfor %}
+                </tbody>
+              </table>
+
+              <br />
+            </div>
+          </div>
+        </div>
+        <!-- Material Section -->
+        <div class="col-12 mt-4 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+          <h2 class="card-title text-start">Materials</h2>
+          <p class="card-text mb-2">Materials Used</p>
+          <div class="row justify-content-center">
+            <div class="col-12 d-flex justify-content-center">
+              <table class="table col-12">
+                <thead>
+                  <tr>
+                    <th scope="col">Formulation</th>
+                    <th scope="col">Ingredient</th>
+                    <th scope="col">Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for stack in experiment.stack_set.all %} {% for layer in stack.layer_set.all %} {% for component in layer.formulation.formulationcomponent_set.all %}
+                  <tr>
+                    {% if forloop.first %}
+                    <td rowspan="{{ layer.formulation.formulationcomponent_set.count }}">{{ layer.formulation.name }}</td>
+                    {% endif %}
+                    <td>{{ component.ingredient.name }}</td>
+                    <td>{{ component.quantity }} {{ component.measurement_unit.short_name }}</td>
+                  </tr>
+                  {% endfor %} {% endfor %} {% endfor %}
+                </tbody>
+              </table>
+
+              <br />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

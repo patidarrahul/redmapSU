@@ -1,0 +1,166 @@
+{% extends 'base.html'%} {% load static %} {% block content %}
+
+<div class="container mt-1">
+  <div class="row">
+    <h5 class="mb-4">Add Formulation</h5>
+    <form method="POST">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6 mt-2 mb-2">
+          <div class="form-floating">
+            <input type="text" class="form-control" id="formulation-name" name="formulation-name" required />
+            <label for="formulation-name">Formulation Name</label>
+          </div>
+        </div>
+        <div class="col-md-3 mt-2 mb-2">
+          <div class="form-floating">
+            <select class="form-select" id="atmosphere" name="atmosphere" required>
+              <option selected value="None">Select</option>
+              <option value="N2">N<sub>2</sub></option>
+              <option value="Air">Air</option>
+            </select>
+            <label for="atmosphere">Atmosphere Made In</label>
+          </div>
+        </div>
+        <div class="col-md-3 mt-2 mb-2">
+          <div class="form-floating">
+            <input type="date" class="form-control" id="formulation-created" name="formulation-created" required />
+            <label for="formulation-created">Date Created</label>
+          </div>
+        </div>
+
+        <div id="formulation-info">
+          <div class="row">
+            <div class="col-md-4 mt-2 mb-2">
+              <div class="form-floating">
+                <select class="form-select" id="inventory-name" name="inventory-name[]" required>
+                  {% for inventory in inventory_list %}
+                  <option value="{{inventory.id}}">{{inventory.short_name}} ({{inventory.batch}})</option>
+                  {% endfor %}
+                </select>
+                <label for="materialName">Material Name</label>
+              </div>
+            </div>
+
+            <div class="col-md-2 mt-2 mb-2">
+              <div class="form-floating">
+                <input type="number" step="0.01" class="form-control" id="quantity" name="quantity[]" required />
+                <label for="quantity">Quantity</label>
+              </div>
+            </div>
+
+            <div class="col-md-2 mt-2 mb-2">
+              <div class="form-floating">
+                <select class="form-select" id="measuremnt-unit" name="measurement-unit[]" required>
+                  {% for measurement_unit in measurement_units %}
+                  <option value="{{measurement_unit.id}}">{{measurement_unit.short_name}}</option>
+                  {% endfor %}
+                </select>
+                <label for="measurementUnit">Unit</label>
+              </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <button class="btn btn-success mt-2 add-material-button" type="button" style="padding-left: 25px; padding-right: 25px; height: 58px; width: 118px">Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mt-2 mb-2">
+          <div class="form-floating">
+            <input type="text" class="form-control" id="notes" name="notes" />
+            <label for="notes">Notes</label>
+          </div>
+        </div>
+        <div class="col-md-7">
+          <button class="btn btn-outline-primary mt-3 mb-3 w-120" type="submit" style="padding-left: 25px; padding-right: 25px">Add to the Database</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% include "partials/list_of_projects.html" %}
+
+<script>
+  $(document).ready(function () {
+    const materialInfoContainer = $("#formulation-info");
+
+    $(".add-material-button").on("click", function () {
+      const newMaterialInfo = `
+        <div class="row">
+            
+            <div class="col-md-4 mt-2 mb-2">
+              <div class="form-floating">
+                <select
+                  class="form-select"
+                  id="material-name"
+                  name="inventory-name[]"
+                 
+                  required
+                >
+                {% for inventory in inventory_list %}
+                  <option value="{{inventory.id}}">
+                    {{inventory.short_name}} ({{inventory.batch}}) </option>
+                  {% endfor %}
+                </select>
+                <label for="material-name">material Name</label>
+              </div>
+            </div>
+            <div class="col-md-2 mt-2 mb-2">
+              <div class="form-floating">
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  id="quantity"
+                  name="quantity[]"
+                 
+                  required
+                />
+                <label for="quantity">Quantity</label>
+              </div>
+            </div>
+
+            <div class="col-md-2 mt-2 mb-2">
+              <div class="form-floating">
+                <select
+                  class="form-select"
+                  id="measuremnt-unit"
+                  name="measurement-unit[]"
+              
+                  required
+                >
+                  {% for measurement_unit in measurement_units %}
+                  <option value="{{measurement_unit.id}}">
+                    {{measurement_unit.short_name}}
+                  </option>
+                  {% endfor %}
+                </select>
+                <label for="measurementUnit">Unit</label>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <button
+                class="btn btn-danger mt-2 remove-material-button" style="
+                  padding-left: 25px;
+                  padding-right: 25px;
+                  height: 58px;
+                  width: 118px;
+                "
+                type="button"
+                
+              >
+                Remove
+              </button>
+            </div>
+        `;
+      materialInfoContainer.append(newMaterialInfo);
+    });
+
+    materialInfoContainer.on("click", ".remove-material-button", function () {
+      $(this).closest(".row").remove();
+    });
+  });
+</script>
+<script src="{% static 'js/formulation.js' %}"></script>
+
+{% endblock content %}

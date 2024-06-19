@@ -1,0 +1,79 @@
+{% extends 'base.html' %} {% load static %}
+<!--  -->
+{% block extrastyle %}
+<style>
+  .form-floating {
+    margin-top: 10px;
+  }
+  .form-check {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+<div class="container mt-1" x-data="{showStep : false}">
+  <div class="row d-flex justify-content-center">
+    <form method="post" class="col-md-6">
+      {% csrf_token %}
+      <!--  -->
+      <h4 class="mb-4" style="color: #7b7b7b">Add Thermal Evaporation Settings</h4>
+      <div class="form-floating">
+        {{ form.name }}
+        <label for="{{ form.name.id_for_label }}">Name</label>
+      </div>
+      <div class="col mt-2">
+        <div id="steps-field">
+          <span class="d-flex justify-content-between">
+            <label for="{{ form.steps.id_for_label }}" class="mb-2"> Steps:</label>
+            <label>
+              <button class="btn btn-primary ml-4" type="button" style="color: #7b7b7b; background: none; border: none" @click="showStep = true">Add</button>
+            </label>
+          </span>
+          {{form.steps}}
+        </div>
+      </div>
+
+      <button type="submit" class="mt-4 btn btn-primary">Save</button>
+    </form>
+    <div class="col-md-6" id="add-step" x-show="showStep">
+      <form method="post" action="{% url 'thermal_evaporation_step' %}" x-init x-target="steps-field">
+        {% csrf_token %}
+
+        <div class="col form-group">
+          <label for="{{ thermal_evaporation_step_form.rate.id_for_label }}">Rate</label>
+          <div class="input-group">
+            {{ thermal_evaporation_step_form.rate}}
+            <span class="input-group-text">A<sup>o</sup>/Sec</span>
+          </div>
+        </div>
+
+        <div class="col form-group">
+          <label for="{{ thermal_evaporation_step_form.time.id_for_label }}">Time</label>
+          <div class="input-group">
+            {{ thermal_evaporation_step_form.time}}
+            <span class="input-group-text">minutes</span>
+          </div>
+        </div>
+
+        <div class="col form-group">
+          <label for="{{ thermal_evaporation_step_form.order.id_for_label }}">Order<i class="text-muted" style="font-size: 12px"> (1 for Step 1 and 2 for Step 2) </i></label>
+
+          {{ thermal_evaporation_step_form.order}}
+        </div>
+
+        <button type="submit" @click="showStep = false" class="btn mt-4 btn-primary" id="add-step-btn">Add Step</button>
+        <button type="submit" @click="showStep = false" class="btn mt-4 btn-secondary">Cancle</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %} {% block extrascripts %}
+
+<script>
+  $("#id_steps").select2({
+    placeholder: "Add steps",
+    theme: "classic",
+  });
+</script>
+
+{% endblock extrascripts %}

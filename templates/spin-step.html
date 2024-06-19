@@ -1,0 +1,55 @@
+{% extends 'base.html' %} {% load static %}
+<!--  -->
+{% block extrastyle %}
+<style>
+  .form-floating {
+    margin-top: 10px;
+  }
+
+  .form-floating span {
+    width: 15%;
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+
+<div class="container mt-1">
+  <div class="row justify-content-center">
+    <div class="col-md-4 col-sm-12 mt-4 justify-content-center">
+      <h2 class="mb-4" style="color: #7b7b7b">Spin Step</h2>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-floating input-group">
+          {{ form.spin_speed }}
+          <label for="{{ form.spin_speed.id_for_label }}">{{ form.spin_speed.label }}</label>
+          <span class="input-group-text">rpm</span>
+        </div>
+        <div class="form-floating input-group">
+          {{ form.spin_acceleration }}
+          <label for="{{ form.spin_acceleration.id_for_label }}"
+            >{{ form.spin_acceleration.label }}</label
+          >
+          <span class="input-group-text">rpm</span>
+        </div>
+        <div class="form-floating input-group">
+          {{ form.spin_time }}
+          <label for="{{ form.spin_time.id_for_label }}">{{ form.spin_time.label }}</label>
+          <span class="input-group-text">sec</span>
+        </div>
+        <div class="form-floating input-group">
+          {{ form.order }}
+          <label for="{{ form.order.id_for_label }}">{{ form.order.label }}</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Save</button>
+        <p class="mt-2">Go back ? <a href="{% url 'spin_program' %}"> Spin Program</a></p>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extrascripts %}
+<script>
+  function closeWindow() {
+    window.close();
+  }
+</script>
+{% endblock extrascripts %}

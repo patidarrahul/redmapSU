@@ -1,0 +1,158 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}" />
+<div class="container w-75">
+  <div class="row mt-4">
+    <div class="col-lg">
+      <form
+        method="post"
+        action="{% url 'update_inventory' inventory.id %}"
+        id="inventory-form"
+      >
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-12 form-floating mb-3">
+            {{ form.name }}
+            <label for="{{ form.name.id_for_label }}">Name</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6 form-floating mb-3">
+            {{ form.short_name }}
+            <label for="{{ form.short_name.id_for_label }}">Short Name</label>
+          </div>
+          <div class="col-6 form-floating mb-3">
+            {{ form.category }}
+            <label for="{{ form.category.id_for_label }}">Category</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6 form-floating mb-3">
+            {{ form.supplier }}
+            <label for="{{ form.supplier.id_for_label }}">Supplier</label>
+          </div>
+          <div class="col-6 form-floating mb-3">
+            {{ form.type }}
+            <label for="{{ form.type.id_for_label }}">Type</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6 form-floating mb-3">
+            {{ form.batch }}
+            <label for="{{ form.batch.id_for_label }}">Batch</label>
+          </div>
+          <div class="col-6 form-floating mb-3">
+            {{ form.arrival_date }}
+            <label for="{{ form.arrival_date.id_for_label }}"
+              >Arrival Date</label
+            >
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6 form-floating mb-3">
+            {{ form.expiry_date }}
+            <label for="{{ form.expiry_date.id_for_label }}">Expiry Date</label>
+          </div>
+          <div class="col-6 form-floating mb-3">
+            {{ form.total_units }}
+            <label for="{{ form.total_units.id_for_label }}">Total Units</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6 form-floating mb-3">
+            {{ form.unit_size }}
+            <label for="{{ form.unit_size.id_for_label }}">Unit Size</label>
+          </div>
+          <div class="col-6 form-floating mb-3">
+            {{ form.measurement_unit }}
+            <label for="{{ form.measurement_unit.id_for_label }}"
+              >Measurement Unit</label
+            >
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 form-floating mb-3">
+            {{ form.notes }}
+            <label for="{{ form.notes.id_for_label }}">Notes</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+    <div class="col-lg">
+      <h3 style="color: #7b7b7b">Inventory List</h3>
+      <div class="form-group col-1">
+        <!--		Show Numbers Of Rows 		-->
+        <select class="form-control" name="state" id="maxRows">
+          <option value="5000">All</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="70">70</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <table class="table table-striped table-class" id="table-id">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Batch</th>
+            <th>Supplier</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for inventory in inventories %}
+          <tr>
+            <td>{{ inventory.name }} ({{ inventory.short_name }})</td>
+            <td>{{ inventory.batch }}</td>
+            <td>{{ inventory.supplier }}</td>
+            <td>
+              <a href="{% url 'update_inventory' inventory.id %}"
+                ><i
+                  class="bi bi-pencil-square mx-2"
+                  style="font-size: 14px; color: #7b7b7b"
+                ></i
+              ></a>
+              <a href=""
+                ><i
+                  class="bi bi-trash3-fill"
+                  style="font-size: 14px; color: #b51616"
+                ></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!--		Start Pagination -->
+      <div class="pagination-container">
+        <nav>
+          <ul class="pagination">
+            <li class="page-item" data-page="prev">
+              <a class="page-link" href="#" aria-label="Previous">
+                <span aria-hidden="true">&lt;</span>
+              </a>
+            </li>
+            <!-- Here the JS Function Will Add the Rows -->
+            <li class="page-item" data-page="next" id="prev">
+              <a class="page-link" href="#" aria-label="Next">
+                <span aria-hidden="true">&gt;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <!--		End Pagination -->
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/update-inventory.js' %}"></script>
+
+{% endblock content%}

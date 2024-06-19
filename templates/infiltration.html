@@ -1,0 +1,47 @@
+{% extends 'base.html' %} {% load static %} {% load widget_tweaks %} {% load crispy_forms_tags %} {% block content %}
+
+<div class="container">
+  <div class="row d-flex justify-content-center">
+    <h1 class="mb-4" style="color: #7b7b7b">Infiltration</h1>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="row">
+        <div class="col-md-8 form-group justify-content-center">
+          <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+          {{ form.name }}
+        </div>
+
+        <div class="col-md-4 form-group justify-content-center">
+          <label for="{{ form.volume.id_for_label }}">{{ form.volume.label }}</label>
+          <div class="input-group">
+            {{ form.volume }}
+            <span class="input-group-text">&micro;L</span>
+          </div>
+        </div>
+        <div class="col-md-4 form-group justify-content-center">
+          <label for="{{ form.time.id_for_label }}">{{ form.time.label }}</label>
+          <div class="input-group">
+            {{ form.time }}
+            <span class="input-group-text">mins</span>
+          </div>
+        </div>
+        <div class="col-md-4 form-group justify-content-center">
+          <label for="{{ form.precursor_temperature.id_for_label }}">{{ form.precursor_temperature.label }}</label>
+          <div class="input-group">
+            {{ form.precursor_temperature }}
+            <span class="input-group-text"><sup>o</sup>C</span>
+          </div>
+        </div>
+        <div class="form-check col-md-4 align-items-center d-flex justify-content-center">
+          {{ form.cover }}
+          <label class="form-check-label px-2" for="{{ form.cover.id_for_label }}"> Cover</label>
+        </div>
+        <button type="submit" class="btn btn-secondary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock content %}

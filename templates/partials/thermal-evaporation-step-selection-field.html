@@ -1,0 +1,21 @@
+<div id="steps-field">
+  <span class="d-flex justify-content-between">
+    <label for="{{ form.steps.id_for_label }}" class="mb-2"> Steps:</label>
+    <label>
+      <button class="btn btn-primary ml-4" type="button" style="color: #7b7b7b; background: none; border: none" @click="showStep = true">Add</button>
+    </label>
+  </span>
+  {{form.steps}} {% if error %}
+  <div class="alert alert-info alert-dismissible mx-auto fade show text-center mt-4" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% else %} {% endif %}
+
+  <script>
+    $("#id_steps").select2({
+      placeholder: "Add steps",
+      theme: "classic",
+    });
+  </script>
+</div>

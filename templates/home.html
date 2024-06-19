@@ -1,0 +1,41 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+
+<div class="container">
+  <div class="row justify-content-center">
+    <!-- post card -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Post</h5>
+          <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+          <p class="card-text">
+            <small class="text-muted">Last updated 3 mins ago</small>
+          </p>
+          <!-- Add comments section -->
+          <form method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Add comment" aria-label="Add comment" aria-describedby="basic-addon2" name="comment" />
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="submit">Add</button>
+              </div>
+            </div>
+          </form>
+
+          {% for comment in comments %}
+          <div class="d-flex flex-row align-items-center p-2">
+            <div class="mr-2">
+              <img src="https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg" class="rounded-circle" width="45" />
+            </div>
+            <div>
+              <div class="font-weight-bold">{{ comment.user }}</div>
+              {{ comment.comment }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

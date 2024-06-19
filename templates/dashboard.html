@@ -1,0 +1,149 @@
+{% extends 'base.html' %} {% load static %} {% block extrastyle %}
+<style>
+  .card {
+    border-radius: 20px;
+    box-shadow: 0 0 5px #a29f9f;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+
+<div class="container">
+  <div class="row mx-auto justify-content-center">
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-body d-flex align-items-center justify-content-center">
+          <span>
+            <label class="card-title mb-0" style="font-size: 20px">Total Users:</label>
+            <label class="card-text mb-0 ml-2" style="font-size: 20px">{{ users.count }}</label>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-body d-flex align-items-center justify-content-center">
+          <span>
+            <label class="card-title mb-0" style="font-size: 20px">Total Experiments:</label>
+            <label class="card-text mb-0 ml-2" style="font-size: 20px">{{ experiments.count }}</label>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-body d-flex align-items-center justify-content-center">
+          <span>
+            <label class="card-title mb-0" style="font-size: 20px">My Experiments:</label>
+            <label class="card-text mb-0 ml-2" style="font-size: 20px">{{ my_experiments.count }}</label>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mx-auto justify-content-center mt-5">
+    <div class="col-md-8">
+      <div class="card px-5 py-5">
+        <canvas id="scatterChart"></canvas>
+        <!-- <div class="card-body" id="plotly_chart">{{ pce_chart | safe }}</div> -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %} {% block extrascripts %}
+<script>
+  var X = [];
+  var Y = [];
+  var user = [];
+  var urls = []; // Array to hold URLs for each data point
+
+
+  // Iterate through Stack objects to collect data (assuming X, Y, and user arrays are populated similarly to your Django/Python code)
+  {% for stack in stacks %}
+      X.push("{{ stack.created|date:'Y-m-d' }}");
+      Y.push({{ stack.hero_device_pce|default_if_none:"null" }}); // Replace with your actual PCE value for each stack
+      user.push("{{ stack.author.first_name }} {{ stack.author.last_name }}");
+      urls.push("{% url 'experiment_page' stack.experiment.id %}"); // Example URL, replace with your actual URL
+  {% endfor %}
+
+  data = X.map((value, index) => ({ x: value, y: Y[index], user: user[index], url: urls[index] }));
+
+  var datasets = [];
+
+  // Loop through users to create separate datasets with different colors for each user
+  var users = Array.from(new Set(user)); // Get unique users
+  users.forEach((u, idx) => {
+      var filteredData = data.filter(d => d.user === u);
+      var color = getRandomColor();
+
+      datasets.push({
+          label: u,
+          data: filteredData,
+          backgroundColor: color,
+          borderColor: color,
+          borderWidth: 1,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          pointStyle: 'circle',
+          hoverBackgroundColor: color,
+          hoverBorderWidth: 2,
+          hoverRadius: 15,
+          pointHoverStyle: 'dash',
+      });
+  });
+
+  var config = {
+      type: 'scatter',
+      data: {
+          datasets: datasets,
+      },
+      options: {
+          scales: {
+              x: {
+                  type: 'time',
+                  time: {
+                      unit: 'day',
+                  },
+                  title: {
+                      display: true,
+                      text: 'Date'
+                  }
+              },
+              y: {
+                  title: {
+                      display: true,
+                      text: 'Power Conversion Efficiency (%)'
+                  }
+              }
+          },
+
+      }
+  };
+
+  var scatterChart = new Chart(document.getElementById('scatterChart'), config);
+
+  function openLink(url) {
+      window.open(url, '_blank'); // Open the URL in a new tab
+  }
+
+  // Function to generate a random color
+  function getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+  }
+  function clickHandler(click) {
+    var points = scatterChart.getElementsAtEventForMode(click, 'nearest', { intersect: true }, true);
+    if (points[0]) {
+    openLink(urls[points[0].index]);
+    }
+  }
+  scatterChart.canvas.addEventListener('click', clickHandler);
+</script>
+
+{% endblock extrascripts %}

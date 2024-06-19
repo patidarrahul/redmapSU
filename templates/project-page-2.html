@@ -1,0 +1,40 @@
+{% extends 'base.html' %} {% load static %} {% block extrastyle %}
+<link rel="stylesheet" href="{% static 'css/project-page.css' %}" />
+
+{% endblock extrastyle %} {% block content %}
+<div class="container mt-5">
+  <div class="row mb-4">
+    <div class="col-12 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+      <h2 class="card-title text-center">{{ project.title }}</h2>
+      <p class="card-text mb-2">{{ project.description }}</p>
+      <p class="card-text">{{ project.author.first_name }}{{ project.author.last_name }}</p>
+      <p class="card-text">{{ project.created | date }}</p>
+      <p class="card-text">Total Experiments: {{ project.experiment_set.all.count }}</p>
+    </div>
+  </div>
+
+  {% for experiment in project.experiment_set.all %}
+  <div class="row mt-4">
+    <div class="col-12 card">
+      <div class="row card-header">Experiment {{ forloop.counter }}</div>
+      <div class="row card-body">
+        <div class="col-4 justify-content-start d-flex">
+          <strong>Stacks:</strong> <br />
+
+          <div class="row">
+            <span class="stack-arrow py-0">&#8627;</span>
+            <a class="link stack" href="" style="text-decoration: None">{{ stack.name }}</a>
+          </div>
+        </div>
+        <div class="col-4 justify-content-center d-flex">
+          <h1>Hello 1</h1>
+        </div>
+        <div class="col-4 justify-content-center d-flex">
+          <h1>Hello 1</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content %}

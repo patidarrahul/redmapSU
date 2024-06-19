@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="row">
+    <h1 class="mb-4">Projects</h1>
+    {% for project in projects %}
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ project.name }}</h5>
+
+          <p class="card-text">{{ project.description|truncatechars:100 }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
