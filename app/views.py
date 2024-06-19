@@ -1130,14 +1130,15 @@ def dashboardView(request):
     user = []
 
     # Iterate through Stack objects to collect data
-    for stack in Stack.objects.all():
-        Y.append(stack.hero_device_pce)
-        created = stack.created
-        # Strip the time from the date
-        created = created.strftime("%Y-%m-%d")
-        X.append(created)
+    if Stack.objects.all():
+        for stack in Stack.objects.all():
+            Y.append(stack.hero_device_pce)
+            created = stack.created
+            # Strip the time from the date
+            created = created.strftime("%Y-%m-%d")
+            X.append(created)
 
-        user.append(stack.author.first_name + ' ' + stack.author.last_name)
+            user.append(stack.author.first_name + ' ' + stack.author.last_name)
 
     # Plotting chart using Plotly Express
     fig = px.scatter(
