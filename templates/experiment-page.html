@@ -92,11 +92,12 @@
                 <div class="layer-containers-container">
                   {% for layer in stack.layer_set.all %}
                   <div class="layer-container">
-                    {% if layer.treatment %}
+                    {% if layer.layer_type == 'Surface Treatment' %}
                     <div class="treatment">
                       <label class="d-flex justify-content-center">{{ layer.treatment }}</label>
                     </div>
-                    {% endif %}
+                    {% else %}
+
                     <div class="layer">
                       <a href="" class="layer-name" data-bs-toggle="dropdown" aria-expanded="false"> {{ layer.name }} </a>
                       <div class="dropdown-menu" aria-labelledby="dropdownLayer">
@@ -116,6 +117,7 @@
                         {% endif %}
                       </div>
                     </div>
+                    {% endif %}
                   </div>
                   {% endfor %}
                 </div>
