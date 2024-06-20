@@ -110,7 +110,7 @@ urlpatterns = [
     path('new_folder/', views.newFolder, name='new_folder'),
     path('delete-files/', views.deleteFiles, name='delete_files'),
     path('rename/', views.rename, name='rename'),
-    path('copy_path/', views.copyPath, name='copy_path'),
+
 
 
 

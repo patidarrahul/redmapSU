@@ -1465,31 +1465,6 @@ def deleteFiles(request):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@ login_required(login_url='sign_in')
-def copyPath(request):
-    # current_directory = request.POST.get('current_directory')
-    # selected_items = request.POST.getlist('selected_items')
-    # selected_item = selected_items[0]
-    path = request.GET.get('name')
-
-    path = os.path.join(request.GET.get('current_directory'), path)
-    # replace backslashes with forward slashes
-    path = path.replace('\\', '/')
-
-    try:
-
-        # store path in clipboard
-        pyperclip.copy(path)
-
-        messages.success(request, 'Path copied to clipboard')
-    except Exception as e:
-        messages.error(request, e)
-
-    return redirect(request.META.get('HTTP_REFERER'))
-
-# HTMX functions
-
-
 def formulationIngredient(request):
 
     return render(request, 'partials/formulation-ingredient.html')

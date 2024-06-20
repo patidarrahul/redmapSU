@@ -145,13 +145,13 @@
         <input type="checkbox" value="{{ directory.name }}" class="custom-control-input" />
         <span class="custom-control-label"></span>
       </label>
-      <a
-        href="{% url 'copy_path' %}?name={{ directory.name }}&current_directory={{ current_directory }}"
-        style="text-decoration: none; color: black; position: absolute; top: 5px; right: 5px"
+      <button
+        style="text-decoration: none; color: black; position: absolute; top: 5px; right: 5px; border: none; background: none"
         title="Copy Path"
-      >
-        <i class="bi bi-copy"></i
-      ></a>
+        id="copyButton"
+        value="{{ current_directory }}/{{ directory.name }}"
+        class="bi bi-copy"
+      ></button>
       <div class="file-item-icon bi bi-folder text-secondary"></div>
       <a href="{% url 'file_manager' directory.path %}" class="file-item-name" style="color: black"> {{ directory.name }} </a>
     </div>
@@ -174,7 +174,6 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  // Assuming you're using jQuery for simplicity
   $("input[type=checkbox]").change(function () {
     var selectedItems = [];
     $("input[type=checkbox]:checked").each(function () {
@@ -183,6 +182,13 @@
     $("#selected_items_input_rename").val(selectedItems.join(","));
 
     $("#selected_items_input_delete").val(selectedItems.join(","));
+  });
+</script>
+<script>
+  $("#copyButton").click(function () {
+    var copyText = $(this).val();
+    navigator.clipboard.writeText(copyText);
+    alert("Copied the text: " + copyText);
   });
 </script>
 
