@@ -148,9 +148,9 @@
       <button
         style="text-decoration: none; color: black; position: absolute; top: 5px; right: 5px; border: none; background: none"
         title="Copy Path"
-        id="copyButton"
+        id="copyButton_{{ directory.name }}"
         value="{{ current_directory }}/{{ directory.name }}"
-        class="bi bi-copy"
+        class="bi bi-copy copy-button"
       ></button>
       <div class="file-item-icon bi bi-folder text-secondary"></div>
       <a href="{% url 'file_manager' directory.path %}" class="file-item-name" style="color: black"> {{ directory.name }} </a>
@@ -185,10 +185,18 @@
   });
 </script>
 <script>
-  $("#copyButton").click(function () {
-    var copyText = $(this).val();
-    navigator.clipboard.writeText(copyText);
-    alert("Copied the text: " + copyText);
+  $(document).ready(function () {
+    $(".copy-button").click(function () {
+      var copyText = $(this).val();
+      navigator.clipboard
+        .writeText(copyText)
+        .then(function () {
+          alert("Copied the text: " + copyText);
+        })
+        .catch(function (error) {
+          console.error("Unable to copy text:", error);
+        });
+    });
   });
 </script>
 
