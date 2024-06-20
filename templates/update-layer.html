@@ -57,27 +57,15 @@
         </div>
         <!-- Coating Method -->
         <div class="col-md-3 form-group">
-          <label for="{{ form.coating_method.id_for_label }}"
-            >{{ form.coating_method.label }}</label
-          >
-          <input
-            type="hidden"
-            name="coating_parameters"
-            value="{{ form.instance.coating_parameters.id }}"
-          />
+          <label for="{{ form.coating_method.id_for_label }}">{{ form.coating_method.label }}</label>
+          <input type="hidden" name="coating_parameters" value="{{ form.instance.coating_parameters.id }}" />
           {% render_field form.coating_method @change="coating_method = $el.value" %}
         </div>
 
         <div class="col-md-3 form-group">
           <span class="d-flex justify-content-between">
             <label for="{{ form.created.id_for_label }}">{{ form.formulation.label }}</label>
-            <a
-              href="{% url 'formulation' %}"
-              target="_blank"
-              onclick="this.href"
-              style="color: #7b7b7b; text-decoration: none"
-              ><i class="bi bi-plus add-field"> </i
-            ></a>
+            <a href="{% url 'formulation' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
           </span>
           {{ form.formulation }}
         </div>
@@ -87,9 +75,7 @@
           {{ form.name }}
         </div>
         <div class="col-md-2 form-group">
-          <label for="{{ form.formulation_volume.id_for_label }}"
-            >{{ form.formulation_volume.label }}</label
-          >
+          <label for="{{ form.formulation_volume.id_for_label }}">{{ form.formulation_volume.label }}</label>
           <div class="input-group">
             {{ form.formulation_volume }}
             <span class="input-group-text">mL</span>
@@ -100,7 +86,7 @@
           {{ form.sequence }}
         </div>
         <div class="col-md-2 form-group">
-          <label for="{{ form.layer_type.id_for_label }}">{{ form.layer_type.label }}</label>
+          <label for="{{ form.layer_type.id_for_label }}">{{ form.layer_role.label }}</label>
           {{ form.layer_role }}
         </div>
 
@@ -109,9 +95,7 @@
           {{ form.atmosphere }}
         </div>
         <div class="col-md-2 form-group">
-          <label for="{{ form.room_temperature.id_for_label }}"
-            >{{ form.room_temperature.label }}</label
-          >
+          <label for="{{ form.room_temperature.id_for_label }}">{{ form.room_temperature.label }}</label>
           <div class="input-group">
             {{ form.room_temperature }}
             <span class="input-group-text"><sup>o</sup>C</span>
@@ -129,9 +113,7 @@
           {{ form.drying_type }}
         </div>
         <div class="col-md-2 form-group">
-          <label for="{{ form.drying_temperature.id_for_label }}"
-            >{{ form.drying_temperature.label }}</label
-          >
+          <label for="{{ form.drying_temperature.id_for_label }}">{{ form.drying_temperature.label }}</label>
           <div class="input-group">
             {{ form.drying_temperature }}
             <span class="input-group-text"><sup>o</sup>C</span>
@@ -151,9 +133,7 @@
         </div>
 
         <div class="col-md-3 form-group">
-          <label for="{{ form.dry_film_thickness.id_for_label }}"
-            >{{ form.dry_film_thickness.label }}</label
-          >
+          <label for="{{ form.dry_film_thickness.id_for_label }}">{{ form.dry_film_thickness.label }}</label>
           <div class="input-group">
             {{ form.dry_film_thickness }}
             <span class="input-group-text">&micro;m</span>
@@ -165,18 +145,14 @@
           {{ form.treatment }}
         </div>
         <div class="col-md-2 form-group">
-          <label for="{{ form.treatment_time.id_for_label }}"
-            >{{ form.treatment_time.label }}</label
-          >
+          <label for="{{ form.treatment_time.id_for_label }}">{{ form.treatment_time.label }}</label>
           <div class="input-group">
             {{ form.treatment_time }}
             <span class="input-group-text">sec</span>
           </div>
         </div>
         <div class="col-md-2 form-group">
-          <label for="{{ form.treatment_power.id_for_label }}"
-            >{{ form.treatment_power.label }}</label
-          >
+          <label for="{{ form.treatment_power.id_for_label }}">{{ form.treatment_power.label }}</label>
 
           {{ form.treatment_power }}
         </div>
@@ -187,16 +163,8 @@
         <template x-if="coating_method === 'Spin Coating'">
           <div class="col-md-3 form-group">
             <span class="d-flex justify-content-between">
-              <label for="{{ coating_parameters_form.spin_coating.id_for_label }}"
-                >{{ coating_parameters_form.spin_coating.label }}</label
-              >
-              <a
-                href="{% url 'spin_coating' %}"
-                target="_blank"
-                onclick="this.href"
-                style="color: #7b7b7b; text-decoration: none"
-                ><i class="bi bi-plus add-field"> </i
-              ></a>
+              <label for="{{ coating_parameters_form.spin_coating.id_for_label }}">{{ coating_parameters_form.spin_coating.label }}</label>
+              <a href="{% url 'spin_coating' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
             </span>
             {{ coating_parameters_form.spin_coating}}
           </div>
@@ -204,16 +172,8 @@
         <template x-if="coating_method === 'Thermal Evaporation'">
           <div class="col-md-3 form-group">
             <span class="d-flex justify-content-between">
-              <label for="{{ coating_parameters_form.thermal_evaporation.id_for_label }}"
-                >{{ coating_parameters_form.thermal_evaporation.label }}</label
-              >
-              <a
-                href="{% url 'thermal_evaporation' %}"
-                target="_blank"
-                onclick="this.href"
-                style="color: #7b7b7b; text-decoration: none"
-                ><i class="bi bi-plus add-field"> </i
-              ></a>
+              <label for="{{ coating_parameters_form.thermal_evaporation.id_for_label }}">{{ coating_parameters_form.thermal_evaporation.label }}</label>
+              <a href="{% url 'thermal_evaporation' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
             </span>
             {{ coating_parameters_form.thermal_evaporation}}
           </div>
@@ -226,9 +186,7 @@
 
       <hr class="mt-4" />
       <button type="submit" class="btn btn-primary mt-4">Update</button>
-      <button type="submit" class="btn btn-secondary mt-4" name="save_as_new" value="save_as_new">
-        Save as new
-      </button>
+      <button type="submit" class="btn btn-secondary mt-4" name="save_as_new" value="save_as_new">Save as new</button>
     </form>
   </div>
 </div>
