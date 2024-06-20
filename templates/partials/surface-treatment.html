@@ -1,0 +1,44 @@
+<div class="row" id="layerType">
+  <div class="col-md-3 form-group">
+    <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+    {{ form.name }}
+  </div>
+  <div class="col-md-3 form-group">
+    <label for="{{ form.stack.id_for_label }}">{{ form.stack.label }}</label>
+    {{ form.stack }}
+  </div>
+  <div class="col-md-2 form-group">
+    <label for="{{ form.sequence.id_for_label }}">Layer Sequence</label>
+    {{ form.sequence }}
+  </div>
+  <div class="col-md-2 form-group">
+    <label for="{{ form.created.id_for_label }}">{{ form.created.label }}</label>
+
+    {{ form.created }}
+  </div>
+  <div class="col-md-3 form-group">
+    <label for="{{ form.treatment.id_for_label }}">{{ form.treatment.label }}</label>
+
+    {{ form.treatment }}
+  </div>
+  <div class="col-md-2 form-group">
+    <label for="{{ form.treatment_time.id_for_label }}">{{ form.treatment_time.label }}</label>
+    <div class="input-group">
+      {{ form.treatment_time }}
+      <span class="input-group-text">sec</span>
+    </div>
+  </div>
+  <div class="col-md-2 form-group">
+    <label for="{{ form.treatment_power.id_for_label }}">{{ form.treatment_power.label }}</label>
+
+    {{ form.treatment_power }}
+  </div>
+  <script>
+    $("#id_stack").select2({
+      theme: "classic",
+    });
+    $("#id_formulation").select2({
+      theme: "classic",
+    });
+  </script>
+</div>

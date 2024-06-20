@@ -362,7 +362,7 @@ class Layer(models.Model):
         LayerComposition, on_delete=models.SET_NULL, null=True, blank=True)
 
     layer_role = models.CharField(
-        max_length=100, choices=layer_role_choices)
+        max_length=100, choices=layer_role_choices, null=True, blank=True)
     formulation_volume = models.FloatField(null=True, blank=True)
 
     # room info
@@ -396,7 +396,7 @@ class Layer(models.Model):
         ('Infilteration', 'Infilteration'),
     )
     coating_method = models.CharField(
-        max_length=100, choices=coating_method_choices)
+        max_length=100, choices=coating_method_choices, null=True, blank=True)
 
     # coating method parameters
     coating_parameters = models.ForeignKey(

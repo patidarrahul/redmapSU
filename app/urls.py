@@ -65,6 +65,11 @@ urlpatterns = [
     path('layer/', views.layerView, name='layer'),
     path('layer/<int:layer_id>/', views.updateLayerView, name='update_layer'),
 
+    path('layer/layer_type', views.layerTypeView, name='layer_type'),
+
+    path('layer/layer_type/<int:layer_id>/',
+         views.updateLayerTypeView, name='update_layer_type'),
+
     # layer composition
     path('layer-composition/', views.layerCompositionView,
          name='layer_composition'),

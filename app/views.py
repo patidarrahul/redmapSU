@@ -621,6 +621,16 @@ def updateStackView(request, stack_id):
 
 
 @ login_required(login_url='sign_in')
+def layerTypeView(request):
+    layer_type = request.POST.get('layer_type')
+    if layer_type == 'Surface Treatment':
+        return render(request, 'partials/surface-treatment.html', {'form': LayerForm(author=request.user)})
+    elif layer_type == 'Coating Layer':
+        return render(request, 'partials/coating-layer.html',
+                      {'form': LayerForm(author=request.user), 'coating_parameters_form': CoatingParametersForm()})
+
+
+@ login_required(login_url='sign_in')
 def layerView(request):
     stack_id = request.GET.get('stack') or None
 
@@ -638,7 +648,17 @@ def layerView(request):
         if form.is_valid():
             layer = form.save(commit=False)
             layer.author = request.user
-            if layer.coating_method == 'Spin Coating':
+            # Get the selected coating method
+            if layer.layer_type == 'Surface Treatment':
+                layer.coating_parameters = None
+                layer.save()
+                experiment = Experiment.objects.get(
+                    pk=layer.stack.experiment.pk)
+                project_id = experiment.project.pk
+                messages.success(request, ' Treatment added successfully.')
+                return redirect('project-page', project_id)
+
+            elif layer.coating_method == 'Spin Coating':
 
                 # Get the selected spin coating instance
                 spin_coating_instance = request.POST.get('spin_coating')
@@ -663,6 +683,30 @@ def layerView(request):
                 coating_parameters, created = CoatingParameters.objects.get_or_create(
                     author=request.user, thermal_evaporation=thermal_evaporation)
                 layer.coating_parameters = coating_parameters
+
+            elif layer.coating_method == 'Screen Printing':
+
+                # Get the selected screen printing instance
+                screen_printing_instance = request.POST.get('screen_printing')
+
+                screen_printing = ScreenPrinting.objects.get(
+                    pk=screen_printing_instance)
+
+                # Create a new CoatingParameters instance with the selected screen printing and add it to the layer
+                coating_parameters, created = CoatingParameters.objects.get_or_create(
+                    author=request.user, screen_printing=screen_printing)
+                layer.coating_parameters = coating_parameters
+
+            elif layer.coating_method == 'Infiltration':
+                # Get the selected Infiltration instance
+                infilteration_instance = request.POST.get('infilteration')
+
+                infilteration = Infiltration.objects.get(
+                    pk=infilteration_instance)
+
+                # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
+                coating_parameters, created = CoatingParameters.objects.get_or_create(
+                    author=request.user, infilteration=infilteration)
 
             else:
                 messages.error(
@@ -704,6 +748,17 @@ def layerView(request):
 
 
 @ login_required(login_url='sign_in')
+def updateLayerTypeView(request, layer_id):
+    layer = get_object_or_404(Layer, pk=layer_id)
+    layer_type = request.POST.get('layer_type')
+    if layer_type == 'Surface Treatment':
+        return render(request, 'partials/surface-treatment.html', {'form': LayerForm(author=request.user, instance=layer)})
+    elif layer_type == 'Coating Layer':
+        return render(request, 'partials/coating-layer.html',
+                      {'form': LayerForm(author=request.user, instance=layer), 'coating_parameters_form': CoatingParametersForm()})
+
+
+@ login_required(login_url='sign_in')
 def updateLayerView(request, layer_id):
     layer = get_object_or_404(Layer, pk=layer_id)
 
@@ -714,7 +769,17 @@ def updateLayerView(request, layer_id):
                 # Create a new instance with the updated data
                 new_layer = form.save(commit=False)
                 new_layer.pk = None  # Clear the primary key to create a new instance
-                if new_layer.coating_method == 'Spin Coating':
+
+                if new_layer.layer_type == 'Surface Treatment':
+                    new_layer.coating_parameters = None
+                    new_layer.save()
+                    experiment = Experiment.objects.get(
+                        pk=new_layer.stack.experiment.pk)
+                    project_id = experiment.project.pk
+                    messages.success(request, ' Treatment added successfully.')
+                    return redirect('project-page', project_id)
+
+                elif new_layer.coating_method == 'Spin Coating':
 
                     # Get the selected spin coating instance
                     spin_coating_instance = request.POST.get('spin_coating')
@@ -738,6 +803,28 @@ def updateLayerView(request, layer_id):
                         author=request.user, thermal_evaporation=thermal_evaporation)
                     layer.coating_parameters = coating_parameters
 
+                elif new_layer.coating_method == 'Infiltration':
+                    # Get the selected Infiltration instance
+                    infilteration_instance = request.POST.get('infilteration')
+                    infilteration = Infiltration.objects.get(
+                        pk=infilteration_instance)
+
+                    # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
+                    coating_parameters, created = CoatingParameters.objects.get_or_create(
+                        author=request.user, infilteration=infilteration)
+                    layer.coating_parameters = coating_parameters
+
+                elif new_layer.coating_method == 'Screen Printing':
+                    # Get the selected Screen Printing instance
+                    screen_printing_instance = request.POST.get(
+                        'screen_printing')
+                    screen_printing = ScreenPrinting.objects.get(
+                        pk=screen_printing_instance)
+
+                    # Create a new CoatingParameters instance with the selected Screen Printing and add it to the layer
+                    coating_parameters, created = CoatingParameters.objects.get_or_create(
+                        author=request.user, screen_printing=screen_printing)
+
                 else:
                     messages.error(
                         request, 'Selected coating method is not supported.')
@@ -754,6 +841,9 @@ def updateLayerView(request, layer_id):
                 return redirect('project-page', project_id)
             else:
                 layer = form.save(commit=False)
+
+                if layer.layer_type == 'Surface Treatment':
+                    layer.coating_parameters = None
 
                 if layer.coating_method == 'Spin Coating':
 
@@ -779,6 +869,29 @@ def updateLayerView(request, layer_id):
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
                         author=request.user, thermal_evaporation=thermal_evaporation)
                     layer.coating_parameters = coating_parameters
+
+                elif layer.coating_method == 'Infiltration':
+                    # Get the selected Infiltration instance
+                    infilteration_instance = request.POST.get('infilteration')
+                    infilteration = Infiltration.objects.get(
+                        pk=infilteration_instance)
+
+                    # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
+                    coating_parameters, created = CoatingParameters.objects.get_or_create(
+
+                        author=request.user, infilteration=infilteration)
+                    layer.coating_parameters = coating_parameters
+
+                elif layer.coating_method == 'Screen Printing':
+                    # Get the selected Screen Printing instance
+                    screen_printing_instance = request.POST.get(
+                        'screen_printing')
+                    screen_printing = ScreenPrinting.objects.get(
+                        pk=screen_printing_instance)
+
+                    # Create a new CoatingParameters instance with the selected Screen Printing and add it to the layer
+                    coating_parameters, created = CoatingParameters.objects.get_or_create(
+                        author=request.user, screen_printing=screen_printing)
 
                 else:
                     messages.error(
