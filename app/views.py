@@ -754,8 +754,11 @@ def updateLayerTypeView(request, layer_id):
     if layer_type == 'Surface Treatment':
         return render(request, 'partials/surface-treatment.html', {'form': LayerForm(author=request.user, instance=layer)})
     elif layer_type == 'Coating Layer':
+        coating_parameters = layer.coating_parameters.id
+        coating_parameters = CoatingParameters.objects.get(pk=coating_parameters)
+        
         return render(request, 'partials/coating-layer.html',
-                      {'form': LayerForm(author=request.user, instance=layer), 'coating_parameters_form': CoatingParametersForm()})
+                      {'form': LayerForm(author=request.user, instance=layer), 'coating_parameters_form': CoatingParametersForm(instance = coating_parameters)})
 
 
 @ login_required(login_url='sign_in')
