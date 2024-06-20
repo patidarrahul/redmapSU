@@ -26,10 +26,18 @@
 
         <div class="col-md-3 form-group">
           <span class="d-flex justify-content-between">
-            <label for="{{ form.created.id_for_label }}">{{ form.formulation.label }}</label>
+            <label for="{{ form.formulation.id_for_label }}">{{ form.formulation.label }}</label>
             <a href="{% url 'formulation' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
           </span>
           {{ form.formulation }}
+        </div>
+
+        <div class="col-md-3 form-group">
+          <span class="d-flex justify-content-between">
+            <label for="{{ form.layer_composition.id_for_label }}">Composition</label>
+            <a href="" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
+          </span>
+          {{ form.layer_composition }}
         </div>
         <!-- Coating Method -->
         <div class="col-md-3 form-group">

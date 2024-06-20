@@ -69,6 +69,13 @@
           </span>
           {{ form.formulation }}
         </div>
+        <div class="col-md-3 form-group">
+          <span class="d-flex justify-content-between">
+            <label for="{{ form.layer_composition.id_for_label }}">Composition</label>
+            <a href="" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
+          </span>
+          {{ form.layer_composition }}
+        </div>
 
         <div class="col-md-3 form-group">
           <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>

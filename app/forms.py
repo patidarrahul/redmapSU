@@ -139,7 +139,7 @@ class LayerForm(forms.ModelForm):
         model = Layer
 
         fields = ['stack', 'name', 'sequence', 'coating_method', 'formulation_volume',
-                  'layer_role', 'dry_film_thickness', 'room_temperature', 'room_humidity',
+                  'layer_role', 'dry_film_thickness', 'room_temperature', 'room_humidity', 'layer_composition',
                   'atmosphere', 'drying_type', 'drying_program', 'completed', 'created', 'formulation',
                   'treatment', 'treatment_time', 'treatment_power',]
 
@@ -153,6 +153,7 @@ class LayerForm(forms.ModelForm):
             'dry_film_thickness': forms.NumberInput(attrs={'class': 'form-control', }),
             'room_temperature': forms.NumberInput(attrs={'class': 'form-control', }),
             'room_humidity': forms.NumberInput(attrs={'class': 'form-control', }),
+            'layer_composition': forms.Select(attrs={'class': 'form-select', }),
             'atmosphere': forms.Select(attrs={'class': 'form-select'}),
             'drying_program': forms.Select(attrs={'class': 'form-select'}),
             'drying_type': forms.Select(attrs={'class': 'form-select'}),

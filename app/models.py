@@ -327,6 +327,11 @@ class DryingProgram(models.Model):
         return f'{self.name}'
 
 
+class LayerComposition(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+
 class Layer(models.Model):
     # general info
     stack = models.ForeignKey(Stack, on_delete=models.CASCADE)
@@ -340,6 +345,8 @@ class Layer(models.Model):
         ('Top Contact', 'Top Contact'),
         ('Other', 'Other'),
     )
+    layer_composition = models.ForeignKey(
+        LayerComposition, on_delete=models.SET_NULL, null=True, blank=True)
 
     layer_role = models.CharField(
         max_length=100, choices=layer_role_choices)
