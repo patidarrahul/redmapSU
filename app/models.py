@@ -159,8 +159,9 @@ class Stack(models.Model):
     number_of_devices = models.IntegerField(default=0)
 
     jv_dir = models.CharField(max_length=1000, null=True, blank=True)
-    hero_device_jv_dir = models.CharField(max_length=1000, null=True, blank=True)
-    hero_device_pce = models.FloatField(null=True, blank=True)  
+    hero_device_jv_dir = models.CharField(
+        max_length=1000, null=True, blank=True)
+    hero_device_pce = models.FloatField(null=True, blank=True)
 
     completed = models.BooleanField(default=False)
     created = models.DateTimeField()
@@ -231,11 +232,11 @@ class ThermalEvaporationStep(models.Model):
 
 class ThermalEvaporation(models.Model):
 
-    author = models.ForeignKey( User, on_delete=models.CASCADE, null = True, blank = True)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True)
 
     name = models.CharField(max_length=100)
     steps = models.ManyToManyField(ThermalEvaporationStep)
-
 
     class Meta:
         verbose_name_plural = 'Thermal Evaporation'
@@ -247,23 +248,22 @@ class ThermalEvaporation(models.Model):
 class Infiltration(models.Model):
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100 , null = True, blank = True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     volume = models.FloatField(null=True, blank=True)
-    time = models.IntegerField(null = True, blank = True)
-    precursor_temperature = models.FloatField( null = True, blank = True)
+    time = models.IntegerField(null=True, blank=True)
+    precursor_temperature = models.FloatField(null=True, blank=True)
     cover = models.BooleanField()
-
 
     class Meta:
         verbose_name_plural = 'Infiltration'
-    
+
     def __str__(self):
         return f'{self.name}'
 
 
 class ScreenPrinting(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100) 
+    name = models.CharField(max_length=100)
 
     class Meta:
         verbose_name_plural = 'Screen Printing'
@@ -284,10 +284,9 @@ class CoatingParameters(models.Model):
         ThermalEvaporation, on_delete=models.SET_NULL, null=True, blank=True)
     infilteration = models.ForeignKey(
         Infiltration, on_delete=models.SET_NULL, null=True, blank=True)
-    
+
     screen_printing = models.ForeignKey(
         ScreenPrinting, on_delete=models.SET_NULL, null=True, blank=True)
-    
 
     def __str__(self):
         if self.thermal_evaporation:
@@ -297,9 +296,10 @@ class CoatingParameters(models.Model):
         else:
             return f'No Coating Parameters'
 
-
     class Meta:
         verbose_name_plural = 'Coating Parameters'
+
+
 class DryingProgramStep(models.Model):
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -313,12 +313,12 @@ class DryingProgramStep(models.Model):
     def __str__(self):
         return f'Order-{self.order} {self.temperature} C, {self.time} minutes'
 
+
 class DryingProgram(models.Model):
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     steps = models.ManyToManyField(DryingProgramStep)
-
 
     class Meta:
         verbose_name_plural = 'Drying Programs'
@@ -326,13 +326,14 @@ class DryingProgram(models.Model):
     def __str__(self):
         return f'{self.name}'
 
+
 class Layer(models.Model):
     # general info
     stack = models.ForeignKey(Stack, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE )
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     sequence = models.IntegerField()
-    layer_type_choices = (
+    layer_role_choices = (
         ('ETL', 'ETL'),
         ('Active Layer', 'Active Layer'),
         ('HTL', 'HTL'),
@@ -340,8 +341,8 @@ class Layer(models.Model):
         ('Other', 'Other'),
     )
 
-    layer_type = models.CharField(
-        max_length=100, choices=layer_type_choices)
+    layer_role = models.CharField(
+        max_length=100, choices=layer_role_choices)
     formulation_volume = models.FloatField(null=True, blank=True)
 
     # room info
@@ -442,7 +443,3 @@ class FormulationComponent(models.Model):
 
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-
-
-
-    

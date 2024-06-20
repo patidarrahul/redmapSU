@@ -132,26 +132,27 @@ class LayerForm(forms.ModelForm):
             self.fields['formulation'].queryset = Formulation.objects.filter(
                 author=author)
             self.fields['stack'].queryset = Stack.objects.filter(author=author)
-            self.fields['drying_program'].queryset = DryingProgram.objects.filter(author = author)
+            self.fields['drying_program'].queryset = DryingProgram.objects.filter(
+                author=author)
 
     class Meta:
         model = Layer
 
         fields = ['stack', 'name', 'sequence', 'coating_method', 'formulation_volume',
-                  'layer_type', 'dry_film_thickness', 'room_temperature', 'room_humidity',
+                  'layer_role', 'dry_film_thickness', 'room_temperature', 'room_humidity',
                   'atmosphere', 'drying_type', 'drying_program', 'completed', 'created', 'formulation',
                   'treatment', 'treatment_time', 'treatment_power',]
 
         widgets = {
             'stack': forms.Select(attrs={'class': 'form-select'}),
-            'name': forms.TextInput(attrs={'class': 'form-control',}),
-            'sequence': forms.NumberInput(attrs={'class': 'form-control',}),
+            'name': forms.TextInput(attrs={'class': 'form-control', }),
+            'sequence': forms.NumberInput(attrs={'class': 'form-control', }),
             'coating_method': forms.Select(attrs={'class': 'form-select', }),
             'formulation_volume': forms.NumberInput(attrs={'class': 'form-control', }),
-            'layer_type': forms.Select(attrs={'class': 'form-select'}),
+            'layer_role': forms.Select(attrs={'class': 'form-select'}),
             'dry_film_thickness': forms.NumberInput(attrs={'class': 'form-control', }),
             'room_temperature': forms.NumberInput(attrs={'class': 'form-control', }),
-            'room_humidity': forms.NumberInput(attrs={'class': 'form-control',}),
+            'room_humidity': forms.NumberInput(attrs={'class': 'form-control', }),
             'atmosphere': forms.Select(attrs={'class': 'form-select'}),
             'drying_program': forms.Select(attrs={'class': 'form-select'}),
             'drying_type': forms.Select(attrs={'class': 'form-select'}),
@@ -160,7 +161,7 @@ class LayerForm(forms.ModelForm):
             'formulation': forms.Select(attrs={'class': 'form-select'}),
             'treatment': forms.Select(attrs={'class': 'form-select'}),
             'treatment_time': forms.NumberInput(attrs={'class': 'form-control', }),
-            'treatment_power': forms.NumberInput(attrs={'class': 'form-control',}),
+            'treatment_power': forms.NumberInput(attrs={'class': 'form-control', }),
         }
 
 
@@ -174,6 +175,8 @@ class DryingProgramStepForm(forms.ModelForm):
             'time': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter Time'}),
             'order': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter Order'}),
         }
+
+
 class DryingProgramForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         author = kwargs.pop('author', None)  # Retrieve the user from kwargs
@@ -182,6 +185,7 @@ class DryingProgramForm(forms.ModelForm):
             # Filter the queryset based on the current user
             self.fields['steps'].queryset = SpinStep.objects.filter(
                 author=author)
+
     class Meta:
         model = DryingProgram
         fields = ['name', 'steps']
@@ -260,18 +264,21 @@ class ThermalEvaporationForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'steps': forms.SelectMultiple(attrs={'class': 'form-select'}), }
 
+
 class InfiltrationForm(forms.ModelForm):
     class Meta:
         model = Infiltration
-        fields = ['name','volume', 'time', 'precursor_temperature','cover']
+        fields = ['name', 'volume', 'time', 'precursor_temperature', 'cover']
 
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control',}),
-            'volume': forms.NumberInput(attrs={'class': 'form-control',}),
-            'time': forms.NumberInput(attrs={'class': 'form-control',}),
-            'precursor_temperature': forms.NumberInput(attrs={'class': 'form-control',}),
-            'cover': forms.CheckboxInput(attrs={'class': 'form-check-input',}),
+            'name': forms.TextInput(attrs={'class': 'form-control', }),
+            'volume': forms.NumberInput(attrs={'class': 'form-control', }),
+            'time': forms.NumberInput(attrs={'class': 'form-control', }),
+            'precursor_temperature': forms.NumberInput(attrs={'class': 'form-control', }),
+            'cover': forms.CheckboxInput(attrs={'class': 'form-check-input', }),
         }
+
+
 class ScreenPrintingForm(forms.ModelForm):
     class Meta:
         model = ScreenPrinting
