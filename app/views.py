@@ -1360,6 +1360,8 @@ def copyPath(request):
     path = request.GET.get('name')
 
     path = os.path.join(request.GET.get('current_directory'), path)
+    # replace backslashes with forward slashes
+    path = path.replace('\\', '/')
 
     try:
 

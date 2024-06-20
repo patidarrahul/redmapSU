@@ -42,7 +42,8 @@
   class="container mt-1"
   x-data='{
   showCoatingParam: true,
-  coating_method: "{{ form.instance.coating_method}}"
+  coating_method: "{{ form.instance.coating_method}}
+  layerType: "{{ form.instance.layer_type}}"
 }'
 >
   <div class="row justify-content-center">
@@ -51,6 +52,12 @@
     <form method="post">
       {% csrf_token %}
       <div class="row">
+        <div class="col-md-3 form-group">
+          <label for="{{ form.layer_type.id_for_label }}">{{ form.layer_type.label }}</label>
+          {% render_field form.layer_type @change="layerType = $el.value" %}
+        </div>
+      </div>
+      <div class="row" x-show="layerType == 'Coating Layer'">
         <div class="col-md-3 form-group">
           <label for="{{ form.stack.id_for_label }}">{{ form.stack.label }}</label>
           {{ form.stack }}
@@ -72,7 +79,7 @@
         <div class="col-md-3 form-group">
           <span class="d-flex justify-content-between">
             <label for="{{ form.layer_composition.id_for_label }}">Composition</label>
-            <a href="" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
+            <a href="{% url 'layer_composition' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
           </span>
           {{ form.layer_composition }}
         </div>
@@ -146,6 +153,8 @@
             <span class="input-group-text">&micro;m</span>
           </div>
         </div>
+      </div>
+      <div class="row" x-show="layerType === 'Surface Treatment'">
         <div class="col-md-3 form-group">
           <label for="{{ form.treatment.id_for_label }}">{{ form.treatment.label }}</label>
 
@@ -165,33 +174,35 @@
         </div>
       </div>
       <hr />
-      <h5>Coating Parameters Field</h5>
-      <div x-show="showCoatingParam">
-        <template x-if="coating_method === 'Spin Coating'">
-          <div class="col-md-3 form-group">
-            <span class="d-flex justify-content-between">
-              <label for="{{ coating_parameters_form.spin_coating.id_for_label }}">{{ coating_parameters_form.spin_coating.label }}</label>
-              <a href="{% url 'spin_coating' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
-            </span>
-            {{ coating_parameters_form.spin_coating}}
-          </div>
-        </template>
-        <template x-if="coating_method === 'Thermal Evaporation'">
-          <div class="col-md-3 form-group">
-            <span class="d-flex justify-content-between">
-              <label for="{{ coating_parameters_form.thermal_evaporation.id_for_label }}">{{ coating_parameters_form.thermal_evaporation.label }}</label>
-              <a href="{% url 'thermal_evaporation' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
-            </span>
-            {{ coating_parameters_form.thermal_evaporation}}
-          </div>
-        </template>
+      <div class="row">
+        <h5>Coating Parameters Field</h5>
+        <div x-show="showCoatingParam">
+          <template x-if="coating_method === 'Spin Coating'">
+            <div class="col-md-3 form-group">
+              <span class="d-flex justify-content-between">
+                <label for="{{ coating_parameters_form.spin_coating.id_for_label }}">{{ coating_parameters_form.spin_coating.label }}</label>
+                <a href="{% url 'spin_coating' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
+              </span>
+              {{ coating_parameters_form.spin_coating}}
+            </div>
+          </template>
+          <template x-if="coating_method === 'Thermal Evaporation'">
+            <div class="col-md-3 form-group">
+              <span class="d-flex justify-content-between">
+                <label for="{{ coating_parameters_form.thermal_evaporation.id_for_label }}">{{ coating_parameters_form.thermal_evaporation.label }}</label>
+                <a href="{% url 'thermal_evaporation' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
+              </span>
+              {{ coating_parameters_form.thermal_evaporation}}
+            </div>
+          </template>
 
-        <template x-for="field in fields">
-          <div class="col-md-3 form-group">{{ field }}</div>
-        </template>
+          <template x-for="field in fields">
+            <div class="col-md-3 form-group">{{ field }}</div>
+          </template>
+        </div>
+
+        <hr class="mt-4" />
       </div>
-
-      <hr class="mt-4" />
       <button type="submit" class="btn btn-primary mt-4">Update</button>
       <button type="submit" class="btn btn-secondary mt-4" name="save_as_new" value="save_as_new">Save as new</button>
     </form>

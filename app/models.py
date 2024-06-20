@@ -344,6 +344,13 @@ class Layer(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     sequence = models.IntegerField()
+    layer_type_choices = (
+        ('Coating Layer', 'Coating Layer'),
+        ('Surface Treatment', 'Surface Treatment'),
+    )
+
+    layer_type = models.CharField(
+        max_length=100, choices=layer_type_choices, default='Coating Layer')
     layer_role_choices = (
         ('ETL', 'ETL'),
         ('Active Layer', 'Active Layer'),

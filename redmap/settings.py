@@ -31,7 +31,11 @@ with open(CONFIG_PATH) as config_file:
 SECRET_KEY = config['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# condition if local server or not
+if config.get('LOCAL_SERVER'):
+    DEBUG = True
+else:
+    DEBUG = False
 
 allowed_hosts_str = config.get('AllOWED_HOSTS_STRING')
 
@@ -63,7 +67,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -96,7 +100,8 @@ WSGI_APPLICATION = 'redmap.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-if config.get("DATABASE_NAME"):  #this is done becasue when launching appache its always best to provide absolute path
+# this is done becasue when launching appache its always best to provide absolute path
+if config.get("DATABASE_NAME"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -158,7 +163,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 if config.get("MEDIA_ROOT"):
-    MEDIA_ROOT = config["MEDIA_ROOT"]  #this is done becasue when launching appache its always best to provide absolute path
+    # this is done becasue when launching appache its always best to provide absolute path
+    MEDIA_ROOT = config["MEDIA_ROOT"]
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
