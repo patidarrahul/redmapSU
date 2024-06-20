@@ -31,7 +31,7 @@ with open(CONFIG_PATH) as config_file:
 SECRET_KEY = config['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 allowed_hosts_str = config.get('AllOWED_HOSTS_STRING')
 
