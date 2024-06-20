@@ -331,6 +331,12 @@ class LayerComposition(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
 
+    class Meta:
+        verbose_name_plural = 'Layer Composition'
+
+    def __str__(self):
+        return f'{self.name}'
+
 
 class Layer(models.Model):
     # general info

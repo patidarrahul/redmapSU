@@ -4,7 +4,7 @@ from django.contrib.auth import views as auth_views
 
 from . import views
 urlpatterns = [
-    
+
     # dashboard
     path('', views.dashboardView, name='dashboard'),
     path('dashboard/api/stacks/', views.get_stacks, name='get_stacks'),
@@ -65,6 +65,11 @@ urlpatterns = [
     path('layer/', views.layerView, name='layer'),
     path('layer/<int:layer_id>/', views.updateLayerView, name='update_layer'),
 
+    # layer composition
+    path('layer-composition/', views.layerCompositionView,
+         name='layer_composition'),
+
+
     # drying program
     path('drying-program/', views.dryingProgramView, name='drying_program'),
     path('drying-program-step/', views.dryingProgramStepView,
@@ -84,7 +89,7 @@ urlpatterns = [
     # screen printing
     path('screen-printing/', views.screenPrintingView, name='screen_printing'),
 
-    #infiltration
+    # infiltration
     path('infiltration/', views.infiltrationView, name='infiltration'),
 
     # formulation
@@ -102,9 +107,9 @@ urlpatterns = [
     path('rename/', views.rename, name='rename'),
     path('copy_path/', views.copyPath, name='copy_path'),
 
-    
 
-    #home
+
+    # home
     path('home/', views.homeView, name='home'),
 
 ]

@@ -166,6 +166,16 @@ class LayerForm(forms.ModelForm):
         }
 
 
+class LayerCompositionForm(forms.ModelForm):
+    class Meta:
+        model = LayerComposition
+        fields = ['name']
+
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
 class DryingProgramStepForm(forms.ModelForm):
     class Meta:
         model = DryingProgramStep

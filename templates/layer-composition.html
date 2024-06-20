@@ -1,0 +1,17 @@
+{% extends 'base.html' %} {% load static %} {% load widget_tweaks %} {% load crispy_forms_tags %} {% block content %}
+<div class="container mt-1">
+  <h1 class="mb-4" style="color: #7b7b7b">Layer Composition</h1>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+      </div>
+      <button class="btn btn-primary" type="submit">Submit</button>
+    </div>
+  </form>
+</div>
+{% endblock content %}

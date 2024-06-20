@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 
 
-
 def signUpView(request):
     """
     A view function that handles user registration.
@@ -203,7 +202,6 @@ def inventoryView(request):
 
     if request.method == 'POST':
 
-  
         # Use Django forms to handle form data
         form = InventoryForm(request.POST)
         if form.is_valid():
@@ -244,7 +242,6 @@ def inventoryView(request):
 
 @login_required(login_url='sign_in')
 def updateInventory(request, inventory_id):
-
     """
     A view function to update inventory information in the database.
     Validates and saves the updated form data if the form is valid.
@@ -515,7 +512,8 @@ def stackView(request):
 
             try:
                 # Create stack directory inside JV directory
-                stack_jv_dir = os.path.join(settings.MEDIA_ROOT,experiment_dir, 'JV', stack.name)
+                stack_jv_dir = os.path.join(
+                    settings.MEDIA_ROOT, experiment_dir, 'JV', stack.name)
 
                 if not os.path.exists(stack_jv_dir):
                     os.makedirs(stack_jv_dir)
@@ -561,8 +559,8 @@ def updateStackView(request, stack_id):
                 experiment_dir = new_stack.experiment.data_dir
                 try:
                     # Create stack directory inside JV directory
-                    stack_jv_dir = os.path.join( settings.MEDIA_ROOT,
-                        experiment_dir, 'JV', new_stack.name)
+                    stack_jv_dir = os.path.join(settings.MEDIA_ROOT,
+                                                experiment_dir, 'JV', new_stack.name)
 
                     if not os.path.exists(stack_jv_dir):
                         os.makedirs(stack_jv_dir)
@@ -570,7 +568,8 @@ def updateStackView(request, stack_id):
                         raise Exception(
                             'Stack directory already exists, chose another name for stack')
 
-                    new_stack.jv_dir = os.path.join(experiment_dir, 'JV', new_stack.name)
+                    new_stack.jv_dir = os.path.join(
+                        experiment_dir, 'JV', new_stack.name)
                     new_stack.save()
 
                 except Exception as e:
@@ -592,7 +591,7 @@ def updateStackView(request, stack_id):
                 try:
                     # Create stack directory inside JV directory
                     stack_jv_dir = os.path.join(settings.MEDIA_ROOT,
-                        experiment_dir, 'JV', stack.name)
+                                                experiment_dir, 'JV', stack.name)
 
                     if not os.path.exists(stack_jv_dir):
                         os.makedirs(stack_jv_dir)
@@ -600,7 +599,8 @@ def updateStackView(request, stack_id):
                         raise Exception(
                             'Stack directory already exists, chose another name for stack')
 
-                    stack.jv_dir = os.path.join(experiment_dir, 'JV', stack.name)
+                    stack.jv_dir = os.path.join(
+                        experiment_dir, 'JV', stack.name)
                     stack.save()
 
                 except Exception as e:
@@ -808,16 +808,42 @@ def dryingProgramView(request):
             drying_program.author = request.user
 
             # Check if a similar entry already exists by name
-            if not DryingProgram.objects.filter(name = form.cleaned_data['name'], author = request.user).exists():
+            if not DryingProgram.objects.filter(name=form.cleaned_data['name'], author=request.user).exists():
                 form.save()
                 messages.success(request, 'Drying program saved successfully.')
 
             else:
-                messages.error(request, 'A Drying program with this name already exists.')
+                messages.error(
+                    request, 'A Drying program with this name already exists.')
 
-    context  = {'form': DryingProgramForm(),
-                'step_form': DryingProgramStepForm()}
+    context = {'form': DryingProgramForm(),
+               'step_form': DryingProgramStepForm()}
     return render(request, 'drying-program.html', context)
+
+
+@ login_required(login_url='sign_in')
+def layerCompositionView(request):
+
+    if request.method == 'POST':
+        form = LayerCompositionForm(request.POST)
+        if form.is_valid():
+            composition = form.save(commit=False)
+
+            # Check if a similar entry already exists
+            if not LayerComposition.objects.filter(name__iexact=form.cleaned_data['name'], author=request.user).exists():
+                composition.author = request.user
+                composition.save()
+                messages.success(
+                    request, 'Layer composition saved successfully.')
+                return redirect('layer')
+
+            else:
+                messages.error(
+                    request, 'A Layer composition with this name already exists.')
+
+    context = {'form': LayerCompositionForm()}
+
+    return render(request, 'layer-composition.html', context)
 
 
 @ login_required(login_url='sign_in')
@@ -836,7 +862,7 @@ def dryingProgramStepView(request):
 
         else:
             message = 'An identical drying step already exists.'
-    
+
     # to show the steps field in drying program form
     return render(request, 'partials/drying-step-selection-field copy.html', {'form': DryingProgramForm(), 'message': message})
 
@@ -945,6 +971,7 @@ def thermalEvaporationView(request):
                'thermal_evaporation_step_form': ThermalEvaporationStepForm()}
     return render(request, 'thermal-evaporation.html', context)
 
+
 @ login_required(login_url='sign_in')
 def updateThermalEvaporationView(request, layer_id):
     layer = get_object_or_404(Layer, pk=layer_id)
@@ -967,16 +994,17 @@ def screenPrintingView(request):
     if request.method == 'POST':
         form = ScreenPrintingForm(request.POST)
         if form.is_valid():
-            screen_printing =form.save(commit=False)
+            screen_printing = form.save(commit=False)
             screen_printing.author = request.user
             screen_printing.save()
             messages.success(request, 'Screen printing saved successfully.')
             return redirect('screen_printing')
-    else :
+    else:
         form = ScreenPrintingForm()
 
     context = {'form': form}
     return render(request, 'screen-printing.html', context)
+
 
 @ login_required(login_url='sign_in')
 def infiltrationView(request):
@@ -992,6 +1020,7 @@ def infiltrationView(request):
 
     context = {'form': InfiltrationForm()}
     return render(request, 'infiltration.html', context)
+
 
 @ login_required(login_url='sign_in')
 def formulationView(request):
@@ -1115,12 +1144,10 @@ def updateFormulationView(request, formulation_id):
 ########################### Dashboard Start############################
 
 @ login_required(login_url='sign_in')
-def dashboardView(request): 
+def dashboardView(request):
 
     if request.method == 'POST':
         pass
-
-
 
     users = User.objects.all()
     experiments = Experiment.objects.all()
@@ -1145,7 +1172,7 @@ def dashboardView(request):
             created = stack.created.strftime("%Y-%m-%d")
             X.append(created)
             user.append(f"{stack.author.first_name} {stack.author.last_name}")
-    
+
     if not stacks:
         # Provide default data or message to display
         X = []
@@ -1172,7 +1199,6 @@ def dashboardView(request):
             )
         )
         pce_chart = fig.to_html()
-  
 
     context = {'users': users, 'experiments': experiments, 'my_experiments': my_experiments,
                'pce_chart': pce_chart, 'stacks': Stack.objects.all()}
@@ -1191,9 +1217,9 @@ def get_stacks(request):
 
 ########################### Home Start############################
 
-def homeView (request):
-    return render(request, 'home.html')
 
+def homeView(request):
+    return render(request, 'home.html')
 
 
 ########################### Home End############################
@@ -1265,8 +1291,8 @@ def uploadFiles(request):
 
         current_directory = request.POST.get('current_directory')
 
-        current_directory = os.path.join(settings.MEDIA_ROOT, current_directory)
-
+        current_directory = os.path.join(
+            settings.MEDIA_ROOT, current_directory)
 
         # Ensure the directory exists
         os.makedirs(current_directory, exist_ok=True)
@@ -1288,7 +1314,8 @@ def uploadFiles(request):
 def newFolder(request):
     if request.method == 'POST':
         current_directory = request.POST.get('current_directory')
-        current_directory = os.path.join(settings.MEDIA_ROOT, current_directory)
+        current_directory = os.path.join(
+            settings.MEDIA_ROOT, current_directory)
         new_folder_name = request.POST.get('new_folder_name')
 
         new_folder_path = os.path.join(current_directory, new_folder_name)
@@ -1305,7 +1332,8 @@ def deleteFiles(request):
         selected_items = request.POST.get('selected_items')
         current_directory = request.POST.get('current_directory')
 
-        current_directory = os.path.join(settings.MEDIA_ROOT, current_directory)
+        current_directory = os.path.join(
+            settings.MEDIA_ROOT, current_directory)
 
         if not selected_items:
             messages.error(request, 'No files selected')
@@ -1350,5 +1378,3 @@ def copyPath(request):
 def formulationIngredient(request):
 
     return render(request, 'partials/formulation-ingredient.html')
-
-
