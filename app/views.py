@@ -139,7 +139,7 @@ def profileView(request):
 
     user = request.user
 
-    projects = Project.objects.filter(author=user)
+    projects = Project.objects.filter(Q(author=user) | Q(collaborators=user))
 
     context = {'projects': projects}
     return render(request, 'profile.html', context)
