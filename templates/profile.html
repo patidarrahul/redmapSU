@@ -1,10 +1,7 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
 
 <div class="container w-75 mt-5">
-  <div
-    class="row card card-body border shadow-sm p-3 d-flex justify-content-center"
-    style="height: 100px"
-  >
+  <div class="row card card-body border shadow-sm p-3 d-flex justify-content-center" style="height: 100px">
     <!-- <div class="col-auto">
       <div>
         <img
@@ -23,9 +20,7 @@
       </div>
     </div>
     <div class="col">
-      <a href="{% url 'update_profile' %}" style="position: absolute; bottom: 10px; right: 10px">
-        Edit</a
-      >
+      <a href="{% url 'update_profile' %}" style="position: absolute; bottom: 10px; right: 10px"> Edit</a>
     </div>
   </div>
   <div class="row row-cols-1 row-cols-md-4 mt-5">
@@ -47,27 +42,18 @@
             <p class="text-gradient text-dark mb-2 text-sm">Project ID: {{project.id}}</p>
           </div>
           <div class="col-6">
-            <a href=" {% url 'update-project' project.id %}" style="float: right">Edit</a>
+            <a href=" {% url 'update_project' project.id %}" style="float: right">Edit</a>
           </div>
         </div>
         <div class="row">
-          <p style="color: rgb(141, 140, 140); font-size: 14px">
-            Total Experiments: {{project.experiment_set.all.count}}
-          </p>
+          <p style="color: rgb(141, 140, 140); font-size: 14px">Total Experiments: {{project.experiment_set.all.count}}</p>
         </div>
         <a href="{% url 'project-page' project.id %}" style="color: rgb(0, 0, 0)">
           <h5>{{project.title}}</h5>
         </a>
-        <p class="mb-4 text-sm" style="color: rgb(141, 140, 140); font-size: 14px">
-          {{project.description|truncatechars:200}}
-        </p>
+        <p class="mb-4 text-sm" style="color: rgb(141, 140, 140); font-size: 14px">{{project.description|truncatechars:200}}</p>
         <div class="d-flex align-items-center justify-content-center mx-auto">
-          <a
-            style="position: absolute; bottom: 10px; height: 30px; width: 155px"
-            href="{% url 'experiment' project.id %}"
-          >
-            Add New Experiment
-          </a>
+          <a style="position: absolute; bottom: 10px; height: 30px; width: 155px" href="{% url 'experiment' project.id %}"> Add New Experiment </a>
         </div>
       </div>
     </div>

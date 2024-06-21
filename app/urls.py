@@ -45,7 +45,7 @@ urlpatterns = [
     path('project/', views.projectView, name='project'),
     path('project/<int:project_id>/', views.projectPageView, name='project-page'),
     path('project/update/<int:project_id>/',
-         views.projectView, name='update-project'),
+         views.updateProjectView, name='update_project'),
 
     # experiment
     path('experiment/project/<int:project_id>/',

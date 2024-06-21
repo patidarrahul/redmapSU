@@ -306,7 +306,7 @@ def projectView(request):
     return render(request, 'project.html', context)
 
 
-def updateProject(request, project_id):
+def updateProjectView(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
     form = ProjectForm(instance=project)
     action = 'update'
