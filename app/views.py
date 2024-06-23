@@ -1295,32 +1295,25 @@ def dashboardView(request):
         Y = []
         user = []
         pce_chart = "<p>No data available</p>"
-    else:
-        # Proceed with plotting logic as before
-        fig = px.scatter(
-            x=X,
-            y=Y,
-            title="Stacks Hero Device vs Date Created",
-            labels=dict(x="Date Created", y="Power Conversion Efficiency (%)"),
-            template="simple_white",
-        )
-        fig.update_traces(
-            hovertemplate="<b>Date:</b> %{x}<br><b>PCE:</b> %{y}%<br><b>Author:</b> %{text}",
-            text=user,
-            marker=dict(
-                size=10,
-                color='navy',
-                symbol='circle',
-                line=dict(width=2, color='navy'),
-            )
-        )
-        pce_chart = fig.to_html()
+  
 
     context = {'users': users, 'experiments': experiments, 'my_experiments': my_experiments,
-               'pce_chart': pce_chart, 'stacks': Stack.objects.all()}
+               'pce_chart': pce_chart}
     return render(request, 'dashboard.html', context)
 
 
+def dashboard_data_view(request):
+    stacks = Stack.objects.all()  # Adjust according to your query
+    stacks_data = [
+        {
+            'created': stack.created.strftime('%Y-%m-%d'),
+            'hero_device_pce': stack.hero_device_pce,
+            'author': f"{stack.author.first_name} {stack.author.last_name}",
+            'url': reverse('experiment_page', args=[stack.experiment.id])
+        }
+        for stack in stacks
+    ]
+    return JsonResponse(stacks_data, safe=False)
 def get_stacks(request):
 
     stacks = Stack.objects.all()

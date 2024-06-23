@@ -8,6 +8,8 @@ urlpatterns = [
     # dashboard
     path('', views.dashboardView, name='dashboard'),
     path('dashboard/api/stacks/', views.get_stacks, name='get_stacks'),
+    path('api/dashboard_data/', views.dashboard_data_view, name='dashboard_data'),
+
 
 
 
