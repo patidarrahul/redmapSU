@@ -9,43 +9,43 @@
 </style>
 {% endblock extrastyle %} {% block content %}
 
-<div class="container">
-  <div class="row mx-auto justify-content-center">
-    <div class="col-md-3">
-      <div class="card">
-        <div class="card-body d-flex align-items-center justify-content-center">
-          <span>
-            <label class="card-title mb-0" style="font-size: 20px">Total Users:</label>
-            <label class="card-text mb-0 ml-2" style="font-size: 20px">{{ users.count }}</label>
-          </span>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card">
-        <div class="card-body d-flex align-items-center justify-content-center">
-          <span>
-            <label class="card-title mb-0" style="font-size: 20px">Total Experiments:</label>
-            <label class="card-text mb-0 ml-2" style="font-size: 20px">{{ experiments.count }}</label>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card">
-        <div class="card-body d-flex align-items-center justify-content-center">
-          <span>
-            <label class="card-title mb-0" style="font-size: 20px">My Experiments:</label>
-            <label class="card-text mb-0 ml-2" style="font-size: 20px">{{ my_experiments.count }}</label>
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="container" x-data="{ clickFilterButton() {document.getElementById('filterButton').click()}}">
   <div class="row mx-auto justify-content-center mt-2">
-    <div class="col-md-8">
-      <div class="card px-5 py-5">
+    <div class="col-md-3 mx-auto justify-content-center">
+      <div class="col">
+        <div class="card">
+          <div class="card-body d-flex align-items-center justify-content-center">
+            <span>
+              <label class="card-title mb-0" style="font-size: 20px">Total Users:</label>
+              <label class="card-text mb-0 ml-2" style="font-size: 20px">{{ users.count }}</label>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-body d-flex align-items-center justify-content-center">
+            <span>
+              <label class="card-title mb-0" style="font-size: 20px">Total Experiments:</label>
+              <label class="card-text mb-0 ml-2" style="font-size: 20px">{{ experiments.count }}</label>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card">
+          <div class="card-body d-flex align-items-center justify-content-center">
+            <span>
+              <label class="card-title mb-0" style="font-size: 20px">My Experiments:</label>
+              <label class="card-text mb-0 ml-2" style="font-size: 20px">{{ my_experiments.count }}</label>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <div class="card px-5 py-3">
         <canvas id="scatterChart"></canvas>
       </div>
     </div>
@@ -54,33 +54,30 @@
     <div class="col-md-12">
       <form id="filterForm">
         <div class="form-row d-flex">
-          <div class="col-md-3">
+          <div class="col-md-3 mx-1">
             <label class="form-label" for="date_from">From</label>
 
-            <input type="date" class="form-control" id="date_from" placeholder="From" />
+            <input type="date" class="form-control" id="date_from" placeholder="From" @change="clickFilterButton()" />
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 mx-1">
             <label class="form-label" for="date_to">To</label>
-            <input type="date" class="form-control" id="date_to" placeholder="To" />
+            <input type="date" class="form-control" id="date_to" placeholder="To" @change="clickFilterButton()" />
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 mx-1">
             <label class="form-label" for="author">Author</label>
-            <select class="form-select" id="author">
+            <select class="form-select" id="author" @change="clickFilterButton()">
               <option value="all">All</option>
               {% for user in users %}
               <option value="{{ user.username }}">{{ user.username }}</option>
               {% endfor %}
             </select>
           </div>
-          <div class="col-md-3 d-flex justify-content-center">
-            <button type="button" class="btn btn-primary mt-auto" id="filterButton">Filter</button>
-          </div>
         </div>
       </form>
     </div>
   </div>
 </div>
-
+<button type="button" class="btn btn-primary mt-auto" id="filterButton" style="display: none">Filter</button>
 <script src="{% static 'js/dashboard-chartjs.js' %}"></script>
 
 {% endblock content %}
