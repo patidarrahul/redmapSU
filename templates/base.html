@@ -87,7 +87,7 @@
                   {% endif %}
                 </div>
 
-                <div class="col-lg-3 col-md-12 d-flex justify-content-center align-items-center">
+                <div class="col-lg-3 col-md-12 d-flex justify-content-end align-items-center">
                   <div class="row">
                     {% if user.is_authenticated %}
                     <div class="col-lg-9 col-md-12 d-flex justify-content-center">
@@ -100,11 +100,11 @@
                         />
                       </form> -->
                     </div>
-                    <div class="col-lg-3 col-md-12 d-flex dropdown justify-content-center">
+                    <div class="col-lg-3 col-md-12 d-flex dropdown justify-content-end">
                       <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle" />
                       </a>
-                      <ul class="dropdown-menu text-small">
+                      <ul class="dropdown-menu text-small dropdown-menu-end">
                         <li>
                           <a class="dropdown-item" href="{% url 'project' %}">New project</a>
                         </li>
