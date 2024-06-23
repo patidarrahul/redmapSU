@@ -43,11 +43,40 @@
       </div>
     </div>
   </div>
-  <div class="row mx-auto justify-content-center mt-5">
+  <div class="row mx-auto justify-content-center mt-2">
     <div class="col-md-8">
       <div class="card px-5 py-5">
         <canvas id="scatterChart"></canvas>
       </div>
+    </div>
+  </div>
+  <div class="row justify-content-center mx-4">
+    <div class="col-md-12">
+      <form id="filterForm">
+        <div class="form-row d-flex">
+          <div class="col-md-3">
+            <label class="form-label" for="date_from">From</label>
+
+            <input type="date" class="form-control" id="date_from" placeholder="From" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" for="date_to">To</label>
+            <input type="date" class="form-control" id="date_to" placeholder="To" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" for="author">Author</label>
+            <select class="form-select" id="author">
+              <option value="all">All</option>
+              {% for user in users %}
+              <option value="{{ user.username }}">{{ user.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3 d-flex justify-content-center">
+            <button type="button" class="btn btn-primary mt-auto" id="filterButton">Filter</button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>

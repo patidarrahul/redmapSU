@@ -1322,7 +1322,19 @@ def dashboardView(request):
 
 
 def dashboard_data_view(request):
+    author = request.GET.get('author')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+
     stacks = Stack.objects.all()  # Adjust according to your query
+
+    if author and author != 'all':
+        stacks = stacks.filter(author__username=author) 
+    if date_from:
+        stacks = stacks.filter(created__gte=date_from)
+    if date_to:
+        stacks = stacks.filter(created__lte=date_to)
+
     stacks_data = [
         {
             'created': stack.created.strftime('%Y-%m-%d'),
