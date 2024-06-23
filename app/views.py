@@ -1295,10 +1295,29 @@ def dashboardView(request):
         Y = []
         user = []
         pce_chart = "<p>No data available</p>"
-  
+    else:
+        # Proceed with plotting logic as before
+        fig = px.scatter(
+            x=X,
+            y=Y,
+            title="Stacks Hero Device vs Date Created",
+            labels=dict(x="Date Created", y="Power Conversion Efficiency (%)"),
+            template="simple_white",
+        )
+        fig.update_traces(
+            hovertemplate="<b>Date:</b> %{x}<br><b>PCE:</b> %{y}%<br><b>Author:</b> %{text}",
+            text=user,
+            marker=dict(
+                size=10,
+                color='navy',
+                symbol='circle',
+                line=dict(width=2, color='navy'),
+            )
+        )
+        pce_chart = fig.to_html()
 
     context = {'users': users, 'experiments': experiments, 'my_experiments': my_experiments,
-               'pce_chart': pce_chart}
+               'pce_chart': pce_chart, 'stacks': Stack.objects.all()}
     return render(request, 'dashboard.html', context)
 
 
