@@ -755,10 +755,11 @@ def updateLayerTypeView(request, layer_id):
         return render(request, 'partials/surface-treatment.html', {'form': LayerForm(author=request.user, instance=layer)})
     elif layer_type == 'Coating Layer':
         coating_parameters = layer.coating_parameters.id
-        coating_parameters = CoatingParameters.objects.get(pk=coating_parameters)
-        
+        coating_parameters = CoatingParameters.objects.get(
+            pk=coating_parameters)
+
         return render(request, 'partials/coating-layer.html',
-                      {'form': LayerForm(author=request.user, instance=layer), 'coating_parameters_form': CoatingParametersForm(instance = coating_parameters)})
+                      {'form': LayerForm(author=request.user, instance=layer), 'coating_parameters_form': CoatingParametersForm(instance=coating_parameters)})
 
 
 @ login_required(login_url='sign_in')
@@ -1329,7 +1330,7 @@ def dashboard_data_view(request):
     stacks = Stack.objects.all()  # Adjust according to your query
 
     if author and author != 'all':
-        stacks = stacks.filter(author__username=author) 
+        stacks = stacks.filter(author__username=author)
     if date_from:
         stacks = stacks.filter(created__gte=date_from)
     if date_to:
@@ -1345,6 +1346,8 @@ def dashboard_data_view(request):
         for stack in stacks
     ]
     return JsonResponse(stacks_data, safe=False)
+
+
 def get_stacks(request):
 
     stacks = Stack.objects.all()
@@ -1368,7 +1371,14 @@ def fileManager(request, path=''):
     if path == '':
         media_path = settings.MEDIA_ROOT
         # Default breadcrumb for the user root
-        navigation_path = [('Media', '')]
+        try:
+            username = request.user.username
+            media_path = os.path.join(settings.MEDIA_ROOT, 'users', username)
+            navigation_path = [('Media', ''), ('users', 'users'),
+                               (username, 'users/' + username)]
+        except:
+            media_path = os.path.join(settings.MEDIA_ROOT)
+            navigation_path = [('Media', '')]
 
     else:
         media_path = os.path.join(settings.MEDIA_ROOT, path)
