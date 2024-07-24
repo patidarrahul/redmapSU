@@ -1369,16 +1369,7 @@ def homeView(request):
 @ login_required(login_url='sign_in')
 def fileManager(request, path=''):
     if path == '':
-        media_path = settings.MEDIA_ROOT
-        # Default breadcrumb for the user root
-        try:
-            username = request.user.username
-            media_path = os.path.join(settings.MEDIA_ROOT, 'users', username)
-            navigation_path = [('Media', ''), ('users', 'users'),
-                               (username, 'users/' + username)]
-        except:
-            media_path = os.path.join(settings.MEDIA_ROOT)
-            navigation_path = [('Media', '')]
+        return redirect('file_manager', path='users/' + request.user.username)
 
     else:
         media_path = os.path.join(settings.MEDIA_ROOT, path)
