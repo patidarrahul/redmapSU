@@ -322,6 +322,15 @@ class SlotDieCoatingForm(forms.ModelForm):
         }
 
 
+class DoctorBladeCoatingForm(forms.ModelForm):
+    class Meta:
+        model = DoctorBladeCoating
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
 class CoatingParametersForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)  # Retrieve the user from kwargs
@@ -338,6 +347,8 @@ class CoatingParametersForm(forms.ModelForm):
                 author=user)
             self.fields['slot_die_coating'].queryset = SlotDieCoating.objects.filter(
                 author=user)
+            self.fields['doctor_blade_coating'].queryset = DoctorBladeCoating.objects.filter(
+                author=user)
 
     class Meta:
         model = CoatingParameters
@@ -349,6 +360,7 @@ class CoatingParametersForm(forms.ModelForm):
             'infilteration': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
             'screen_printing': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
             'slot_die_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+            'doctor_blade_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
         }
 
 

@@ -141,6 +141,15 @@
           {{ coating_parameters_form.slot_die_coating}}
         </div>
       </template>
+      <template x-if="coating_method === 'Doctor Blade Coating'">
+        <div class="col-md-3 form-group">
+          <span class="d-flex justify-content-between">
+            <label for="{{ coating_parameters_form.doctor_blade_coating.id_for_label }}">{{ coating_parameters_form.doctor_blade_coating.label }}</label>
+            <a href="{% url 'doctor_blade_coating' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
+          </span>
+          {{ coating_parameters_form.doctor_blade_coating}}
+        </div>
+      </template>
     </div>
     <hr class="mt-4" />
   </div>

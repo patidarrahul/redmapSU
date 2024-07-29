@@ -103,6 +103,10 @@ urlpatterns = [
     path('slot-die-coating/', views.slotDieCoatingView,
          name='slot_die_coating'),
 
+    # doctor blade coating
+    path('doctor-blade-coating/', views.doctorBladeCoatingView,
+         name='doctor_blade_coating'),
+
     # formulation
     path('formulation/', views.formulationView, name='formulation'),
     path('formulation/update/<int:formulation_id>/',

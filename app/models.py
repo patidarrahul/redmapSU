@@ -293,28 +293,50 @@ class SlotDieCoating(models.Model):
         return f'{self.name}'
 
 
+class DoctorBladeCoating(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural = 'Doctor Blade Coating'
+
+    def __str__(self):
+        return f'{self.name}'
+
+
 class CoatingParameters(models.Model):
 
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, default='')
     spin_coating = models.ForeignKey(
-        SpinCoating, on_delete=models.SET_NULL, null=True, blank=True)
+        SpinCoating, on_delete=models.CASCADE, null=True, blank=True)
     thermal_evaporation = models.ForeignKey(
-        ThermalEvaporation, on_delete=models.SET_NULL, null=True, blank=True)
+        ThermalEvaporation, on_delete=models.CASCADE, null=True, blank=True)
     infilteration = models.ForeignKey(
-        Infiltration, on_delete=models.SET_NULL, null=True, blank=True)
+        Infiltration, on_delete=models.CASCADE, null=True, blank=True)
 
     screen_printing = models.ForeignKey(
-        ScreenPrinting, on_delete=models.SET_NULL, null=True, blank=True)
+        ScreenPrinting, on_delete=models.CASCADE, null=True, blank=True)
 
     slot_die_coating = models.ForeignKey(
-        SlotDieCoating, on_delete=models.SET_NULL, null=True, blank=True)
+        SlotDieCoating, on_delete=models.CASCADE, null=True, blank=True)
+
+    doctor_blade_coating = models.ForeignKey(
+        DoctorBladeCoating, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         if self.thermal_evaporation:
             return f'Thermal Evaporation: {self.thermal_evaporation}'
         elif self.spin_coating:
             return f'Spin Coating: {self.spin_coating}'
+        elif self.infilteration:
+            return f'Infiltration: {self.infilteration}'
+        elif self.screen_printing:
+            return f'Screen Printing: {self.screen_printing}'
+        elif self.slot_die_coating:
+            return f'Slot Die Coating: {self.slot_die_coating}'
+        elif self.doctor_blade_coating:
+            return f'Doctor Blade Coating: {self.doctor_blade_coating}'
         else:
             return f'No Coating Parameters'
 
@@ -417,6 +439,7 @@ class Layer(models.Model):
         ('Screen Printing', 'Screen Printing'),
         ('Infilteration', 'Infilteration'),
         ('Slot Die Coating', 'Slot Die Coating'),
+        ('Doctor Blade Coating', 'Doctor Blade Coating'),
     )
     coating_method = models.CharField(
         max_length=100, choices=coating_method_choices, null=True, blank=True)

@@ -1156,6 +1156,23 @@ def slotDieCoatingView(request):
 
 
 @ login_required(login_url='sign_in')
+def doctorBladeCoatingView(request):
+
+    if request.method == 'POST':
+        form = DoctorBladeCoatingForm(request.POST)
+        if form.is_valid():
+            settings = form.save(commit=False)
+            settings.author = request.user
+            form.save()
+            messages.success(
+                request, 'Doctor blade coating saved successfully.')
+            return redirect('doctor_blade_coating')
+
+    context = {'form': DoctorBladeCoatingForm()}
+    return render(request, 'doctor-blade-coating.html', context)
+
+
+@ login_required(login_url='sign_in')
 def formulationView(request):
 
     if request.method == 'POST':
