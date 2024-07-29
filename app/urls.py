@@ -99,6 +99,10 @@ urlpatterns = [
     # infiltration
     path('infiltration/', views.infiltrationView, name='infiltration'),
 
+    # slot die coating
+    path('slot-die-coating/', views.slotDieCoatingView,
+         name='slot_die_coating'),
+
     # formulation
     path('formulation/', views.formulationView, name='formulation'),
     path('formulation/update/<int:formulation_id>/',

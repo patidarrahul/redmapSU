@@ -1140,6 +1140,22 @@ def infiltrationView(request):
 
 
 @ login_required(login_url='sign_in')
+def slotDieCoatingView(request):
+
+    if request.method == 'POST':
+        form = SlotDieCoatingForm(request.POST)
+        if form.is_valid():
+            settings = form.save(commit=False)
+            settings.author = request.user
+            form.save()
+            messages.success(request, 'Slot die coating saved successfully.')
+            return redirect('slot_die_coating')
+
+    context = {'form': SlotDieCoatingForm()}
+    return render(request, 'slot-die-coating.html', context)
+
+
+@ login_required(login_url='sign_in')
 def formulationView(request):
 
     if request.method == 'POST':

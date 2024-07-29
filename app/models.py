@@ -172,7 +172,7 @@ class Stack(models.Model):
         ordering = ['-created']
 
     def __str__(self):
-        return f'{self.name} (Experiemnt: {self.experiment.serial_number})'
+        return f'{self.name} (Experiment: {self.experiment.serial_number})'
 
 
 class SpinStep(models.Model):
@@ -274,6 +274,17 @@ class ScreenPrinting(models.Model):
 #### A bridge between layer and all coating techniques to add respective parameters ####
 
 
+class SlotDieCoating(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural = 'Slot Die Coating'
+
+    def __str__(self):
+        return f'{self.name}'
+
+
 class CoatingParameters(models.Model):
 
     author = models.ForeignKey(
@@ -287,6 +298,9 @@ class CoatingParameters(models.Model):
 
     screen_printing = models.ForeignKey(
         ScreenPrinting, on_delete=models.SET_NULL, null=True, blank=True)
+
+    slot_die_coating = models.ForeignKey(
+        SlotDieCoating, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         if self.thermal_evaporation:
@@ -394,6 +408,7 @@ class Layer(models.Model):
         ('Thermal Evaporation', 'Thermal Evaporation'),
         ('Screen Printing', 'Screen Printing'),
         ('Infilteration', 'Infilteration'),
+        ('Slot Die Coating', 'Slot Die Coating'),
     )
     coating_method = models.CharField(
         max_length=100, choices=coating_method_choices, null=True, blank=True)
