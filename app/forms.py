@@ -304,10 +304,21 @@ class ScreenPrintingForm(forms.ModelForm):
 class SlotDieCoatingForm(forms.ModelForm):
     class Meta:
         model = SlotDieCoating
-        fields = ['name']
+        fields = ['name', 'coating_speed', 'pump_rate', 'wet_film_thickness',
+                  'coating_width', 'slot_die_and_substrate_gap',
+                  'shim_thickness', 'meniscus_guide_thickness',
+                  'meniscus_guide_tab_depth']
 
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'coating_speed': forms.NumberInput(attrs={'class': 'form-control', }),
+            'pump_rate': forms.NumberInput(attrs={'class': 'form-control', }),
+            'wet_film_thickness': forms.NumberInput(attrs={'class': 'form-control', }),
+            'coating_width': forms.NumberInput(attrs={'class': 'form-control', }),
+            'slot_die_and_substrate_gap': forms.NumberInput(attrs={'class': 'form-control', }),
+            'shim_thickness': forms.NumberInput(attrs={'class': 'form-control', }),
+            'meniscus_guide_thickness': forms.NumberInput(attrs={'class': 'form-control', }),
+            'meniscus_guide_tab_depth': forms.NumberInput(attrs={'class': 'form-control', }),
         }
 
 

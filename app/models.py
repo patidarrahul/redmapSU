@@ -277,6 +277,14 @@ class ScreenPrinting(models.Model):
 class SlotDieCoating(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    coating_speed = models.FloatField(null=True, blank=True)
+    wet_film_thickness = models.FloatField(null=True, blank=True)
+    slot_die_and_substrate_gap = models.FloatField(null=True, blank=True)
+    coating_width = models.FloatField(null=True, blank=True)
+    shim_thickness = models.FloatField(null=True, blank=True)
+    meniscus_guide_thickness = models.FloatField(null=True, blank=True)
+    meniscus_guide_tab_depth = models.FloatField(null=True, blank=True)
+    pump_rate = models.FloatField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'Slot Die Coating'

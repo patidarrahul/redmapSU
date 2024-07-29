@@ -1,19 +1,84 @@
 {% extends 'base.html' %} {% load static %} {% load widget_tweaks %} {% load crispy_forms_tags %} {% block content %}
-
-<div class="container">
+<div class="container" style="width: 60%">
   <div class="row d-flex justify-content-center">
     <h1 class="mb-4" style="color: #7b7b7b">Slot Die Coating</h1>
 
-    <form method="post">
+    <form method="post" id="coating-form">
       {% csrf_token %}
 
-      <div class="col-md-12 form-group justify-content-center">
-        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
-        {{ form.name }}
+      <div class="row">
+        <div class="col-md-12 form-group">
+          <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+          {{ form.name }}
+        </div>
       </div>
+
+      <div class="row">
+        <div class="col-md-6 form-group">
+          <label for="{{ form.coating_speed.id_for_label }}">{{ form.coating_speed.label }} (meter/min)</label>
+          {{ form.coating_speed }}
+        </div>
+
+        <div class="col-md-6 form-group">
+          <label for="{{ form.wet_film_thickness.id_for_label }}">{{ form.wet_film_thickness.label }} (&micro;m)</label>
+          {{ form.wet_film_thickness }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 form-group">
+          <label for="{{ form.slot_die_and_substrate_gap.id_for_label }}">{{ form.slot_die_and_substrate_gap.label }} (&micro;m)</label>
+          {{ form.slot_die_and_substrate_gap }}
+        </div>
+
+        <div class="col-md-6 form-group">
+          <label for="{{ form.coating_width.id_for_label }}">{{ form.coating_width.label }} (mm)</label>
+          {{ form.coating_width }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 form-group">
+          <label for="{{ form.shim_thickness.id_for_label }}">{{ form.shim_thickness.label }} (&micro;m)</label>
+          {{ form.shim_thickness }}
+        </div>
+
+        <div class="col-md-6 form-group">
+          <label for="{{ form.meniscus_guide_thickness.id_for_label }}">{{ form.meniscus_guide_thickness.label }} (&micro;m)</label>
+          {{ form.meniscus_guide_thickness }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 form-group">
+          <label for="{{ form.meniscus_guide_tab_depth.id_for_label }}">{{ form.meniscus_guide_tab_depth.label }} (&micro;m)</label>
+          {{ form.meniscus_guide_tab_depth }}
+        </div>
+
+        <div class="col-md-6 form-group">
+          <label for="{{ form.pump_rate.id_for_label }}">{{ form.pump_rate.label }} (ml/min)</label>
+          {{ form.pump_rate }}
+        </div>
+      </div>
+
       <button type="submit" class="btn btn-primary">Save</button>
     </form>
   </div>
 </div>
+{% endblock content %} {% block extrascripts %}
+<script>
+  function calculatePumpRate() {
+    var coatingWidth = parseFloat(document.getElementById("id_coating_width").value);
+    var speed = parseFloat(document.getElementById("id_coating_speed").value);
+    var wetFilmThickness = parseFloat(document.getElementById("id_wet_film_thickness").value);
 
-{% endblock content %}
+    if (!isNaN(coatingWidth) && !isNaN(speed) && !isNaN(wetFilmThickness)) {
+      var pumpRate = coatingWidth * speed * wetFilmThickness;
+      var pumpRate = pumpRate / 1000;
+      document.getElementById("id_pump_rate").value = pumpRate;
+    }
+  }
+
+  document.getElementById("coating-form").addEventListener("input", calculatePumpRate);
+</script>
+{% endblock extrascripts %}
