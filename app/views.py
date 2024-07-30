@@ -284,6 +284,19 @@ def projectPageView(request, project_id):
 
 
 @login_required(login_url='sign_in')
+def deleteExperimentView(request, experiment_id):
+
+    experiment = get_object_or_404(Experiment, pk=experiment_id)
+
+    if request.method == 'POST':
+        experiment.delete()
+        messages.success(request, 'Experiment deleted successfully.')
+        return redirect('project-page', project_id=experiment.project.id)
+
+    return redirect('project-page', project_id=experiment.project.id)
+
+
+@login_required(login_url='sign_in')
 def projectView(request):
 
     if request.method == 'POST':

@@ -54,6 +54,8 @@ urlpatterns = [
          views.experimentView, name='experiment'),
     path('experiment/<int:experiment_id>/',
          views.updateExperimentView, name='update_experiment'),
+    path('experiment/delete/<int:experiment_id>/',
+         views.deleteExperimentView, name='delete_experiment'),
 
     # experiment page
     path('experiment-page/<int:experiment_id>/',
