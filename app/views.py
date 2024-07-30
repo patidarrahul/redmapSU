@@ -1382,15 +1382,17 @@ def dashboard_data_view(request):
     if date_to:
         stacks = stacks.filter(created__lte=date_to)
 
-    stacks_data = [
-        {
-            'created': stack.created.strftime('%Y-%m-%d'),
-            'hero_device_pce': stack.hero_device_pce,
-            'author': f"{stack.author.first_name} {stack.author.last_name}",
-            'url': reverse('experiment_page', args=[stack.experiment.id])
-        }
-        for stack in stacks
-    ]
+    stacks_data = []
+
+    for stack in stacks:
+        if stack.hero_device_pce is not None:  # Filter out stacks without PCE data
+            stacks_data.append({
+                'created': stack.created.strftime('%Y-%m-%d'),
+                'hero_device_pce': stack.hero_device_pce,
+                'author': f"{stack.author.first_name} {stack.author.last_name}",
+                'url': reverse('experiment_page', args=[stack.experiment.id])
+            })
+
     return JsonResponse(stacks_data, safe=False)
 
 

@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
             user: item.author,
             url: item.url
         }));
-
+        console.log(data);
         const users = [...new Set(data.map(d => d.user))];
         const datasets = users.map(user => createDataset(user, data));
 
