@@ -145,7 +145,8 @@ class Stack(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    substrate = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    substrate = models.ForeignKey(
+        Inventory, on_delete=models.SET_NULL, null=True, blank=True)
     geometry_choices = (
         ('N-I-P', 'N-I-P'),
         ('P-I-N', 'P-I-N'),
@@ -322,7 +323,7 @@ class CoatingParameters(models.Model):
         SlotDieCoating, on_delete=models.CASCADE, null=True, blank=True)
 
     doctor_blade_coating = models.ForeignKey(
-        DoctorBladeCoating, on_delete=models.SET_NULL, null=True, blank=True)
+        DoctorBladeCoating, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         if self.thermal_evaporation:
