@@ -67,8 +67,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         scatterChartElement.addEventListener('click', event => {
             const points = scatterChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
-            if (points[0]) {
-                window.open(data[points[0].index].url, '_blank');
+            console.log(points[0].index);
+            if (points.length > 0) {
+                const pointIndex = points[0].index;
+                const datasetIndex = points[0].datasetIndex;
+                const pointData = scatterChart.data.datasets[datasetIndex].data[pointIndex];
+                window.open(pointData.url, '_blank');
             }
         });
     }
