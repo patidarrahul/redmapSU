@@ -379,18 +379,26 @@ def experimentView(request, project_id):
                 experiment = form.save(commit=False)
                 experiment.project = project
                 experiment.author = request.user
-                experiment.save()
-                experiment_status = ExperimentStatus.objects.create(
-                    experiment=experiment)
-                experiment_status.save()
+                data_dir_name = experiment.data_dir
+                data_dir = os.path.join(
+                    settings.MEDIA_ROOT, 'users', request.user.username, data_dir_name)
+                if not os.path.exists(data_dir):
+                    os.makedirs(data_dir)
+                    experiment.data_dir = os.path.join(
+                        'users', request.user.username, data_dir_name)
+                    experiment.save()
+                    experiment_status = ExperimentStatus.objects.create(
+                        experiment=experiment)
+                    experiment_status.save()
+                else:
+                    raise Exception(
+                        'Experiment directory already exists, chose another name for experiment')
 
                 messages.success(request, 'Experiment saved successfully.')
                 # Redirect to profile page after successful addition
                 return redirect('project-page', experiment.project.id)
             except Exception as e:
-                logger.error("Error saving experiment: %s", str(e))
-                messages.error(
-                    request, 'An error occurred while saving the experiment.')
+                messages.error(request, str(e))
     else:
         form = ExperimentForm(
             initial={'project': project, 'serial_number': next_experiment_number})
@@ -413,14 +421,33 @@ def updateExperimentView(request, experiment_id):
     """
 
     experiment = get_object_or_404(Experiment, pk=experiment_id)
+    old_data_dir = experiment.data_dir
 
     if request.method == 'POST':
         form = ExperimentForm(request.POST, instance=experiment)
         if form.is_valid():
-            form.save()
-            project = experiment.project.id
+            updated_experiment = form.save(commit=False)
+            project = updated_experiment.project.id
+            # checking the change in the data_dir
+            updated_data_dir = os.path.join(
+                settings.MEDIA_ROOT, 'users', request.user.username, updated_experiment.data_dir)
+            if not updated_data_dir == os.path.join(settings.MEDIA_ROOT, old_data_dir):
+                if not os.path.exists(updated_data_dir):
+                    os.makedirs(updated_data_dir)
+                    updated_experiment.data_dir = os.path.join(
+                        'users', request.user.username, updated_experiment.data_dir
+                    )
+                    updated_experiment.save()
+                else:
+                    messages.error(
+                        request, 'Experiment directory already exists, chose another name for experiment'
+                    )
+                    return render(request, 'experiment.html', {'form': form, 'action': 'update'})
+            else:
+                updated_experiment.data_dir = old_data_dir
+                updated_experiment.save()
 
-            messages.success(request, 'Experiment saved successfully.')
+            messages.success(request, 'Experiment updated successfully.')
             return redirect('project-page', project)
     else:
         form = ExperimentForm(instance=experiment)
@@ -527,7 +554,7 @@ def stackView(request):
                 # Create stack directory inside JV directory
                 stack_jv_dir = os.path.join(
                     settings.MEDIA_ROOT, experiment_dir, 'JV', stack.name)
-
+                print(stack_jv_dir)
                 if not os.path.exists(stack_jv_dir):
                     os.makedirs(stack_jv_dir)
                 else:

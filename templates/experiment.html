@@ -49,7 +49,7 @@
           <label for="{{ form.data_dir.id_for_label }}">Data Directory</label>
           {{ form.data_dir }}
           <p class="card-text" style="color: #7b7b7b; font-size: 12px">
-            Please make a directory using the file manager and paste the address of the directory here. All the data of this experiment will be stored in this directory.
+            Enter the name of the directory. The folder with this name will be created in your folder. All the data belonging to this experiment will be stored here.
           </p>
         </div>
       </div>
@@ -62,4 +62,19 @@
   </div>
 </div>
 
-{% endblock content %}
+{% endblock content %} {% block extrascripts %}
+<script>
+  // Set the value of the 'data_dir' input field to the basename of the selected directory
+  document.addEventListener("DOMContentLoaded", function () {
+    var dataDirInput = document.getElementById("id_data_dir");
+
+    if (dataDirInput) {
+      var fullPath = dataDirInput.value;
+      var basename = fullPath.match(/([^\/\\]+)\/?$/);
+
+      dataDirInput.value = basename[1];
+    }
+  });
+</script>
+
+{% endblock extrascripts %}
