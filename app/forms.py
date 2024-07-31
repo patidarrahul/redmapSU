@@ -104,6 +104,12 @@ class ExperimentForm(forms.ModelForm):
 
 
 class StackForm(forms.ModelForm):
+
+    substrate = forms.ModelChoiceField(
+        queryset=Inventory.objects.filter(category__name='Substrate'),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
     class Meta:
         model = Stack
         fields = ['experiment', 'name', 'substrate', 'geometry',
@@ -113,7 +119,6 @@ class StackForm(forms.ModelForm):
             'experiment': forms.Select(attrs={'class': 'form-select'}),
             'author': forms.Select(attrs={'class': 'form-select'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'substrate': forms.Select(attrs={'class': 'form-select'}),
             'geometry': forms.Select(attrs={'class': 'form-select'}),
             'number_of_layers': forms.NumberInput(attrs={'class': 'form-control', }),
             'number_of_devices': forms.NumberInput(attrs={'class': 'form-control', }),
