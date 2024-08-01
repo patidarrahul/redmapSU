@@ -26,8 +26,14 @@
       <div class="btn-group mr-2">
         <button type="button" class="btn dropdown-toggle px-2" data-bs-toggle="dropdown">Action</button>
         <div class="dropdown-menu">
-          <a class="dropdown-item" href="javascript:void(0)">Move</a>
-          <a class="dropdown-item" href="javascript:void(0)">Copy</a>
+          <form method="post" action="{% url 'download_files' %}">
+            {% csrf_token %}
+
+            <input type="hidden" name="current_directory" value="{{ current_directory }}" />
+            <input type="hidden" name="selected_items" value="" id="selected_items_input_download" />
+            <button class="dropdown-item" type="submit">Download</button>
+          </form>
+
           <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#renameModal">Rename</a>
           <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</a>
         </div>
@@ -182,6 +188,8 @@
     $("#selected_items_input_rename").val(selectedItems.join(","));
 
     $("#selected_items_input_delete").val(selectedItems.join(","));
+
+    $("#selected_items_input_download").val(selectedItems.join(","));
   });
 </script>
 <script>

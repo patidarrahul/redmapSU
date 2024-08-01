@@ -12,7 +12,9 @@ from .models import *
 from django.contrib.auth.decorators import login_required
 from .forms import *
 import logging
-import pyperclip
+import zipfile
+from io import BytesIO
+import mimetypes
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -1564,6 +1566,81 @@ def deleteFiles(request):
                     os.remove(item_path)
 
             messages.success(request, 'Files deleted successfully')
+
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+@ login_required(login_url='sign_in')
+def downloadFiles(request):
+    if request.method == 'POST':
+        selected_items = request.POST.get('selected_items')
+        current_directory = request.POST.get('current_directory')
+        current_directory = os.path.join(
+            settings.MEDIA_ROOT, current_directory)
+
+        if not selected_items:
+            messages.error(
+                request, 'No files or folders selected for download')
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        selected_items_list = selected_items.split(',')
+
+        if len(selected_items_list) == 1:
+            item_path = os.path.join(current_directory, selected_items_list[0])
+            if os.path.exists(item_path):
+                if os.path.isdir(item_path):
+                    # If it's a directory, create a ZIP file
+                    zip_buffer = BytesIO()
+                    with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+                        for root, dirs, files in os.walk(item_path):
+                            for file in files:
+                                file_path = os.path.join(root, file)
+                                arcname = os.path.relpath(
+                                    file_path, current_directory)
+                                zip_file.write(file_path, arcname)
+                    zip_buffer.seek(0)
+                    response = HttpResponse(
+                        zip_buffer, content_type='application/zip')
+                    response[
+                        'Content-Disposition'] = f'attachment; filename={os.path.basename(item_path)}.zip'
+                else:
+                    # If it's a file, download it directly
+                    with open(item_path, 'rb') as file:
+                        response = HttpResponse(
+                            file.read(), content_type=mimetypes.guess_type(item_path)[0])
+                        response[
+                            'Content-Disposition'] = f'attachment; filename={os.path.basename(item_path)}'
+                return response
+            else:
+                messages.error(request, 'File or folder not found')
+                return redirect(request.META.get('HTTP_REFERER'))
+
+        else:
+            # If multiple files or directories are selected, create a ZIP file
+            zip_buffer = BytesIO()
+            with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+                for item in selected_items_list:
+                    item_path = os.path.join(current_directory, item)
+                    if os.path.exists(item_path):
+                        if os.path.isdir(item_path):
+                            for root, dirs, files in os.walk(item_path):
+                                for file in files:
+                                    file_path = os.path.join(root, file)
+                                    arcname = os.path.relpath(
+                                        file_path, current_directory)
+                                    zip_file.write(file_path, arcname)
+                        else:
+                            zip_file.write(item_path, os.path.relpath(
+                                item_path, current_directory))
+                    else:
+                        messages.error(
+                            request, f'File or folder {item} not found')
+                        return redirect(request.META.get('HTTP_REFERER'))
+
+            zip_buffer.seek(0)
+            response = HttpResponse(zip_buffer, content_type='application/zip')
+            response['Content-Disposition'] = 'attachment; filename=selected_items.zip'
+            return response
 
     return redirect(request.META.get('HTTP_REFERER'))
 
