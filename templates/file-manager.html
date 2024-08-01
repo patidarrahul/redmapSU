@@ -163,15 +163,17 @@
     </div>
 
     {% endfor %} {% for file in files_list %}
-    <div class="file-item">
-      <div class="file-item-select-bg bg-primary"></div>
-      <label class="file-item-checkbox custom-control custom-checkbox">
-        <input type="checkbox" value="{{ file.name }}" class="custom-control-input" />
-        <span class="custom-control-label"></span>
-      </label>
-      <div class="file-item-icon bi bi-file-earmark-fill text-secondary"></div>
-      <a href="" class="file-item-name" style="color: black"> {{ file.name }} </a>
-    </div>
+    <a href="{% url 'view_file' file.path %}" class="file-item-link" style="text-decoration: none">
+      <div class="file-item">
+        <div class="file-item-select-bg bg-primary"></div>
+        <label class="file-item-checkbox custom-control custom-checkbox">
+          <input type="checkbox" value="{{ file.name }}" class="custom-control-input" />
+          <span class="custom-control-label"></span>
+        </label>
+        <div class="file-item-icon bi bi-file-earmark-fill text-secondary"></div>
+        <div class="file-item-name" style="color: black">{{ file.name }}</div>
+      </div>
+    </a>
 
     {% endfor %}
   </div>

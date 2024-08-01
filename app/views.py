@@ -1645,6 +1645,20 @@ def downloadFiles(request):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+@login_required(login_url='sign_in')
+def viewFile(request, file_path):
+
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(
+                file.read(), content_type=mimetypes.guess_type(file_path)[0])
+            response['Content-Disposition'] = 'inline; filename=' + \
+                os.path.basename(file_path)
+            return response
+    else:
+        raise Http404("File does not exist")
+
+
 def formulationIngredient(request):
 
     return render(request, 'partials/formulation-ingredient.html')
