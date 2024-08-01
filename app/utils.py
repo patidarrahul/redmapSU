@@ -23,7 +23,7 @@ def dataframe(dir):
     series_fwd = []
     shunt_rev = []
     shunt_fwd = []
-    
+
     for file in files:
         try:
             # Detect file encoding dynamically
@@ -31,7 +31,7 @@ def dataframe(dir):
                 raw_data = f.read()
                 result = chardet.detect(raw_data)
                 encoding = result['encoding']
-            
+
             # Read file using detected encoding
             with open(file, 'r', encoding=encoding) as f:
                 split_file = []
@@ -39,7 +39,7 @@ def dataframe(dir):
                     line = line.split('\t')
                     split_file.append(line)
 
-                if split_file[28][3] == 'Light':  ## Filtering the light current
+                if split_file[28][3] == 'Light':  # Filtering the light current
                     file_location.append(file)
                     cell_id.append(split_file[23][1])
                     jsc_rev.append(float(split_file[28][7]))
@@ -81,7 +81,8 @@ def dataframe(dir):
 
 def jvBoxPlot(experiment_id):
     stacks = Stack.objects.filter(experiment_id=experiment_id)
-    all_jv_dirs = [(stack.name ,os.path.join(settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
+    all_jv_dirs = [(stack.name, os.path.join(
+        settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
 
     df_list = []
 
@@ -91,53 +92,52 @@ def jvBoxPlot(experiment_id):
         # storing stack df in csv
         dataframe(jv_dir).to_csv(f'{jv_dir}/summary_jv.csv', index=False)
 
-    
-
     fig_jv = go.Figure()
     fig_voc = go.Figure()
     fig_ff = go.Figure()
     fig_pce = go.Figure()
     for stack_name, df in df_list:
-        fig_jv.add_trace(go.Box(y=df.iloc[:, 3], boxpoints='all', # can also be outliers, or suspectedoutliers, or False
-            jitter=0.3, # add some jitter for a better separation between points
-            pointpos=-1.8,
-            showlegend=False, # remove legend
-            name = stack_name
- 
-            )) # relative position of points wrt box))
+        fig_jv.add_trace(go.Box(y=df.iloc[:, 2], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
+                                jitter=0.3,  # add some jitter for a better separation between points
+                                pointpos=-1.8,
+                                showlegend=False,  # remove legend
+                                name=stack_name
 
-    for stack_name ,df in df_list:
-        fig_voc.add_trace(go.Box(y=df.iloc[:, 5], boxpoints='all', # can also be outliers, or suspectedoutliers, or False
-            jitter=0.3, # add some jitter for a better separation between points
-            pointpos=-1.8, 
-            showlegend=False, # remove legend
-            name = stack_name
-
-            )) # relative position of points wrt box))
+                                ))  # relative position of points wrt box))
 
     for stack_name, df in df_list:
-        fig_ff.add_trace(go.Box(y=df.iloc[:, 7], boxpoints='all', # can also be outliers, or suspectedoutliers, or False
-            jitter=0.3, # add some jitter for a better separation between points
-            pointpos=-1.8,
-            showlegend=False, # remove legend 
-            name = stack_name
-            )) # relative position of points wrt box))
+        fig_voc.add_trace(go.Box(y=df.iloc[:, 4], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
+                                 jitter=0.3,  # add some jitter for a better separation between points
+                                 pointpos=-1.8,
+                                 showlegend=False,  # remove legend
+                                 name=stack_name
 
-    for stack_name,df in df_list:
-        fig_pce.add_trace(go.Box(y=df.iloc[:, 9], boxpoints='all', # can also be outliers, or suspectedoutliers, or False
-            jitter=0.3, # add some jitter for a better separation between points
-            pointpos=-1.8,
-            showlegend=False, # remove legend 
-            name = stack_name
-            )) # relative position of points wrt box))
-    
+                                 ))  # relative position of points wrt box))
+    for stack_name, df in df_list:
+        fig_ff.add_trace(go.Box(y=df.iloc[:, 6], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
+                                jitter=0.3,  # add some jitter for a better separation between points
+                                pointpos=-1.8,
+                                showlegend=False,  # remove legend
+                                name=stack_name
+                                ))  # relative position of points wrt box))
 
-    fig_jv.update_layout(yaxis_title='Current Density (mA/cm<sup>2</sup>)', width = 600)
-    fig_voc.update_layout(yaxis_title='Open Circuit Voltage (Volts)', width = 600)
-    fig_ff.update_layout(yaxis_title='Fill Factor (%)', width = 600)
-    fig_pce.update_layout(yaxis_title='Power Conversion Efficiency (%)', width = 600)
+    for stack_name, df in df_list:
+        fig_pce.add_trace(go.Box(y=df.iloc[:, 8], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
+                                 jitter=0.3,  # add some jitter for a better separation between points
+                                 pointpos=-1.8,
+                                 showlegend=False,  # remove legend
+                                 name=stack_name
+                                 ))  # relative position of points wrt box))
 
-    #add 
+    fig_jv.update_layout(
+        yaxis_title='Current Density (mA/cm<sup>2</sup>)', width=600)
+    fig_voc.update_layout(
+        yaxis_title='Open Circuit Voltage (Volts)', width=600)
+    fig_ff.update_layout(yaxis_title='Fill Factor (%)', width=600)
+    fig_pce.update_layout(
+        yaxis_title='Power Conversion Efficiency (%)', width=600)
+
+    # add
     figures = {
         'fig_jv': fig_jv,
         'fig_voc': fig_voc,
@@ -150,7 +150,8 @@ def jvBoxPlot(experiment_id):
 
 def heroJV(experiment_id):
     stacks = Stack.objects.filter(experiment_id=experiment_id)
-    all_jv_dirs = [(stack.id ,os.path.join(settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
+    all_jv_dirs = [(stack.id, os.path.join(
+        settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
 
     for stack_id, jv_dir in all_jv_dirs:
         csv_path = f'{jv_dir}/summary_jv.csv'
@@ -159,37 +160,27 @@ def heroJV(experiment_id):
 
         if df.empty:
             continue
-        
 
         # first compare between rev and fwd which is higher on average
 
         # get the average of the columns
-        avg_rev = df.iloc[:,8].mean()
-        avg_fwd = df.iloc[:,9].mean()
+        avg_rev = df.iloc[:, 8].mean()
+        avg_fwd = df.iloc[:, 9].mean()
 
         if avg_rev > avg_fwd:
-            max_index = df.iloc[:,8].idxmax()
+            max_index = df.iloc[:, 8].idxmax()
             hero_device_pce = df.iloc[max_index, 8]
             # get the filename at the max index
             hero_device_jv_dir = df.iloc[max_index, 0]
-            
+
         else:
-            max_index = df.iloc[:,9].idxmax()
+            max_index = df.iloc[:, 9].idxmax()
             hero_device_pce = df.iloc[max_index, 9]
             # get the filename at the max index
             hero_device_jv_dir = df.iloc[max_index, 0]
-            
-
-        
-
 
         # get the stack name
         stack = Stack.objects.get(id=stack_id)
         stack.hero_device_jv_dir = hero_device_jv_dir
         stack.hero_device_pce = hero_device_pce
         stack.save()
-
-
-
-            
-
