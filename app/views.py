@@ -749,6 +749,32 @@ def layerView(request):
                 # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
                 coating_parameters, created = CoatingParameters.objects.get_or_create(
                     author=request.user, infilteration=infilteration)
+            elif layer.coating_method == 'Slot Die Coating':
+
+                # Get the selected Slot Die Coating instance
+                slot_die_coating_instance = request.POST.get(
+                    'slot_die_coating')
+
+                slot_die_coating = SlotDieCoating.objects.get(
+                    pk=slot_die_coating_instance)
+
+                # Create a new CoatingParameters instance with the selected Slot Die Coating and add it to the layer
+                coating_parameters, created = CoatingParameters.objects.get_or_create(
+                    author=request.user, slot_die_coating=slot_die_coating)
+                layer.coating_parameters = coating_parameters
+
+            elif layer.coating_method == 'Doctor Blade Coating':
+                # Get the selected Doctor Blade Coating instance
+                doctor_blade_coating_instance = request.POST.get(
+                    'doctor_blade_coating')
+
+                doctor_blade_coating = DoctorBladeCoating.objects.get(
+                    pk=doctor_blade_coating_instance)
+
+                # Create a new CoatingParameters instance with the selected Doctor Blade Coating and add it to the layer
+                coating_parameters, created = CoatingParameters.objects.get_or_create(
+                    author=request.user, doctor_blade_coating=doctor_blade_coating)
+                layer.coating_parameters = coating_parameters
 
             else:
                 messages.error(
@@ -870,6 +896,33 @@ def updateLayerView(request, layer_id):
                     # Create a new CoatingParameters instance with the selected Screen Printing and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
                         author=request.user, screen_printing=screen_printing)
+                    layer.coating_parameters = coating_parameters
+
+                elif new_layer.coating_method == 'Slot Die Coating':
+
+                    # Get the selected Slot Die Coating instance
+                    slot_die_coating_instance = request.POST.get(
+                        'slot_die_coating')
+                    slot_die_coating = SlotDieCoating.objects.get(
+                        pk=slot_die_coating_instance)
+
+                    # Create a new CoatingParameters instance with the selected Slot Die Coating and add it to the layer
+                    coating_parameters, created = CoatingParameters.objects.get_or_create(
+                        author=request.user, slot_die_coating=slot_die_coating)
+                    layer.coating_parameters = coating_parameters
+
+                elif new_layer.coating_method == 'Doctor Blade Coating':
+
+                    # Get the selected Doctor Blade Coating instance
+                    doctor_blade_coating_instance = request.POST.get(
+                        'doctor_blade_coating')
+                    doctor_blade_coating = DoctorBladeCoating.objects.get(
+                        pk=doctor_blade_coating_instance)
+
+                    # Create a new CoatingParameters instance with the selected Doctor Blade Coating and add it to the layer
+                    coating_parameters, created = CoatingParameters.objects.get_or_create(
+                        author=request.user, doctor_blade_coating=doctor_blade_coating)
+                    layer.coating_parameters = coating_parameters
 
                 else:
                     messages.error(
