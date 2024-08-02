@@ -85,12 +85,22 @@ def jvBoxPlot(experiment_id):
         settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
 
     df_list = []
+    # check if all jv dirs exist, since we only wnat to compile the data into CSV ones, if they exist we can skip
+    if all([os.path.exists(jv_dir) for jv_dir in all_jv_dirs[1]]):
+        for stack_name, jv_dir in all_jv_dirs:
+            df = pd.read_csv(f'{jv_dir}/summary_jv.csv')
+            df_list.append((stack_name, df))
 
-    for stack_name, jv_dir in all_jv_dirs:
-        df_list.append((stack_name, dataframe(jv_dir)))
+    else:
+
+        for stack_name, jv_dir in all_jv_dirs:
+            df_list.append((stack_name, dataframe(jv_dir)))
 
         # storing stack df in csv
         dataframe(jv_dir).to_csv(f'{jv_dir}/summary_jv.csv', index=False)
+
+        # find hero PCE
+        heroJV(experiment_id)
 
     fig_jv = go.Figure()
     fig_voc = go.Figure()
@@ -139,10 +149,10 @@ def jvBoxPlot(experiment_id):
 
     # add
     figures = {
-        'fig_jv': fig_jv,
-        'fig_voc': fig_voc,
-        'fig_ff': fig_ff,
-        'fig_pce': fig_pce
+        'fig_jv': fig_jv.to_html(),
+        'fig_voc': fig_voc.to_html(),
+        'fig_ff': fig_ff.to_html(),
+        'fig_pce': fig_pce.to_html(),
 
     }
     return figures

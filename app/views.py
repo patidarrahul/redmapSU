@@ -339,12 +339,12 @@ def updateProjectView(request, project_id):
 def experimentPageView(request, experiment_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
 
-    figures = jvBoxPlot(experiment_id)  # defined in utils.py
-    heroJV(experiment_id)
-    jv_chart = figures['fig_jv'].to_html()
-    voc_chart = figures['fig_voc'].to_html()
-    ff_chart = figures['fig_ff'].to_html()
-    pce_chart = figures['fig_pce'].to_html()
+    figures = jvBoxPlot(experiment_id)       # defined in utils.py
+
+    jv_chart = figures['fig_jv']
+    voc_chart = figures['fig_voc']
+    ff_chart = figures['fig_ff']
+    pce_chart = figures['fig_pce']
 
     context = {'experiment': experiment, 'jv_chart': jv_chart,
                'voc_chart': voc_chart, 'ff_chart': ff_chart, 'pce_chart': pce_chart}
