@@ -85,10 +85,11 @@ def jvBoxPlot(experiment_id):
         settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
 
     df_list = []
-    # check if all jv dirs exist, since we only wnat to compile the data into CSV ones, if they exist we can skip
-    if all([os.path.exists(jv_dir) for jv_dir in all_jv_dirs[1]]):
+    print(all_jv_dirs)
+    # Check if all 'summary_jv.csv' files exist
+    if all([os.path.exists(os.path.join(jv_dir, 'summary_jv.csv')) for _, jv_dir in all_jv_dirs]):
         for stack_name, jv_dir in all_jv_dirs:
-            df = pd.read_csv(f'{jv_dir}/summary_jv.csv')
+            df = pd.read_csv(os.path.join(jv_dir, 'summary_jv.csv'))
             df_list.append((stack_name, df))
 
     else:
@@ -96,8 +97,8 @@ def jvBoxPlot(experiment_id):
         for stack_name, jv_dir in all_jv_dirs:
             df_list.append((stack_name, dataframe(jv_dir)))
 
-        # storing stack df in csv
-        dataframe(jv_dir).to_csv(f'{jv_dir}/summary_jv.csv', index=False)
+            # storing stack df in csv
+            dataframe(jv_dir).to_csv(f'{jv_dir}/summary_jv.csv', index=False)
 
         # find hero PCE
         heroJV(experiment_id)
