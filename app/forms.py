@@ -136,20 +136,21 @@ class LayerForm(forms.ModelForm):
             # Filter the queryset based on the current user
             self.fields['formulation'].queryset = Formulation.objects.filter(
                 author=author)
-            self.fields['stack'].queryset = Stack.objects.filter(author=author)
+            self.fields['stacks'].queryset = Stack.objects.filter(
+                author=author)
             self.fields['drying_program'].queryset = DryingProgram.objects.filter(
                 author=author)
 
     class Meta:
         model = Layer
 
-        fields = ['stack', 'name', 'sequence', 'coating_method', 'formulation_volume',
+        fields = ['stacks', 'name', 'sequence', 'coating_method', 'formulation_volume',
                   'layer_role', 'dry_film_thickness', 'room_temperature', 'room_humidity', 'layer_composition', 'layer_type',
                   'atmosphere', 'drying_type', 'drying_program', 'completed', 'created', 'formulation',
                   'treatment', 'treatment_time', 'treatment_power',]
 
         widgets = {
-            'stack': forms.Select(attrs={'class': 'form-select'}),
+            'stacks': forms.SelectMultiple(attrs={'class': 'form-select'}),
             'name': forms.TextInput(attrs={'class': 'form-control', }),
             'sequence': forms.NumberInput(attrs={'class': 'form-control', }),
             'coating_method': forms.Select(attrs={'class': 'form-select', }),

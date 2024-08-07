@@ -385,7 +385,7 @@ class LayerComposition(models.Model):
 
 class Layer(models.Model):
     # general info
-    stack = models.ForeignKey(Stack, on_delete=models.CASCADE)
+    stacks = models.ManyToManyField(Stack, related_name='layers')
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     sequence = models.IntegerField()

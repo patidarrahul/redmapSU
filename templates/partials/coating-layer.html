@@ -5,9 +5,9 @@
       <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
       {{ form.name }}
     </div>
-    <div class="col-md-3 form-group">
-      <label for="{{ form.stack.id_for_label }}">{{ form.stack.label }}</label>
-      {{ form.stack }}
+    <div class="col-md-4 form-group">
+      <label for="{{ form.stacks.id_for_label }}">{{ form.stacks.label }}</label>
+      {{ form.stacks }}
     </div>
     <div class="col-md-2 form-group">
       <label for="{{ form.sequence.id_for_label }}">Layer Sequence</label>
@@ -154,10 +154,7 @@
     <hr class="mt-4" />
   </div>
   <script>
-    $("#id_stack").select2({
-      theme: "classic",
-    });
-    $("#id_formulation").select2({
+    $("#id_stacks").select2({
       theme: "classic",
     });
   </script>

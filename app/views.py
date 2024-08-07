@@ -493,7 +493,7 @@ def updateExperimentStatus(instance):
 
     # update layer status
 
-    if all(stack.layer_set.count() == stack.number_of_layers for stack in experiment.stack_set.all()):
+    if all(stack.layers.count() == stack.number_of_layers for stack in experiment.stack_set.all()):
 
         experiment.experimentstatus.layers = True
         experiment.experimentstatus.save()
@@ -508,7 +508,7 @@ def updateExperimentStatus(instance):
     coating_parameters_status = True
 
     for stack in experiment.stack_set.all():
-        for layer in stack.layer_set.all():
+        for layer in stack.layers.all():
             if not layer.coating_parameters:
                 # As soon as we find a layer without coating parameters, set status to False and break
                 coating_parameters_status = False
@@ -586,29 +586,31 @@ def stackView(request):
     return render(request, 'stack.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def updateStackView(request, stack_id):
-    stack = get_object_or_404(Stack, pk=stack_id)
+    old_stack = get_object_or_404(Stack, pk=stack_id)
+    old_stack_name = old_stack.name
 
     if request.method == 'POST':
-        form = StackForm(request.POST, instance=stack)
+        form = StackForm(request.POST, instance=old_stack)
         if form.is_valid():
             if request.POST.get('save_as_new'):
                 # Create a new instance with the updated data
                 new_stack = form.save(commit=False)
                 new_stack.pk = None  # Clear the primary key to create a new instance
+                # Ensure the name is taken from the form
+                new_stack.name = form.cleaned_data['name']
 
                 experiment_dir = new_stack.experiment.data_dir
-                try:
-                    # Create stack directory inside JV directory
-                    stack_jv_dir = os.path.join(settings.MEDIA_ROOT,
-                                                experiment_dir, 'JV', new_stack.name)
+                stack_jv_dir = os.path.join(
+                    settings.MEDIA_ROOT, experiment_dir, 'JV', new_stack.name)
 
+                try:
                     if not os.path.exists(stack_jv_dir):
                         os.makedirs(stack_jv_dir)
                     else:
                         raise Exception(
-                            'Stack directory already exists, chose another name for stack')
+                            'Stack directory already exists, choose another name for the stack')
 
                     new_stack.jv_dir = os.path.join(
                         experiment_dir, 'JV', new_stack.name)
@@ -617,49 +619,101 @@ def updateStackView(request, stack_id):
                 except Exception as e:
                     messages.error(request, str(e))
                     return redirect('stack')
+
                 # Update experiment status
-                experiment = Experiment.objects.get(pk=new_stack.experiment.pk)
-                updateExperimentStatus(experiment)
+                updateExperimentStatus(new_stack.experiment)
 
                 messages.success(
                     request, 'Stack saved as a new instance successfully.')
                 project_id = new_stack.experiment.project.pk
-                return redirect('project-page', project_id)
+                return redirect('project-page', project_id=project_id)
             else:
-                stack = form.save(commit=False)
+                # Update the old stack instance with the updated data
+                new_stack = form.save(commit=False)
 
-                experiment_dir = stack.experiment.data_dir
-                # what if jv_dir field was added later
                 try:
-                    # Create stack directory inside JV directory
-                    stack_jv_dir = os.path.join(settings.MEDIA_ROOT,
-                                                experiment_dir, 'JV', stack.name)
+                    if old_stack_name != new_stack.name:
+                        # Rename the old stack directory
+                        old_stack_jv_dir = os.path.join(
+                            settings.MEDIA_ROOT, old_stack.experiment.data_dir, 'JV',
+                            old_stack_name)
+                        new_stack_jv_dir = os.path.join(
+                            settings.MEDIA_ROOT, new_stack.experiment.data_dir, 'JV', new_stack.name)
 
-                    if not os.path.exists(stack_jv_dir):
-                        os.makedirs(stack_jv_dir)
-                    else:
-                        raise Exception(
-                            'Stack directory already exists, chose another name for stack')
+                        if os.path.exists(old_stack_jv_dir):
+                            os.rename(old_stack_jv_dir, new_stack_jv_dir)
+                            new_stack.jv_dir = new_stack_jv_dir
+                        elif not os.path.exists(old_stack_jv_dir):
+                            os.makedirs(new_stack_jv_dir)
+                        else:
+                            raise Exception(
+                                'Stack directory already exists, choose another name for the stack')
 
-                    stack.jv_dir = os.path.join(
-                        experiment_dir, 'JV', stack.name)
-                    stack.save()
+                    new_stack.author = request.user
+                    new_stack.save()
 
                 except Exception as e:
                     messages.error(request, str(e))
                     return redirect('stack')
-                    # Update experiment status
-                experiment = Experiment.objects.get(pk=stack.experiment.pk)
-                updateExperimentStatus(experiment)
+
+                # Update experiment status
+                updateExperimentStatus(new_stack.experiment)
 
                 messages.success(request, 'Stack updated successfully.')
-                project_id = stack.experiment.project.pk
-                return redirect('project-page', project_id)
+                project_id = new_stack.experiment.project.pk
+                return redirect('project-page', project_id=project_id)
     else:
-        form = StackForm(instance=stack)
+        form = StackForm(instance=old_stack)
 
-    context = {'form': form,  'action': 'update'}
+    context = {'form': form, 'action': 'update'}
     return render(request, 'stack.html', context)
+
+
+@ login_required(login_url='sign_in')
+def duplicateStackView(request, stack_id):
+    stack = get_object_or_404(Stack, pk=stack_id)
+    # duplicate stack with new name and add all the layers associated with the stack to the new stack
+    experiment = stack.experiment
+    all_stacks_count = Stack.objects.filter(experiment=experiment).count()
+
+    new_stack_name = stack.name + ' ' + str(all_stacks_count + 1)
+
+    new_stack_jv_dir = os.path.join(
+        settings.MEDIA_ROOT, stack.experiment.data_dir, 'JV', new_stack_name)
+
+    new_stack = Stack.objects.create(
+        name=new_stack_name, experiment=experiment, substrate=stack.substrate, geometry=stack.geometry,
+        number_of_layers=stack.number_of_layers, number_of_devices=stack.number_of_devices, created=stack.created,
+        author=request.user
+
+
+    )
+
+    if not os.path.exists(new_stack_jv_dir):
+        os.makedirs(new_stack_jv_dir)
+
+        new_stack.jv_dir = new_stack_jv_dir
+
+    else:
+        raise Exception(
+            'Stack directory already exists, choose another name for the stack')
+
+    for layer in stack.layers.all():
+        new_stack.layers.add(layer)
+    new_stack.save()
+    return redirect('project-page', project_id=experiment.project.pk)
+
+
+@ login_required(login_url='sign_in')
+def removeLayerFromStackView(request):
+    stack_id = request.GET.get('stack')
+    layer_id = request.GET.get('layer')
+    layer = get_object_or_404(Layer, pk=layer_id)
+    stack = get_object_or_404(Stack, pk=stack_id)
+    stack.layers.remove(layer)
+    experiment = stack.experiment
+    messages.success(request, 'Layer removed successfully.')
+    return redirect('project-page', project_id=experiment.project.pk)
 
 
 @ login_required(login_url='sign_in')
@@ -678,7 +732,8 @@ def layerView(request):
 
     if stack_id:
         stack = get_object_or_404(Stack, pk=stack_id)
-        form = LayerForm(initial={'stack': stack}, author=request.user)
+        form = LayerForm(
+            initial={'stacks': [stack]}, author=request.user)
 
     else:
         form = LayerForm(author=request.user)
@@ -694,8 +749,9 @@ def layerView(request):
             if layer.layer_type == 'Surface Treatment':
                 layer.coating_parameters = None
                 layer.save()
+                stack = layer.stacks.first()
                 experiment = Experiment.objects.get(
-                    pk=layer.stack.experiment.pk)
+                    pk=stack.experiment.pk)
                 project_id = experiment.project.pk
                 messages.success(request, ' Treatment added successfully.')
                 return redirect('project-page', project_id)
@@ -782,14 +838,17 @@ def layerView(request):
                 return redirect('layer')
 
             layer.save()
-            experiment = Experiment.objects.get(pk=layer.stack.experiment.pk)
+            # Save many-to-many relationships
+            layer.stacks.set(form.cleaned_data['stacks'])
+            stack = layer.stacks.first()
+            experiment = Experiment.objects.get(pk=stack.experiment.pk)
             updateExperimentStatus(experiment)
             messages.success(request, 'Layer saved successfully.')
             project_id = experiment.project.pk
             return redirect('project-page', project_id)
 
     # Set the querysets for the form fields based on the user
-    form.fields['stack'].queryset = Stack.objects.filter(
+    form.fields['stacks'].queryset = Stack.objects.filter(
         author=request.user
     )
     form.fields['formulation'].queryset = Formulation.objects.filter(
@@ -845,8 +904,9 @@ def updateLayerView(request, layer_id):
                 if new_layer.layer_type == 'Surface Treatment':
                     new_layer.coating_parameters = None
                     new_layer.save()
+                    stack = new_layer.stacks.first()
                     experiment = Experiment.objects.get(
-                        pk=new_layer.stack.experiment.pk)
+                        pk=stack.experiment.pk)
                     project_id = experiment.project.pk
                     messages.success(request, ' Treatment added successfully.')
                     return redirect('project-page', project_id)
@@ -931,12 +991,13 @@ def updateLayerView(request, layer_id):
                 new_layer.save()
 
                 # Update experiment status
-                experiment = Experiment.objects.get(
-                    pk=new_layer.stack.experiment.pk)
+                new_layer.stacks.set(form.cleaned_data['stacks'])
+                stack = new_layer.stacks.first()
+                experiment = Experiment.objects.get(pk=stack.experiment.pk)
                 updateExperimentStatus(experiment)
                 messages.success(
                     request, 'Layer saved as a new instance successfully.')
-                project_id = new_layer.stack.experiment.project.pk
+                project_id = experiment.project.pk
                 return redirect('project-page', project_id)
             else:
                 layer = form.save(commit=False)
@@ -1024,11 +1085,12 @@ def updateLayerView(request, layer_id):
                         request, 'Selected coating method is not supported.')
                     return redirect('layer')
                 layer.save()
-                experiment = Experiment.objects.get(
-                    pk=layer.stack.experiment.pk)
+                layer.stacks.set(form.cleaned_data['stacks'])
+                stack = layer.stacks.first()
+                experiment = Experiment.objects.get(pk=stack.experiment.pk)
                 updateExperimentStatus(experiment)
                 messages.success(request, 'Layer updated successfully.')
-                project_id = layer.stack.experiment.project.pk
+                project_id = experiment.project.pk
                 return redirect('project-page', project_id)
     else:
         form = LayerForm(instance=layer, author=request.user)

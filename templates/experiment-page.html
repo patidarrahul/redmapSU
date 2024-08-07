@@ -90,7 +90,7 @@
                   >{{ stack.name }}</a
                 >
                 <div class="layer-containers-container">
-                  {% for layer in stack.layer_set.all %}
+                  {% for layer in stack.layers.all %}
                   <div class="layer-container">
                     {% if layer.layer_type == 'Surface Treatment' %}
                     <div class="treatment">
@@ -175,11 +175,11 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for stack in experiment.stack_set.all %} {% for layer in stack.layer_set.all %}
+                  {% for stack in experiment.stack_set.all %} {% for layer in stack.layers.all %}
                   <tr>
                     {% if forloop.first %}
                     <!-- Display stack name only once for the first layer -->
-                    <td rowspan="{{ stack.layer_set.count }}">{{ stack.name }}</td>
+                    <td rowspan="{{ stack.layers.count }}">{{ stack.name }}</td>
                     {% endif %}
                     <!-- Display layer details for each layer -->
                     <td>{{ layer.name }}</td>

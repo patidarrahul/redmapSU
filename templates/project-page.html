@@ -65,12 +65,13 @@
                 <!-- dropdown for stacks -->
                 <a class="link stack" href="{% url 'update_stack' stack.id  %}" id="dropdownStack" style="text-decoration: None" data-bs-toggle="dropdown">{{ stack.name }}</a>
                 <div class="dropdown-menu" aria-labelledby="dropdownStack">
+                  <a class="dropdown-item" href="{% url 'duplicate_stack' stack.id %}">Duplicate</a>
                   <a class="dropdown-item" href="{% url 'update_stack' stack.id %}">Update</a>
                   <a class="dropdown-item" href="{% url 'layer' %}?stack={{ stack.id }}">Add Layer</a>
                 </div>
                 <a href="#" class="layer">{{stack.substrate}}</a>
 
-                {% for layer in stack.layer_set.all %}
+                {% for layer in stack.layers.all %}
                 <!-- dropdown for layers -->
                 <a class="layer" href="#" id="dropdownLayer" style="text-decoration: None" data-bs-toggle="dropdown">{{ layer.name }}</a>
                 <div class="dropdown-menu" aria-labelledby="dropdownLayer">
@@ -86,6 +87,8 @@
                   <a class="dropdown-item" href="{% url 'formulation' %}">Add Formulation</a>
 
                   {% endif %}
+                  <a class="dropdown-item" href="{% url 'remove_layer'%}?layer={{ layer.id }}&stack={{ stack.id }}">Remove from this stack</a>
+                  <a class="dropdown-item" href="">Delete</a>
                 </div>
 
                 {% endfor %}

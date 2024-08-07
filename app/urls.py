@@ -64,6 +64,9 @@ urlpatterns = [
     # stack
     path('stack/', views.stackView, name='stack'),
     path('stack/<int:stack_id>/', views.updateStackView, name='update_stack'),
+    path('stack/duplicate_stack/<int:stack_id>/',
+         views.duplicateStackView, name='duplicate_stack'),
+    path('stack/remove_layer/', views.removeLayerFromStackView, name='remove_layer'),
 
     # layer
     path('layer/', views.layerView, name='layer'),
