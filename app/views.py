@@ -642,9 +642,14 @@ def updateStackView(request, stack_id):
 
                         if os.path.exists(old_stack_jv_dir):
                             os.rename(old_stack_jv_dir, new_stack_jv_dir)
-                            new_stack.jv_dir = new_stack_jv_dir
+                            new_stack.jv_dir = os.path.join(
+                                new_stack.experiment.data_dir, 'JV', new_stack.name
+                            )
                         elif not os.path.exists(old_stack_jv_dir):
                             os.makedirs(new_stack_jv_dir)
+                            new_stack.jv_dir = os.path.join(
+                                new_stack.experiment.data_dir, 'JV', new_stack.name
+                            )
                         else:
                             raise Exception(
                                 'Stack directory already exists, choose another name for the stack')
@@ -692,7 +697,8 @@ def duplicateStackView(request, stack_id):
     if not os.path.exists(new_stack_jv_dir):
         os.makedirs(new_stack_jv_dir)
 
-        new_stack.jv_dir = new_stack_jv_dir
+        new_stack.jv_dir = os.path.join(
+            stack.experiment.data_dir, 'JV', new_stack_name)  # save relative path
 
     else:
         raise Exception(
