@@ -305,6 +305,18 @@ class DoctorBladeCoating(models.Model):
         return f'{self.name}'
 
 
+class SprayPyrolysis(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural = 'Spray Pyrolysis'
+
+    def __str__(self):
+        return f'{self.name}'
+
+
 class CoatingParameters(models.Model):
 
     author = models.ForeignKey(
@@ -324,6 +336,8 @@ class CoatingParameters(models.Model):
 
     doctor_blade_coating = models.ForeignKey(
         DoctorBladeCoating, on_delete=models.CASCADE, null=True, blank=True)
+    spray_pyrolysis = models.ForeignKey(
+        SprayPyrolysis, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         if self.thermal_evaporation:
@@ -441,6 +455,7 @@ class Layer(models.Model):
         ('Infilteration', 'Infilteration'),
         ('Slot Die Coating', 'Slot Die Coating'),
         ('Doctor Blade Coating', 'Doctor Blade Coating'),
+        ('Spray Pyrolysis', 'Spray Pyrolysis'),
     )
     coating_method = models.CharField(
         max_length=100, choices=coating_method_choices, null=True, blank=True)

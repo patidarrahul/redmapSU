@@ -832,6 +832,19 @@ def layerView(request):
                     author=request.user, doctor_blade_coating=doctor_blade_coating)
                 layer.coating_parameters = coating_parameters
 
+            elif layer.coating_method == 'Spray Pyrolysis':
+
+                # Get the selected Spray Pyrolysis instance
+                spray_pyrolysis_instance = request.POST.get('spray_pyrolysis')
+
+                spray_pyrolysis = SprayPyrolysis.objects.get(
+                    pk=spray_pyrolysis_instance)
+
+                # Create a new CoatingParameters instance with the selected Spray Pyrolysis and add it to the layer
+                coating_parameters, created = CoatingParameters.objects.get_or_create(
+                    author=request.user, spray_pyrolysis=spray_pyrolysis)
+                layer.coating_parameters = coating_parameters
+
             else:
                 messages.error(
                     request, 'Selected coating method is not supported.')
@@ -921,7 +934,7 @@ def updateLayerView(request, layer_id):
                     # Create a new CoatingParameters instance with the selected spin coating and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
                         author=request.user, spin_coating=spin_coating)
-                    layer.coating_parameters = coating_parameters
+                    new_layer.coating_parameters = coating_parameters
 
                 elif new_layer.coating_method == 'Thermal Evaporation':
                     # Get the selected thermal evaporation instance
@@ -933,7 +946,7 @@ def updateLayerView(request, layer_id):
                     # Create a new CoatingParameters instance with the selected thermal evaporation and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
                         author=request.user, thermal_evaporation=thermal_evaporation)
-                    layer.coating_parameters = coating_parameters
+                    new_layer.coating_parameters = coating_parameters
 
                 elif new_layer.coating_method == 'Infiltration':
                     # Get the selected Infiltration instance
@@ -944,7 +957,7 @@ def updateLayerView(request, layer_id):
                     # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
                         author=request.user, infilteration=infilteration)
-                    layer.coating_parameters = coating_parameters
+                    new_layer.coating_parameters = coating_parameters
 
                 elif new_layer.coating_method == 'Screen Printing':
                     # Get the selected Screen Printing instance
@@ -956,7 +969,7 @@ def updateLayerView(request, layer_id):
                     # Create a new CoatingParameters instance with the selected Screen Printing and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
                         author=request.user, screen_printing=screen_printing)
-                    layer.coating_parameters = coating_parameters
+                    new_layer.coating_parameters = coating_parameters
 
                 elif new_layer.coating_method == 'Slot Die Coating':
 
@@ -969,7 +982,7 @@ def updateLayerView(request, layer_id):
                     # Create a new CoatingParameters instance with the selected Slot Die Coating and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
                         author=request.user, slot_die_coating=slot_die_coating)
-                    layer.coating_parameters = coating_parameters
+                    new_layer.coating_parameters = coating_parameters
 
                 elif new_layer.coating_method == 'Doctor Blade Coating':
 
@@ -982,7 +995,20 @@ def updateLayerView(request, layer_id):
                     # Create a new CoatingParameters instance with the selected Doctor Blade Coating and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
                         author=request.user, doctor_blade_coating=doctor_blade_coating)
-                    layer.coating_parameters = coating_parameters
+                    new_layer.coating_parameters = coating_parameters
+
+                elif new_layer.coating_method == 'Spray Pyrolysis':
+
+                    # Get the selected Spray Pyrolysis instance
+                    spray_pyrolysis_instance = request.POST.get(
+                        'spray_pyrolysis')
+                    spray_pyrolysis = SprayPyrolysis.objects.get(
+                        pk=spray_pyrolysis_instance)
+
+                    # Create a new CoatingParameters instance with the selected Spray Pyrolysis and add it to the layer
+                    coating_parameters, created = CoatingParameters.objects.get_or_create(
+                        author=request.user, spray_pyrolysis=spray_pyrolysis)
+                    new_layer.coating_parameters = coating_parameters
 
                 else:
                     messages.error(
@@ -1078,6 +1104,17 @@ def updateLayerView(request, layer_id):
                     # Create a new CoatingParameters instance with the selected Doctor Blade Coating and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
                         author=request.user, doctor_blade_coating=doctor_blade_coating)
+                    layer.coating_parameters = coating_parameters
+
+                elif layer.coating_method == 'Spray Pyrolysis':
+
+                    # Get the selected Spray Pyrolysis instance
+                    spray_pyrolysis_instance = request.POST.get(
+                        'spray_pyrolysis')
+
+                    # Create a new CoatingParameters instance with the selected Spray Pyrolysis and add it to the layer
+                    coating_parameters, created = CoatingParameters.objects.get_or_create(
+                        author=request.user, spray_pyrolysis=spray_pyrolysis_instance)
                     layer.coating_parameters = coating_parameters
 
                 else:
@@ -1354,6 +1391,23 @@ def doctorBladeCoatingView(request):
 
     context = {'form': DoctorBladeCoatingForm()}
     return render(request, 'doctor-blade-coating.html', context)
+
+
+@ login_required(login_url='sign_in')
+def sprayPyrolysisView(request):
+
+    if request.method == 'POST':
+
+        form = SprayPyrolysisForm(request.POST)
+        if form.is_valid():
+            settings = form.save(commit=False)
+            settings.author = request.user
+            form.save()
+            messages.success(request, 'Spray pyrolysis saved successfully.')
+            return redirect('spray_pyrolysis')
+
+    context = {'form': SprayPyrolysisForm()}
+    return render(request, 'spray-pyrolysis.html', context)
 
 
 @ login_required(login_url='sign_in')

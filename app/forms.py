@@ -337,6 +337,15 @@ class DoctorBladeCoatingForm(forms.ModelForm):
         }
 
 
+class SprayPyrolysisForm(forms.ModelForm):
+    class Meta:
+        model = SprayPyrolysis
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
 class CoatingParametersForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)  # Retrieve the user from kwargs
@@ -355,6 +364,8 @@ class CoatingParametersForm(forms.ModelForm):
                 author=user)
             self.fields['doctor_blade_coating'].queryset = DoctorBladeCoating.objects.filter(
                 author=user)
+            self.fields['spray_pyrolysis'].queryset = SprayPyrolysis.objects.filter(
+                author=user)
 
     class Meta:
         model = CoatingParameters
@@ -367,6 +378,7 @@ class CoatingParametersForm(forms.ModelForm):
             'screen_printing': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
             'slot_die_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
             'doctor_blade_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+            'spray_pyrolysis': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
         }
 
 

@@ -85,7 +85,6 @@ def jvBoxPlot(experiment_id):
         settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
 
     df_list = []
-    print(all_jv_dirs)
     # Check if all 'summary_jv.csv' files exist
     if all([os.path.exists(os.path.join(jv_dir, 'summary_jv.csv')) for _, jv_dir in all_jv_dirs]):
         for stack_name, jv_dir in all_jv_dirs:

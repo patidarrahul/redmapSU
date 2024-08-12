@@ -112,6 +112,10 @@ urlpatterns = [
     path('doctor-blade-coating/', views.doctorBladeCoatingView,
          name='doctor_blade_coating'),
 
+    # spray pyrolysis
+    path('spray-pyrolysis/', views.sprayPyrolysisView, name='spray_pyrolysis'),
+
+
     # formulation
     path('formulation/', views.formulationView, name='formulation'),
     path('formulation/update/<int:formulation_id>/',
