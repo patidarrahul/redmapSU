@@ -29,78 +29,75 @@ logger = logging.getLogger(__name__)
 
 def signUpView(request):
     """
-    A view function that handles user registration.
+    Handles user sign-up process.
 
     Parameters:
-        request (HttpRequest): The HTTP request object.
+    request (HttpRequest): The current HTTP request.
 
     Returns:
-        HttpResponse: Renders the 'sign-up.html' template with the form data.
-
-    Description:
-        This function handles user registration. It first checks if the user is already authenticated.
-        If the user is authenticated, it redirects them to the 'index' page.
-        If the user is not authenticated, it checks if the request method is POST.
-        If the request method is POST, it creates a UserForm instance with the data from the request.
-        If the form is valid, it creates a new user by saving the form data.
-        It then creates a directory for the user in the 'users' directory of the media root.
-        It logs in the user and displays a success message.
-        If the form is not valid, it displays an error message.
-        If the request method is not POST, it creates a UserForm instance without any data.
-        It renders the 'sign-up.html' template with the form data.
+    HttpResponse: A redirect to the dashboard if the user is already authenticated or if the sign-up is successful.
+    HttpResponse: A render of the sign-up page with error messages if the sign-up form is invalid or if the username or email already exists.
     """
     if request.user.is_authenticated:
         return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            if User.objects.filter(Q(username=user.username) | Q(email=user.email)).exists():
+                messages.error(
+                    request, 'Username or email already exists. Please choose another.')
+                return render(request, 'sign-up.html', {'form': form})
+
+            user_dir_path = Path(settings.MEDIA_ROOT) / 'users' / user.username
+            user_dir_path.mkdir(parents=True, exist_ok=True)
+
+            user.save()
+            UserProfile.objects.create(user=user, user_dir=str(user_dir_path))
+            login(request, user)
+            messages.success(request, 'User created successfully.')
+            return redirect('dashboard')
+
+        messages.error(request, 'Please correct the errors below.')
+
     else:
-        if request.method == 'POST':
-            form = UserForm(request.POST)
-            if form.is_valid():
-                try:
-                    user = form.save(commit=False)
+        form = UserForm()
 
-                    # check username or email already exists
-                    if User.objects.filter(Q(username=user.username) | Q(email=user.email)).exists():
-                        raise Exception(
-                            f'Username or email already exists: {user.username} or {user.email} choose another username or email')
-
-                    # check user dir exist:
-                    if not os.path.exists(os.path.join(settings.MEDIA_ROOT, 'users')):
-                        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'users'))
-                    # create a directory inside users directory with username
-                    if not os.path.exists(os.path.join(settings.MEDIA_ROOT, 'users', f'{user.username}')):
-                        os.makedirs(os.path.join(
-                            settings.MEDIA_ROOT, 'users', f'{user.username}'))
-
-                    user_dir = os.path.join(
-                        'users', f'{user.username}')
-
-                    user.save()
-                    UserProfile.objects.create(user=user, user_dir=user_dir)
-
-                    messages.success(request, 'User created successfully.')
-                    return redirect('dashboard')
-                except Exception as e:
-                    messages.error(request, f'Failed to create user: {str(e)}')
-        else:
-            form = UserForm()
-
-        return render(request, 'sign-up.html', {'form': form})
+    return render(request, 'sign-up.html', {'form': form})
 
 
 @login_required(login_url='sign_in')
 def userProfileView(request):
+    """
+    Handles user profile view and update process.
+
+    Parameters:
+    request (HttpRequest): The current HTTP request.
+
+    Returns:
+    HttpResponse: A render of the user profile page with the form.
+    """
     user = request.user
-    user_dir = UserProfile.objects.get(user=user).user_dir
-    form = UserProfileForm(initial={'user_dir': user_dir})
+
+    # Retrieve the user's profile; return 404 if not found
     user_profile = get_object_or_404(UserProfile, user=user)
 
     if request.method == 'POST':
+        # Initialize form with POST data and bind it to the user profile
         form = UserProfileForm(request.POST, instance=user_profile)
+
         if form.is_valid():
-            form.save()
+            form.save()  # Save the updated profile
             messages.success(request, 'User profile updated successfully.')
             return redirect('profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        # Initialize the form with the current user profile data
+        form = UserProfileForm(instance=user_profile)
 
+    # Render the profile page with the form
     return render(request, 'user-profile.html', {'form': form})
 
 
@@ -111,29 +108,38 @@ def signOutView(request):
     return redirect('sign_in')
 
 
-def signInView(request):
+def sign_in_view(request):
+    """
+    Handles user sign-in process.
+
+    Parameters:
+    request (HttpRequest): The current HTTP request.
+
+    Returns:
+    HttpResponse: A redirect to the dashboard if the user is already authenticated or if the sign-in is successful.
+    HttpResponse: A render of the sign-in page with the form.
+    """
+    # Redirect authenticated users directly to the dashboard
     if request.user.is_authenticated:
         return redirect('dashboard')
+
+    if request.method == 'POST':
+        sign_in_form = SignInForm(request.POST)
+
+        if sign_in_form.is_valid():
+            username = sign_in_form.cleaned_data['username']
+            password = sign_in_form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+                return redirect('dashboard')
+
+            sign_in_form.add_error(None, 'Invalid username or password')
     else:
-        if request.method == 'POST':
-            form = SignInForm(request.POST)
-            if form.is_valid():
-                username = form.cleaned_data['username']
-                password = form.cleaned_data['password']
-                user = authenticate(
-                    request, username=username, password=password)
-                if user is not None:
-                    try:
-                        login(request, user)
-                        # Redirect to the home page after successful sign-in
-                        return redirect('dashboard')
-                    except Exception as e:
-                        messages.error(request, f'Failed to sign in: {str(e)}')
-                else:
-                    form.add_error(None, 'Invalid username or password')
-        else:
-            form = SignInForm()
-    return render(request, 'sign-in.html', {'form': form})
+        sign_in_form = SignInForm()
+
+    return render(request, 'sign-in.html', {'form': sign_in_form})
 
 
 @login_required(login_url='sign_in')
