@@ -1,6 +1,9 @@
+import json
 from django.contrib import admin
 from django.urls import path, re_path
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 from . import views
 urlpatterns = [
@@ -148,3 +151,10 @@ htmx_urlpatterns = [
 ]
 
 urlpatterns += htmx_urlpatterns
+
+with open(settings.CONFIG_PATH) as config_file:
+    config = json.load(config_file)
+
+if config.get("LOCAL_SERVER"):
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

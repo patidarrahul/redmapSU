@@ -85,7 +85,8 @@ def userProfileView(request):
 
     if request.method == 'POST':
         # Initialize form with POST data and bind it to the user profile
-        form = UserProfileForm(request.POST, instance=user_profile)
+        form = UserProfileForm(
+            request.POST, request.FILES, instance=user_profile)
 
         if form.is_valid():
             form.save()  # Save the updated profile

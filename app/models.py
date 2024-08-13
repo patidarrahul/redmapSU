@@ -1,6 +1,13 @@
 from datetime import timezone
+import os
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+
+
+def user_directory_path(instance, filename):
+    # File will be uploaded to MEDIA_ROOT/users/<username>/<filename>
+    return os.path.join('users', instance.user.username, filename)
 
 
 class UserProfile(models.Model):
@@ -8,6 +15,11 @@ class UserProfile(models.Model):
     role = models.CharField(max_length=100, blank=True, null=True)
     user_dir = models.CharField(
         max_length=1000, unique=True, null=True, blank=True)
+    photo = models.ImageField(
+        upload_to=user_directory_path, blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username
 
 
 class Category(models.Model):

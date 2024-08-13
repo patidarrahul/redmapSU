@@ -17,7 +17,10 @@ class UserForm(UserCreationForm):
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['role', 'user_dir']
+        fields = ['role', 'user_dir', 'photo']
+
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
 
 
 class SignInForm(forms.Form):
