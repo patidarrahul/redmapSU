@@ -102,7 +102,13 @@
                     </div>
                     <div class="col-lg-3 col-md-12 d-flex dropdown justify-content-end">
                       <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- What if there is no photo -->
+
+                        {% if request.user.userprofile.photo %}
                         <img src="{{ request.user.userprofile.photo.url }}" alt="mdo" width="32" height="32" class="rounded-circle" />
+                        {% else %}
+                        <img src="{% static 'images/redmap-light.png' %}" alt="mdo" width="32" height="32" class="rounded-circle" />
+                        {% endif %}
                       </a>
                       <ul class="dropdown-menu text-small dropdown-menu-end">
                         <li>
