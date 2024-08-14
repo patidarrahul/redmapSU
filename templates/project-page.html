@@ -68,6 +68,7 @@
                   <a class="dropdown-item" href="{% url 'duplicate_stack' stack.id %}">Duplicate</a>
                   <a class="dropdown-item" href="{% url 'update_stack' stack.id %}">Update</a>
                   <a class="dropdown-item" href="{% url 'layer' %}?stack={{ stack.id }}">Add Layer</a>
+                  <a class="dropdown-item" href="{% url 'delete_stack' stack.id %}">Delete</a>
                 </div>
                 <a href="#" class="layer">{{stack.substrate}}</a>
 

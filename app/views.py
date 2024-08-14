@@ -682,6 +682,34 @@ def updateStackView(request, stack_id):
 
 
 @ login_required(login_url='sign_in')
+def delete_stack_view(request, stack_id):
+    """
+    View function to handle the deletion of a Stack object.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+        stack_id (int): The ID of the Stack object to be deleted.
+
+    Returns:
+        HttpResponse: The HTTP response object. Redirects the user to the project page after deleting the Stack object.
+    """
+    # Get the Stack object with the given ID
+    stack = get_object_or_404(Stack, pk=stack_id)
+
+    # Get the ID of the project associated with the Stack object
+    project_id = stack.experiment.project.pk
+
+    # Delete the Stack object
+    stack.delete()
+
+    # Display a success message to the user
+    messages.success(request, 'Stack deleted successfully.')
+
+    # Redirect the user to the project page
+    return redirect('project-page', project_id=project_id)
+
+
+@ login_required(login_url='sign_in')
 def duplicateStackView(request, stack_id):
     stack = get_object_or_404(Stack, pk=stack_id)
     # duplicate stack with new name and add all the layers associated with the stack to the new stack
