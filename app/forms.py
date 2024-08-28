@@ -116,7 +116,7 @@ class StackForm(forms.ModelForm):
     class Meta:
         model = Stack
         fields = ['experiment', 'name', 'substrate', 'geometry',
-                  'number_of_layers', 'number_of_devices', 'created', 'jv_dir']
+                  'number_of_layers', 'number_of_devices', 'created', 'jv_dir', 'jv_software']
 
         widgets = {
             'experiment': forms.Select(attrs={'class': 'form-select'}),
@@ -127,6 +127,7 @@ class StackForm(forms.ModelForm):
             'number_of_devices': forms.NumberInput(attrs={'class': 'form-control', }),
             'created': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'jv_dir': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Experiment Directory'}),
+            'jv_software': forms.Select(attrs={'class': 'form-control'}),
 
         }
 

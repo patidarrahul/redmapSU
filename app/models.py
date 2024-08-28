@@ -171,6 +171,14 @@ class Stack(models.Model):
     number_of_layers = models.IntegerField(default=0)
     number_of_devices = models.IntegerField(default=0)
 
+    # this os done to check which software is being used for the measurement, default is old software, this will help deal with the output file
+    jv_software_choices = (
+        ('default', 'default'),
+        ('new', 'new')
+    )
+    jv_software = models.CharField(
+        max_length=100, choices=jv_software_choices, default='default')
+
     jv_dir = models.CharField(max_length=1000, null=True, blank=True)
     hero_device_jv_dir = models.CharField(
         max_length=1000, null=True, blank=True)
