@@ -842,14 +842,14 @@ def layerView(request):
 
             elif layer.coating_method == 'Infiltration':
                 # Get the selected Infiltration instance
-                infilteration_instance = request.POST.get('infilteration')
+                infiltration_instance = request.POST.get('infiltration')
 
-                infilteration = Infiltration.objects.get(
-                    pk=infilteration_instance)
+                infiltration = Infiltration.objects.get(
+                    pk=infiltration_instance)
 
                 # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
                 coating_parameters, created = CoatingParameters.objects.get_or_create(
-                    author=request.user, infilteration=infilteration)
+                    author=request.user, infiltration=infiltration)
             elif layer.coating_method == 'Slot Die Coating':
 
                 # Get the selected Slot Die Coating instance
@@ -995,13 +995,13 @@ def updateLayerView(request, layer_id):
 
                 elif new_layer.coating_method == 'Infiltration':
                     # Get the selected Infiltration instance
-                    infilteration_instance = request.POST.get('infilteration')
-                    infilteration = Infiltration.objects.get(
-                        pk=infilteration_instance)
+                    infiltration_instance = request.POST.get('infiltration')
+                    infiltration = Infiltration.objects.get(
+                        pk=infiltration_instance)
 
                     # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, infilteration=infilteration)
+                        author=request.user, infiltration=infiltration)
                     new_layer.coating_parameters = coating_parameters
 
                 elif new_layer.coating_method == 'Screen Printing':
@@ -1103,14 +1103,14 @@ def updateLayerView(request, layer_id):
 
                 elif layer.coating_method == 'Infiltration':
                     # Get the selected Infiltration instance
-                    infilteration_instance = request.POST.get('infilteration')
-                    infilteration = Infiltration.objects.get(
-                        pk=infilteration_instance)
+                    infiltration_instance = request.POST.get('infiltration')
+                    infiltration = Infiltration.objects.get(
+                        pk=infiltration_instance)
 
                     # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
 
-                        author=request.user, infilteration=infilteration)
+                        author=request.user, infiltration=infiltration)
                     layer.coating_parameters = coating_parameters
 
                 elif layer.coating_method == 'Screen Printing':

@@ -345,7 +345,7 @@ class CoatingParameters(models.Model):
         SpinCoating, on_delete=models.CASCADE, null=True, blank=True)
     thermal_evaporation = models.ForeignKey(
         ThermalEvaporation, on_delete=models.CASCADE, null=True, blank=True)
-    infilteration = models.ForeignKey(
+    infiltration = models.ForeignKey(
         Infiltration, on_delete=models.CASCADE, null=True, blank=True)
 
     screen_printing = models.ForeignKey(
@@ -364,8 +364,8 @@ class CoatingParameters(models.Model):
             return f'Thermal Evaporation: {self.thermal_evaporation}'
         elif self.spin_coating:
             return f'Spin Coating: {self.spin_coating}'
-        elif self.infilteration:
-            return f'Infiltration: {self.infilteration}'
+        elif self.infiltration:
+            return f'Infiltration: {self.infiltration}'
         elif self.screen_printing:
             return f'Screen Printing: {self.screen_printing}'
         elif self.slot_die_coating:
@@ -472,7 +472,7 @@ class Layer(models.Model):
         ('Spin Coating', 'Spin Coating'),
         ('Thermal Evaporation', 'Thermal Evaporation'),
         ('Screen Printing', 'Screen Printing'),
-        ('Infilteration', 'Infilteration'),
+        ('Infiltration', 'Infiltration'),
         ('Slot Die Coating', 'Slot Die Coating'),
         ('Doctor Blade Coating', 'Doctor Blade Coating'),
         ('Spray Pyrolysis', 'Spray Pyrolysis'),

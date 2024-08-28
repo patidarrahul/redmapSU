@@ -360,7 +360,7 @@ class CoatingParametersForm(forms.ModelForm):
                 author=user)
             self.fields['thermal_evaporation'].queryset = ThermalEvaporation.objects.filter(
                 author=user)
-            self.fields['infilteration'].queryset = Infiltration.objects.filter(
+            self.fields['infiltration'].queryset = Infiltration.objects.filter(
                 author=user)
             self.fields['screen_printing'].queryset = ScreenPrinting.objects.filter(
                 author=user)
@@ -378,7 +378,7 @@ class CoatingParametersForm(forms.ModelForm):
         widgets = {
             'spin_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
             'thermal_evaporation': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
-            'infilteration': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+            'infiltration': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
             'screen_printing': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
             'slot_die_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
             'doctor_blade_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),

@@ -123,13 +123,13 @@
           {{ coating_parameters_form.screen_printing}}
         </div>
       </template>
-      <template x-if="coating_method === 'Infilteration'">
+      <template x-if="coating_method === 'Infiltration'">
         <div class="col-md-3 form-group">
           <span class="d-flex justify-content-between">
-            <label for="{{ coating_parameters_form.infilteration.id_for_label }}">{{ coating_parameters_form.infilteration.label }}</label>
+            <label for="{{ coating_parameters_form.infiltration.id_for_label }}">{{ coating_parameters_form.infiltration.label }}</label>
             <a href="{% url 'infiltration' %}" target="_blank" onclick="this.href" style="color: #7b7b7b; text-decoration: none"><i class="bi bi-plus add-field"> </i></a>
           </span>
-          {{ coating_parameters_form.infilteration}}
+          {{ coating_parameters_form.infiltration}}
         </div>
       </template>
       <template x-if="coating_method === 'Slot Die Coating'">
