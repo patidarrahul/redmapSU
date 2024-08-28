@@ -345,8 +345,12 @@ def updateProjectView(request, project_id):
 @ login_required(login_url='sign_in')
 def experimentPageView(request, experiment_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
+    try:
+        figures = jvBoxPlot(experiment_id)       # defined in utils.py
 
-    figures = jvBoxPlot(experiment_id)       # defined in utils.py
+    except Exception as e:
+        messages.error(request, f'Failed to generate charts: {str(e)}')
+        return redirect(request.META.get('HTTP_REFERER'))
 
     jv_chart = figures['fig_jv']
     voc_chart = figures['fig_voc']
