@@ -9,6 +9,10 @@
     text-decoration: none;
     margin-left: 10px;
   }
+  a {
+    text-decoration: none;
+    color: #c94890;
+  }
 </style>
 {% endblock extrastyle %} {% block content %}
 <div class="container mt-5">
@@ -18,9 +22,9 @@
         <div class="col-12 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
           <h2 class="card-title text-center">{{ project.title }}</h2>
           <p class="card-text mb-2">{{ project.description }}</p>
-          <p class="card-text">{{ project.author.first_name }}{{ project.author.last_name }}</p>
-          <p class="card-text">{{ project.created | date }}</p>
-          <p class="card-text">Total Experiments: {{ project.experiment_set.all.count }}</p>
+          <p class="card-text">
+            Created by {{ project.author.first_name }}{{ project.author.last_name }} on {{ project.created | date }}. There are {{ project.experiment_set.all.count }} experiments in this project
+          </p>
         </div>
       </div>
 

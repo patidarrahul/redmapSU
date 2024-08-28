@@ -1,5 +1,10 @@
 {% extends 'base.html' %} {% load static %} {% block extrastyle %}
 <style>
+  /* add text decoration none to all the anchor tags */
+  a {
+    text-decoration: none;
+    color: #c94890;
+  }
   .stack-container {
     border-radius: 20px;
     box-shadow: inset 0 0 5px #a29f9f;
@@ -68,18 +73,14 @@
     <div class="col-md-12 mx-auto">
       <div class="row">
         <div class="col-12 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
-          <h2 class="card-title text-center">{{ experiment.title }}</h2>
+          <h4 class="card-title text-center">{% if experiment.title %} {{ experiment.title }} {% else %} No Title was added {% endif %}</h4>
           <p class="card-text mb-2">{{ experiment.description }}</p>
-          <p class="card-text">{{ experiment.author.first_name }}{{ experiment.author.last_name }}</p>
-          <p class="card-text">{{ experiment.created | date }}</p>
-          <p class="card-text">Total Stacks: {{ experiment.stack_set.all.count }}</p>
+          <p class="card-text">{{ experiment.author.first_name }}{{ experiment.author.last_name }} {{ experiment.created | date }}</p>
+          <p class="card-text mb-0"><a href="{% url 'project-page' experiment.project.id %}">View all experiments within the project</a></p>
         </div>
 
         <div class="col-12 mt-4 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
           <div class="row">
-            <h2 class="card-title text-start">Stacks</h2>
-            <p class="card-text mb-2">Stacks Used</p>
-
             {% for stack in experiment.stack_set.all %}
             <div class="stack-container col-md-4 d-flex justify-content-center mx-auto">
               <div style="width: 80%">
