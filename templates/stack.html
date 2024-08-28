@@ -53,6 +53,12 @@
           <label for="{{ form.jv_software.id_for_label }}">JV Software</label>
           {{ form.jv_software }}
         </div>
+        {% if action == 'update' %}
+        <div class="col-md-3 form-group">
+          <label for="{{ form.jv_dir.id_for_label }}">JV Directory</label>
+          {{ form.jv_dir }}
+        </div>
+        {% endif %}
       </div>
       {% if action == 'update' %}
       <button type="submit" class="btn btn-primary">Update</button>
