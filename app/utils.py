@@ -5,6 +5,7 @@ import chardet
 import plotly.graph_objects as go
 from .models import *
 from django.conf import settings
+import re
 
 
 def dataframe(dir):
@@ -55,6 +56,23 @@ def dataframe(dir):
                     shunt_rev.append(abs(float(split_file[28][14])))
                     shunt_fwd.append(abs(float(split_file[29][14])))
 
+                elif split_file[29][3] == 'Light':
+                    file_location.append(file)
+                    # increase the row number by 1
+                    cell_id.append(split_file[23][1])
+                    jsc_rev.append(float(split_file[29][7]))
+                    jsc_fwd.append(float(split_file[30][7]))
+                    voc_rev.append(float(split_file[29][5]))
+                    voc_fwd.append(float(split_file[30][5]))
+                    ff_rev.append(float(split_file[29][8]))
+                    ff_fwd.append(float(split_file[30][8]))
+                    pce_rev.append(float(split_file[29][9]))
+                    pce_fwd.append(float(split_file[30][9]))
+                    series_rev.append(split_file[29][15])
+                    series_fwd.append(split_file[30][15])
+                    shunt_rev.append(abs(float(split_file[29][14])))
+                    shunt_fwd.append(abs(float(split_file[30][14])))
+
         except Exception as e:
             print(e)
             # Handle other exceptions
@@ -79,8 +97,118 @@ def dataframe(dir):
     return df
 
 
+def dataframe_new(dir):
+    file_location = []
+    cell_id = []
+    pce_rev = []
+    pce_fwd = []
+    jsc_rev = []
+    jsc_fwd = []
+    voc_rev = []
+    voc_fwd = []
+    ff_rev = []
+    ff_fwd = []
+    series_rev = []
+    series_fwd = []
+    shunt_rev = []
+    shunt_fwd = []
+
+    patterns = {
+        'Dark Measurement': r'Dark Measurement:\s*(\w+)',
+        'Scan Direction': r'Scan Direction:\s*(\w+)',
+        'Device Name': r'Device Name:\s*(\w+)',
+        'Pixel': r'Pixel:\s*(\d+)',
+        'Reverse Scan Jsc (mA/cm²)': r'Reverse Scan Jsc \(mA/cm�\):\s*([\d.]+)',
+        'Reverse Scan Voc (V)': r'Reverse Scan Voc \(V\):\s*([\d.]+)',
+        'Reverse Scan FF': r'Reverse Scan FF:\s*([\d.]+)',
+        'Reverse Scan PCE (%)': r'Reverse Scan PCE \(%\):\s*([\d.]+)',
+        'Reverse Scan Rseries (Ohm)': r'Reverse Scan Rseries \(Ohm\):\s*([\d.]+)',
+        'Reverse Scan Rshunt (Ohm)': r'Reverse Scan Rshunt \(Ohm\):\s*([\d.]+)',
+        'Forward Scan Jsc (mA/cm²)': r'Forward Scan Jsc \(mA/cm�\):\s*([\d.]+)',
+        'Forward Scan Voc (V)': r'Forward Scan Voc \(V\):\s*([\d.]+)',
+        'Forward Scan FF': r'Forward Scan FF:\s*([\d.]+)',
+        'Forward Scan PCE (%)': r'Forward Scan PCE \(%\):\s*([\d.]+)',
+        'Forward Scan Rseries (Ohm)': r'Forward Scan Rseries \(Ohm\):\s*([\d.]+)',
+        'Forward Scan Rshunt (Ohm)': r'Forward Scan Rshunt \(Ohm\):\s*([\d.]+)'
+    }
+
+    for filename in os.listdir(dir):
+        if filename.endswith(".txt"):
+            filepath = os.path.join(dir, filename)
+            with open(filepath, 'rb') as file:
+                raw_data = file.read()
+                result = chardet.detect(raw_data)
+                encoding = result['encoding']
+                content = raw_data.decode(encoding)
+
+                if (re.search(patterns['Dark Measurement'], content) and
+                    re.search(patterns['Dark Measurement'], content).group(1) == 'False' and
+                    re.search(patterns['Scan Direction'], content) and
+                        re.search(patterns['Scan Direction'], content).group(1) == 'Both'):
+
+                    file_location.append(filepath)
+                    cell_id.append(re.search(patterns['Device Name'], content).group(1) + ' ' +
+                                   re.search(patterns['Pixel'], content).group(1))
+
+                    # Append values to the respective lists
+                    jsc_rev.append(
+                        re.search(patterns['Reverse Scan Jsc (mA/cm²)'], content).group(1))
+                    voc_rev.append(
+                        re.search(patterns['Reverse Scan Voc (V)'], content).group(1))
+                    ff_rev.append(
+                        re.search(patterns['Reverse Scan FF'], content).group(1))
+                    pce_rev.append(
+                        re.search(patterns['Reverse Scan PCE (%)'], content).group(1))
+                    series_rev.append(
+                        re.search(patterns['Reverse Scan Rseries (Ohm)'], content).group(1))
+                    shunt_rev.append(
+                        re.search(patterns['Reverse Scan Rshunt (Ohm)'], content).group(1))
+                    jsc_fwd.append(
+                        re.search(patterns['Forward Scan Jsc (mA/cm²)'], content).group(1))
+                    voc_fwd.append(
+                        re.search(patterns['Forward Scan Voc (V)'], content).group(1))
+                    ff_fwd.append(
+                        re.search(patterns['Forward Scan FF'], content).group(1))
+                    pce_fwd.append(
+                        re.search(patterns['Forward Scan PCE (%)'], content).group(1))
+                    series_fwd.append(
+                        re.search(patterns['Forward Scan Rseries (Ohm)'], content).group(1))
+                    shunt_fwd.append(
+                        re.search(patterns['Forward Scan Rshunt (Ohm)'], content).group(1))
+
+    df = pd.DataFrame({
+        'File Location': file_location,
+        'Cell ID': cell_id,
+        'Jsc Rev': jsc_rev,
+        'Jsc Fwd': jsc_fwd,
+        'Voc Rev': voc_rev,
+        'Voc Fwd': voc_fwd,
+        'FF Rev': ff_rev,
+        'FF Fwd': ff_fwd,
+        'PCE Rev': pce_rev,
+        'PCE Fwd': pce_fwd,
+        'Series Resistance Rev': series_rev,
+        'Series Resistance Fwd': series_fwd,
+        'Shunt Resistance Rev': shunt_rev,
+        'Shunt Resistance Fwd': shunt_fwd
+    })
+
+    return df
+
+
 def jvBoxPlot(experiment_id):
     stacks = Stack.objects.filter(experiment_id=experiment_id)
+    jv_software = ''
+    # check which jv_software to use
+
+    if all([stack.jv_software == 'new' for stack in stacks]):
+        jv_software = 'new'
+
+    elif all([stack.jv_software == 'default' for stack in stacks]):
+        jv_software = 'default'
+
+    else:
+        raise ValueError('All stacks must have the same jv_software')
     all_jv_dirs = [(stack.name, os.path.join(
         settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
 
@@ -94,10 +222,14 @@ def jvBoxPlot(experiment_id):
     else:
 
         for stack_name, jv_dir in all_jv_dirs:
-            df_list.append((stack_name, dataframe(jv_dir)))
-
-            # storing stack df in csv
-            dataframe(jv_dir).to_csv(f'{jv_dir}/summary_jv.csv', index=False)
+            if jv_software == 'default':
+                df = dataframe(jv_dir)
+                df_list.append((stack_name, df))
+                df.to_csv(os.path.join(jv_dir, 'summary_jv.csv'), index=False)
+            elif jv_software == 'new':
+                df = dataframe_new(jv_dir)
+                df_list.append((stack_name, df))
+                df.to_csv(os.path.join(jv_dir, 'summary_jv.csv'), index=False)
 
         # find hero PCE
         heroJV(experiment_id)
