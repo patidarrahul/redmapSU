@@ -37,17 +37,18 @@ document.addEventListener("DOMContentLoaded", function () {
         if (scatterChart) {
             scatterChart.destroy(); // Destroy the existing chart instance
         }
-
+    
         const data = scatterData.map(item => ({
             x: item.created,
             y: item.hero_device_pce,
             user: item.author,
-            url: item.url
+            url: item.url,
+            color: item.color // Use the color from the API
         }));
-        console.log(data);
+    
         const users = [...new Set(data.map(d => d.user))];
         const datasets = users.map(user => createDataset(user, data));
-
+    
         const config = {
             type: 'scatter',
             data: { datasets },
@@ -62,12 +63,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         };
-
+    
         scatterChart = new Chart(scatterChartElement, config);
-
+    
         scatterChartElement.addEventListener('click', event => {
             const points = scatterChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
-            console.log(points[0].index);
             if (points.length > 0) {
                 const pointIndex = points[0].index;
                 const datasetIndex = points[0].datasetIndex;
@@ -76,10 +76,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
+    
     function createDataset(user, data) {
         const userData = data.filter(d => d.user === user);
-        const color = getRandomColor();
+        const color = userData[0].color; // Use the color from the data
         return {
             label: user,
             data: userData,
