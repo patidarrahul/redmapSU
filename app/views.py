@@ -1660,7 +1660,8 @@ def dashboard_data_view(request):
                 'created': stack.created.strftime('%Y-%m-%d'),
                 'hero_device_pce': stack.hero_device_pce,
                 'author': f"{stack.author.first_name} {stack.author.last_name}",
-                'url': reverse('experiment_page', args=[stack.experiment.id])
+                'url': reverse('experiment_page', args=[stack.experiment.id]),
+                'color': stack.author.userprofile.color or '#000000'
             })
 
     return JsonResponse(stacks_data, safe=False)
