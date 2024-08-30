@@ -118,18 +118,18 @@ def dataframe_new(dir):
         'Scan Direction': r'Scan Direction:\s*(\w+)',
         'Device Name': r'Device Name:\s*(\w+)',
         'Pixel': r'Pixel:\s*(\d+)',
-        'Reverse Scan Jsc (mA/cm²)': r'Reverse Scan Jsc \(mA/cm�\):\s*([\d.]+)',
+        'Reverse Scan Jsc (mA/cm²)': r'Reverse Scan Jsc \(mA/cm\u00B2\):\s*([\d.]+)',
         'Reverse Scan Voc (V)': r'Reverse Scan Voc \(V\):\s*([\d.]+)',
         'Reverse Scan FF': r'Reverse Scan FF:\s*([\d.]+)',
         'Reverse Scan PCE (%)': r'Reverse Scan PCE \(%\):\s*([\d.]+)',
-        'Reverse Scan Rseries (Ohm)': r'Reverse Scan Rseries \(Ohm\):\s*([\d.]+)',
-        'Reverse Scan Rshunt (Ohm)': r'Reverse Scan Rshunt \(Ohm\):\s*([\d.]+)',
-        'Forward Scan Jsc (mA/cm²)': r'Forward Scan Jsc \(mA/cm�\):\s*([\d.]+)',
+        'Reverse Scan Series Resistance (Ohms)': r'Reverse Scan Series Resistance \(Ohms\):\s*([\d.]+)',
+        'Reverse Scan Shunt Resistance (Ohms)': r'Reverse Scan Shunt Resistance \(Ohms\):\s*([\d.]+)',
+        'Forward Scan Jsc (mA/cm²)': r'Forward Scan Jsc \(mA/cm\u00B2\):\s*([\d.]+)',
         'Forward Scan Voc (V)': r'Forward Scan Voc \(V\):\s*([\d.]+)',
         'Forward Scan FF': r'Forward Scan FF:\s*([\d.]+)',
         'Forward Scan PCE (%)': r'Forward Scan PCE \(%\):\s*([\d.]+)',
-        'Forward Scan Rseries (Ohm)': r'Forward Scan Rseries \(Ohm\):\s*([\d.]+)',
-        'Forward Scan Rshunt (Ohm)': r'Forward Scan Rshunt \(Ohm\):\s*([\d.]+)'
+        'Forward Scan Series Resistance (Ohms)': r'Forward Scan Series Resistance \(Ohms\):\s*([\d.]+)',
+        'Forward Scan Shunt Resistance (Ohms)': r'Forward Scan Shunt Resistance \(Ohms\):\s*([\d.]+)'
     }
 
     for filename in os.listdir(dir):
@@ -153,16 +153,18 @@ def dataframe_new(dir):
                     # Append values to the respective lists
                     jsc_rev.append(
                         re.search(patterns['Reverse Scan Jsc (mA/cm²)'], content).group(1))
+
                     voc_rev.append(
                         re.search(patterns['Reverse Scan Voc (V)'], content).group(1))
+
                     ff_rev.append(
                         re.search(patterns['Reverse Scan FF'], content).group(1))
                     pce_rev.append(
                         re.search(patterns['Reverse Scan PCE (%)'], content).group(1))
                     series_rev.append(
-                        re.search(patterns['Reverse Scan Rseries (Ohm)'], content).group(1))
+                        re.search(patterns['Reverse Scan Series Resistance (Ohms)'], content).group(1))
                     shunt_rev.append(
-                        re.search(patterns['Reverse Scan Rshunt (Ohm)'], content).group(1))
+                        re.search(patterns['Reverse Scan Shunt Resistance (Ohms)'], content).group(1))
                     jsc_fwd.append(
                         re.search(patterns['Forward Scan Jsc (mA/cm²)'], content).group(1))
                     voc_fwd.append(
@@ -172,9 +174,9 @@ def dataframe_new(dir):
                     pce_fwd.append(
                         re.search(patterns['Forward Scan PCE (%)'], content).group(1))
                     series_fwd.append(
-                        re.search(patterns['Forward Scan Rseries (Ohm)'], content).group(1))
+                        re.search(patterns['Forward Scan Series Resistance (Ohms)'], content).group(1))
                     shunt_fwd.append(
-                        re.search(patterns['Forward Scan Rshunt (Ohm)'], content).group(1))
+                        re.search(patterns['Forward Scan Shunt Resistance (Ohms)'], content).group(1))
 
     df = pd.DataFrame({
         'File Location': file_location,
