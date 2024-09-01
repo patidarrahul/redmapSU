@@ -1636,7 +1636,17 @@ def dashboard_data_view(request):
 
     return JsonResponse(stacks_data, safe=False)
 
+def get_experiments_by_user(request):
 
+    total_users = User.objects.all()
+    experiments_by_user = []
+
+    for user in total_users:
+        name = user.first_name + ' ' + user.last_name
+        experiments = Experiment.objects.filter(author=user).count()
+        experiments_by_user.append({'user': name, 'experiments': experiments})
+
+    return JsonResponse(experiments_by_user, safe=False)
 def get_stacks(request):
 
     stacks = Stack.objects.all()

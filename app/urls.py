@@ -12,6 +12,7 @@ urlpatterns = [
     path('', views.dashboardView, name='dashboard'),
     path('dashboard/api/stacks/', views.get_stacks, name='get_stacks'),
     path('api/dashboard_data/', views.dashboard_data_view, name='dashboard_data'),
+    path('api/get_experiments_by_user/', views.get_experiments_by_user, name='get_experiments_by_user'),
 
 
 

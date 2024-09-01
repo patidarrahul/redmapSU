@@ -1,10 +1,10 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
     const scatterChartElement = document.getElementById('scatterChart');
     const filterButton = document.getElementById('filterButton');
 
-    let scatterChart = null; // Variable to store the chart instance
-
     if (!scatterChartElement || !filterButton) return;
+
+    let scatterChart = null; // Variable to store the chart instance
 
     // Attach event listener for the filter button
     filterButton.addEventListener('click', fetchFilteredData);
@@ -12,11 +12,15 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initial fetch to load data without any filters
     fetchData();
 
-    function fetchData(params = '') {
-        fetch(`/api/dashboard_data/${params}`)
-            .then(response => response.json())
-            .then(renderChart)
-            .catch(error => console.error('Error fetching data:', error));
+    async function fetchData(params = '') {
+        try {
+            const response = await fetch(`/api/dashboard_data/${params}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            renderChart(data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
     }
 
     function fetchFilteredData() {
@@ -25,7 +29,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const dateTo = document.getElementById('date_to').value;
 
         const queryParams = new URLSearchParams();
-
         if (author) queryParams.append('author', author);
         if (dateFrom) queryParams.append('date_from', dateFrom);
         if (dateTo) queryParams.append('date_to', dateTo);
@@ -37,18 +40,18 @@ document.addEventListener("DOMContentLoaded", function () {
         if (scatterChart) {
             scatterChart.destroy(); // Destroy the existing chart instance
         }
-    
+
         const data = scatterData.map(item => ({
             x: item.created,
             y: item.hero_device_pce,
             user: item.author,
             url: item.url,
-            color: item.color // Use the color from the API
+            color: item.color
         }));
-    
+
         const users = [...new Set(data.map(d => d.user))];
         const datasets = users.map(user => createDataset(user, data));
-    
+
         const config = {
             type: 'scatter',
             data: { datasets },
@@ -63,23 +66,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         };
-    
+
         scatterChart = new Chart(scatterChartElement, config);
-    
+
         scatterChartElement.addEventListener('click', event => {
             const points = scatterChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
             if (points.length > 0) {
-                const pointIndex = points[0].index;
-                const datasetIndex = points[0].datasetIndex;
+                const { index: pointIndex, datasetIndex } = points[0];
                 const pointData = scatterChart.data.datasets[datasetIndex].data[pointIndex];
                 window.open(pointData.url, '_blank');
             }
         });
     }
-    
+
     function createDataset(user, data) {
         const userData = data.filter(d => d.user === user);
-        const color = userData[0].color; // Use the color from the data
+        const color = userData[0].color;
         return {
             label: user,
             data: userData,
@@ -96,3 +98,49 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 });
+
+// Experiments by User
+
+async function fetchExperimentsByUser() {
+    try {
+        const response = await fetch('/api/get_experiments_by_user/');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+
+        const users = data.map(item => item.user);
+        const experimentsCounts = data.map(item => item.experiments);
+
+        plotExperimentsByUser(users, experimentsCounts);
+    } catch (error) {
+        console.error('Error fetching experiments by user:', error);
+    }
+}
+
+function plotExperimentsByUser(users, experimentsCounts) {
+    const ctx = document.getElementById('experimentsByUserChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: users,
+            datasets: [{
+                label: 'Experiments Done',
+                data: experimentsCounts,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+// Call the fetch function when the page loads
+window.onload = fetchExperimentsByUser;
