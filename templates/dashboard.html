@@ -66,6 +66,11 @@
         <div class="card-body text-center">
           <h5 class="card-title">Total Experiments</h5>
           <p class="card-text">{{ experiments.count }}</p>
+          <p class="card-text">
+            <span class="badge bg-info"><i class="bi bi-caret-up-fill"></i>{{ experiment_24_hours.count }} (24h)</span>
+            <span class="badge bg-success"><i class="bi bi-caret-up-fill"></i>{{ experiment_week.count }} (7 days)</span>
+            <span class="badge bg-warning text-dark"><i class="bi bi-caret-up-fill"></i>{{ experiment_month.count }} (30 days)</span>
+          </p>
         </div>
       </div>
       <div class="card d-flex flex-column align-items-center justify-content-center">
@@ -76,7 +81,12 @@
       </div>
     </div>
 
-    <div class="col-md-9">
+    <!-- <div class="col-md-9">
+      <div class="chart-container"></div>
+      <canvas id="experimentsbyMonth"></canvas>
+    </div> -->
+
+    <div class="col-md-10">
       <div class="chart-container">
         <canvas id="scatterChart"></canvas>
       </div>
@@ -92,15 +102,15 @@
       <div class="form-container">
         <form id="filterForm">
           <div class="row">
-            <div class="col-md-4 mb-3">
+            <div class="col-md-2 mb-3">
               <label class="form-label" for="date_from">From</label>
               <input type="date" class="form-control" id="date_from" @change="clickFilterButton()" />
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-2 mb-3">
               <label class="form-label" for="date_to">To</label>
               <input type="date" class="form-control" id="date_to" @change="clickFilterButton()" />
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-2 mb-3">
               <label class="form-label" for="author">Author</label>
               <select class="form-select" id="author" @change="clickFilterButton()">
                 <option value="all">All</option>
