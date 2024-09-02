@@ -12,7 +12,8 @@ urlpatterns = [
     path('', views.dashboardView, name='dashboard'),
     path('dashboard/api/stacks/', views.get_stacks, name='get_stacks'),
     path('api/dashboard_data/', views.dashboard_data_view, name='dashboard_data'),
-    path('api/get_experiments_by_user/', views.get_experiments_by_user, name='get_experiments_by_user'),
+    path('api/get_experiments_by_user/', views.get_experiments_by_user,
+         name='get_experiments_by_user'),
 
 
 
@@ -33,18 +34,18 @@ urlpatterns = [
         template_name='password-reset-complete.html'), name='password_reset_complete'),
 
     # profile
-    path('profile/', views.profileView, name='profile'),
-    path('profile/<int:user_id>/', views.profilePageView, name='profile_page'),
+    path('profile/', views.profile_view, name='profile'),
+    path('profile/<int:user_id>/', views.profile_page_view, name='profile_page'),
     path('profile/update', views.userProfileView, name='update_profile'),
 
     # supplier
-    path('category/', views.categoryView, name='category'),
+    path('category/', views.create_category_view, name='category'),
     path('supplier/', views.supplierView, name='supplier'),
     path('measurement-unit/', views.measurementUnitView, name='measurement_unit'),
 
 
     # inventory
-    path('inventory/', views.inventoryView, name='inventory'),
+    path('inventory/', views.inventory_view, name='inventory'),
     path('inventory/update/<int:inventory_id>/',
          views.updateInventory, name='update_inventory'),
 

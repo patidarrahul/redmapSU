@@ -167,7 +167,29 @@ def profile_view(request):
 
 
 @login_required(login_url='sign_in')
-def create_category(request):
+def profile_page_view(request, user_id):
+    """
+    Handles user profile page rendering.
+
+    Parameters:
+    request (HttpRequest): The current HTTP request.
+
+    Returns:
+    HttpResponse: A render of the profile page with the user's projects.
+    """
+    user = get_object_or_404(User, id=user_id)
+    projects = Project.objects.filter(
+        Q(author=user) |
+        Q(collaborators=user)
+    )
+    experiments = Experiment.objects.filter(author=user)
+
+    context = {'projects': projects, 'user': user, 'experiments': experiments}
+    return render(request, 'profile-page.html', context)
+
+
+@login_required(login_url='sign_in')
+def create_category_view(request):
     """
     Handles GET and POST requests for the category creation page.
 
@@ -303,8 +325,17 @@ def deleteExperimentView(request, experiment_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
 
     if request.method == 'POST':
-        experiment.delete()
-        messages.success(request, 'Experiment deleted successfully.')
+        try:
+            # delete the experiment director
+            experiment_dir = os.path.join(
+                settings.MEDIA_ROOT, experiment.data_dir)
+            if os.path.exists(experiment_dir):
+                shutil.rmtree(experiment_dir)
+            experiment.delete()
+            messages.success(request, 'Experiment deleted successfully.')
+
+        except Exception as e:
+            messages.error(request, f'Failed to delete experiment: {e}')
         return redirect('project-page', project_id=experiment.project.id)
 
     return redirect('project-page', project_id=experiment.project.id)
@@ -702,17 +733,28 @@ def delete_stack_view(request, stack_id):
     Returns:
         HttpResponse: The HTTP response object. Redirects the user to the project page after deleting the Stack object.
     """
+
     # Get the Stack object with the given ID
     stack = get_object_or_404(Stack, pk=stack_id)
 
     # Get the ID of the project associated with the Stack object
     project_id = stack.experiment.project.pk
 
-    # Delete the Stack object
-    stack.delete()
+    try:
+        # Delete the folder of the stack
+        stack_jv_dir = os.path.join(
+            settings.MEDIA_ROOT, stack.experiment.data_dir, 'JV', stack.name)
+        if os.path.exists(stack_jv_dir):
+            shutil.rmtree(stack_jv_dir)
 
-    # Display a success message to the user
-    messages.success(request, 'Stack deleted successfully.')
+        # Delete the Stack object
+        stack.delete()
+
+        # Display a success message to the user
+        messages.success(request, 'Stack deleted successfully.')
+
+    except Exception as e:
+        messages.error(request, str(e))
 
     # Redirect the user to the project page
     return redirect('project-page', project_id=project_id)
