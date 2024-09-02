@@ -146,38 +146,49 @@ def sign_in_view(request):
 
 
 @login_required(login_url='sign_in')
-def profileView(request):
+def profile_view(request):
+    """
+    Handles user profile page rendering.
 
+    Parameters:
+    request (HttpRequest): The current HTTP request.
+
+    Returns:
+    HttpResponse: A render of the profile page with the user's projects.
+    """
     user = request.user
-
-    projects = Project.objects.filter(Q(author=user) | Q(collaborators=user))
+    projects = Project.objects.filter(
+        Q(author=user) |
+        Q(collaborators=user)
+    )
 
     context = {'projects': projects}
     return render(request, 'profile.html', context)
 
-@login_required(login_url='sign_in')
-def profilePageView(request, user_id):
-
-    user = get_object_or_404(User, id=user_id)
-    projects = Project.objects.filter(Q(author=user) | Q(collaborators=user))
-    experiments = Experiment.objects.filter(Q(author=user))
-
-    context = {'projects': projects, 'user': user, 'experiments': experiments}
-    return render(request, 'profile-page.html', context)
 
 @login_required(login_url='sign_in')
-def categoryView(request):
-    form = CategoryForm()
+def create_category(request):
+    """
+    Handles GET and POST requests for the category creation page.
+
+    Parameters:
+    request (HttpRequest): The current HTTP request.
+
+    Returns:
+    HttpResponse: A render of the category creation page or a redirect to the
+        inventory page if the category is created successfully.
+    """
+    category_form = CategoryForm()
     if request.method == 'POST':
-        form = CategoryForm(request.POST)
-        if form.is_valid():
-            category = form.save(commit=False)
+        category_form = CategoryForm(request.POST)
+        if category_form.is_valid():
+            category = category_form.save(commit=False)
             category.author = request.user
             category.save()
             messages.success(request, 'Category created successfully.')
             return redirect(reverse('inventory') + f'?category={category.id}')
 
-    return render(request, 'category.html', {'form': form})
+    return render(request, 'category.html', {'form': category_form})
 
 
 @login_required(login_url='sign_in')
@@ -215,46 +226,29 @@ def supplierView(request):
 
 
 @login_required(login_url='sign_in')
-def inventoryView(request):
-    """
-    A view function to render the inventory page with the InventoryForm.
-    """
+def inventory_view(request):
+    """View function to render the inventory page with the InventoryForm."""
 
-    if request.method == 'POST':
-
-        # Use Django forms to handle form data
-        form = InventoryForm(request.POST)
-        if form.is_valid():
-
-            # Create inventory object without saving to the database yet
-            inventory = form.save(commit=False)
-            inventory.author = request.user  # Set added_by field
-
-            try:
-                inventory.save()  # Save inventory object to the database
-                messages.success(request, 'Inventory added successfully.')
-
-            except Exception as e:
-                messages.error(request, f'Failed to add inventory: {str(e)}')
-        else:
-            messages.error(
-                request, 'Form is invalid. Please check the entered data.')
-
+    form = InventoryForm(request.POST or None)
+    if form.is_valid():
+        inventory = form.save(commit=False)
+        inventory.author = request.user
+        try:
+            inventory.save()
+            messages.success(request, 'Inventory added successfully.')
+        except Exception as e:
+            messages.error(request, f'Failed to add inventory: {str(e)}')
     else:
+        messages.error(
+            request, 'Form is invalid. Please check the entered data.')
 
-        form = InventoryForm()
-
-    if request.method == 'GET':
-
-        q = request.GET.get('q')
-        if q:
-            inventories = Inventory.objects.filter(Q(name__icontains=q) | Q(
-                short_name__icontains=q) | Q(batch__icontains=q))
-
-        else:
-            inventories = Inventory.objects.all()
-    else:
-        inventories = Inventory.objects.all()
+    inventories = Inventory.objects.all()
+    if request.GET.get('q'):
+        inventories = inventories.filter(
+            Q(name__icontains=request.GET['q']) |
+            Q(short_name__icontains=request.GET['q']) |
+            Q(batch__icontains=request.GET['q'])
+        )
 
     context = {'form': form, 'inventories': inventories}
     return render(request, 'inventory.html', context)
@@ -1597,7 +1591,7 @@ def dashboardView(request):
     experiments = Experiment.objects.all()
     my_experiments = Experiment.objects.filter(author=request.user)
 
-    #experiment added in last 24 hours last week and last month
+    # experiment added in last 24 hours last week and last month
     last_24_hours = datetime.now() - timedelta(hours=24)
     last_week = datetime.now() - timedelta(days=7)
     last_month = datetime.now() - timedelta(days=30)
@@ -1606,15 +1600,12 @@ def dashboardView(request):
     experiment_week = Experiment.objects.filter(created__gte=last_week)
     experiment_month = Experiment.objects.filter(created__gte=last_month)
 
-  
-
     context = {'users': users, 'experiments': experiments,
-                'my_experiments': my_experiments,
-                'experiment_24_hours': experiment_24_hours,
-                'experiment_week': experiment_week,
-                'experiment_month': experiment_month}
+               'my_experiments': my_experiments,
+               'experiment_24_hours': experiment_24_hours,
+               'experiment_week': experiment_week,
+               'experiment_month': experiment_month}
     return render(request, 'dashboard.html', context)
-
 
 
 def dashboard_data_view(request):
@@ -1645,6 +1636,7 @@ def dashboard_data_view(request):
 
     return JsonResponse(stacks_data, safe=False)
 
+
 def get_experiments_by_user(request):
 
     total_users = User.objects.all()
@@ -1656,6 +1648,8 @@ def get_experiments_by_user(request):
         experiments_by_user.append({'user': name, 'experiments': experiments})
 
     return JsonResponse(experiments_by_user, safe=False)
+
+
 def get_stacks(request):
 
     stacks = Stack.objects.all()
