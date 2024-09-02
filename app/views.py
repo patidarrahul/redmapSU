@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime
-
+from django.apps import apps
 import os
 import shutil
 from pathlib import Path
@@ -818,165 +818,73 @@ def layerTypeView(request):
                       {'form': LayerForm(author=request.user), 'coating_parameters_form': CoatingParametersForm()})
 
 
+# defining global coating methods
+
+coating_method_choices = Layer.coating_method_choices
+coating_methods = {
+    key: (key.lower().replace(' ', '_'),
+          apps.get_model('app', key.replace(' ', '')))
+    for key, _ in coating_method_choices
+}
+
+
 @ login_required(login_url='sign_in')
 def layerView(request):
-    stack_id = request.GET.get('stack') or None
+    stack_id = request.GET.get('stack')
+    form_initial = {'stacks': [get_object_or_404(
+        Stack, pk=stack_id)]} if stack_id else {}
 
-    if stack_id:
-        stack = get_object_or_404(Stack, pk=stack_id)
-        form = LayerForm(
-            initial={'stacks': [stack]}, author=request.user)
-
-    else:
-        form = LayerForm(author=request.user)
+    form = LayerForm(request.POST or None,
+                     initial=form_initial, author=request.user)
     coating_parameters_form = CoatingParametersForm()
 
-    if request.method == 'POST':
-        form = LayerForm(request.POST)
+    if request.method == 'POST' and form.is_valid():
+        layer = form.save(commit=False)
+        layer.author = request.user
 
-        if form.is_valid():
-            layer = form.save(commit=False)
-            layer.author = request.user
-            # Get the selected coating method
-            if layer.layer_type == 'Surface Treatment':
-                layer.coating_parameters = None
-                layer.save()
-                stack = layer.stacks.first()
-                experiment = Experiment.objects.get(
-                    pk=stack.experiment.pk)
-                project_id = experiment.project.pk
-                messages.success(request, ' Treatment added successfully.')
-                return redirect('project-page', project_id)
-
-            elif layer.coating_method == 'Spin Coating':
-
-                # Get the selected spin coating instance
-                spin_coating_instance = request.POST.get('spin_coating')
-
-                spin_coating = SpinCoating.objects.get(
-                    pk=spin_coating_instance)
-
-                # Create a new CoatingParameters instance with the selected spin coating and add it to the layer
-                coating_parameters, created = CoatingParameters.objects.get_or_create(
-                    author=request.user, spin_coating=spin_coating)
-                layer.coating_parameters = coating_parameters
-
-            elif layer.coating_method == 'Thermal Evaporation':
-                # Get the selected thermal evaporation instance
-                thermal_evaporation_instance = request.POST.get(
-                    'thermal_evaporation')
-                # if user selects a non thermal evaporation settings then show error
-                thermal_evaporation = ThermalEvaporation.objects.get(
-                    pk=thermal_evaporation_instance)
-
-                # Create a new CoatingParameters instance with the selected thermal evaporation and add it to the layer
-                coating_parameters, created = CoatingParameters.objects.get_or_create(
-                    author=request.user, thermal_evaporation=thermal_evaporation)
-                layer.coating_parameters = coating_parameters
-
-            elif layer.coating_method == 'Screen Printing':
-
-                # Get the selected screen printing instance
-                screen_printing_instance = request.POST.get('screen_printing')
-
-                screen_printing = ScreenPrinting.objects.get(
-                    pk=screen_printing_instance)
-
-                # Create a new CoatingParameters instance with the selected screen printing and add it to the layer
-                coating_parameters, created = CoatingParameters.objects.get_or_create(
-                    author=request.user, screen_printing=screen_printing)
-                layer.coating_parameters = coating_parameters
-
-            elif layer.coating_method == 'Infiltration':
-                # Get the selected Infiltration instance
-                infiltration_instance = request.POST.get('infiltration')
-
-                infiltration = Infiltration.objects.get(
-                    pk=infiltration_instance)
-
-                # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
-                coating_parameters, created = CoatingParameters.objects.get_or_create(
-                    author=request.user, infiltration=infiltration)
-            elif layer.coating_method == 'Slot Die Coating':
-
-                # Get the selected Slot Die Coating instance
-                slot_die_coating_instance = request.POST.get(
-                    'slot_die_coating')
-
-                slot_die_coating = SlotDieCoating.objects.get(
-                    pk=slot_die_coating_instance)
-
-                # Create a new CoatingParameters instance with the selected Slot Die Coating and add it to the layer
-                coating_parameters, created = CoatingParameters.objects.get_or_create(
-                    author=request.user, slot_die_coating=slot_die_coating)
-                layer.coating_parameters = coating_parameters
-
-            elif layer.coating_method == 'Doctor Blade Coating':
-                # Get the selected Doctor Blade Coating instance
-                doctor_blade_coating_instance = request.POST.get(
-                    'doctor_blade_coating')
-
-                doctor_blade_coating = DoctorBladeCoating.objects.get(
-                    pk=doctor_blade_coating_instance)
-
-                # Create a new CoatingParameters instance with the selected Doctor Blade Coating and add it to the layer
-                coating_parameters, created = CoatingParameters.objects.get_or_create(
-                    author=request.user, doctor_blade_coating=doctor_blade_coating)
-                layer.coating_parameters = coating_parameters
-
-            elif layer.coating_method == 'Spray Pyrolysis':
-
-                # Get the selected Spray Pyrolysis instance
-                spray_pyrolysis_instance = request.POST.get('spray_pyrolysis')
-
-                spray_pyrolysis = SprayPyrolysis.objects.get(
-                    pk=spray_pyrolysis_instance)
-
-                # Create a new CoatingParameters instance with the selected Spray Pyrolysis and add it to the layer
-                coating_parameters, created = CoatingParameters.objects.get_or_create(
-                    author=request.user, spray_pyrolysis=spray_pyrolysis)
-                layer.coating_parameters = coating_parameters
-
-            else:
-                messages.error(
-                    request, 'Selected coating method is not supported.')
-                return redirect('layer')
-
+        if layer.layer_type == 'Surface Treatment':
+            print('in surface treatment')
+            layer.coating_parameters = None
             layer.save()
-            # Save many-to-many relationships
             layer.stacks.set(form.cleaned_data['stacks'])
-            stack = layer.stacks.first()
-            experiment = Experiment.objects.get(pk=stack.experiment.pk)
-            updateExperimentStatus(experiment)
-            messages.success(request, 'Layer saved successfully.')
-            project_id = experiment.project.pk
-            return redirect('project-page', project_id)
+            return redirect_to_project_page(layer.stacks.first(), request)
 
-    # Set the querysets for the form fields based on the user
-    form.fields['stacks'].queryset = Stack.objects.filter(
-        author=request.user
-    )
+        elif layer.coating_method in coating_methods:
+            param_name, model = coating_methods[layer.coating_method]
+            instance = request.POST.get(param_name)
+            obj = model.objects.get(pk=instance)
+            coating_parameters, created = CoatingParameters.objects.get_or_create(
+                author=request.user, **{param_name: obj}
+            )
+            layer.coating_parameters = coating_parameters
+            layer.save()
+            layer.stacks.set(form.cleaned_data['stacks'])
+            updateExperimentStatus(layer.stacks.first().experiment)
+            return redirect_to_project_page(layer.stacks.first(), request)
+
+        else:
+            messages.error(
+                request, 'Selected coating method is not supported.')
+            return redirect('layer')
+
+    form.fields['stacks'].queryset = Stack.objects.filter(author=request.user)
     form.fields['formulation'].queryset = Formulation.objects.filter(
-        author=request.user
-    )
-
-    # Set the querysets for the all the form fields based on the user
-
+        author=request.user)
     coating_parameters_form['thermal_evaporation'].queryset = ThermalEvaporation.objects.filter(
-        author=request.user
-    )
+        author=request.user)
     coating_parameters_form['spin_coating'].queryset = SpinCoating.objects.filter(
-        author=request.user
-    )
+        author=request.user)
 
-    context = {
-
+    return render(request, 'layer.html', {
         'form': form,
         'coating_parameters_form': coating_parameters_form,
+    })
 
-    }
 
-    return render(request, 'layer.html', context)
+def redirect_to_project_page(stack, request):
+    experiment = Experiment.objects.get(pk=stack.experiment.pk)
+    project_id = experiment.project.pk
+    return redirect('project-page', project_id)
 
 
 @ login_required(login_url='sign_in')
@@ -1000,232 +908,50 @@ def updateLayerView(request, layer_id):
 
     if request.method == 'POST':
         form = LayerForm(request.POST, instance=layer)
+
         if form.is_valid():
+            new_layer = form.save(commit=False)
+
             if request.POST.get('save_as_new'):
-                # Create a new instance with the updated data
-                new_layer = form.save(commit=False)
                 new_layer.pk = None  # Clear the primary key to create a new instance
 
-                if new_layer.layer_type == 'Surface Treatment':
-                    new_layer.coating_parameters = None
-                    new_layer.save()
-                    stack = new_layer.stacks.first()
-                    experiment = Experiment.objects.get(
-                        pk=stack.experiment.pk)
-                    project_id = experiment.project.pk
-                    messages.success(request, ' Treatment added successfully.')
-                    return redirect('project-page', project_id)
+            if new_layer.layer_type == 'Surface Treatment':
+                new_layer.coating_parameters = None
 
-                elif new_layer.coating_method == 'Spin Coating':
+            elif new_layer.coating_method:
 
-                    # Get the selected spin coating instance
-                    spin_coating_instance = request.POST.get('spin_coating')
-                    spin_coating = SpinCoating.objects.get(
-                        pk=spin_coating_instance)
-
-                    # Create a new CoatingParameters instance with the selected spin coating and add it to the layer
+                if new_layer.coating_method in coating_methods:
+                    param_name, model = coating_methods[new_layer.coating_method]
+                    instance = request.POST.get(param_name)
+                    obj = model.objects.get(pk=instance)
                     coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, spin_coating=spin_coating)
+                        author=request.user, **{param_name: obj}
+                    )
                     new_layer.coating_parameters = coating_parameters
-
-                elif new_layer.coating_method == 'Thermal Evaporation':
-                    # Get the selected thermal evaporation instance
-                    thermal_evaporation_instance = request.POST.get(
-                        'thermal_evaporation')
-                    thermal_evaporation = ThermalEvaporation.objects.get(
-                        pk=thermal_evaporation_instance)
-
-                    # Create a new CoatingParameters instance with the selected thermal evaporation and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, thermal_evaporation=thermal_evaporation)
-                    new_layer.coating_parameters = coating_parameters
-
-                elif new_layer.coating_method == 'Infiltration':
-                    # Get the selected Infiltration instance
-                    infiltration_instance = request.POST.get('infiltration')
-                    infiltration = Infiltration.objects.get(
-                        pk=infiltration_instance)
-
-                    # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, infiltration=infiltration)
-                    new_layer.coating_parameters = coating_parameters
-
-                elif new_layer.coating_method == 'Screen Printing':
-                    # Get the selected Screen Printing instance
-                    screen_printing_instance = request.POST.get(
-                        'screen_printing')
-                    screen_printing = ScreenPrinting.objects.get(
-                        pk=screen_printing_instance)
-
-                    # Create a new CoatingParameters instance with the selected Screen Printing and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, screen_printing=screen_printing)
-                    new_layer.coating_parameters = coating_parameters
-
-                elif new_layer.coating_method == 'Slot Die Coating':
-
-                    # Get the selected Slot Die Coating instance
-                    slot_die_coating_instance = request.POST.get(
-                        'slot_die_coating')
-                    slot_die_coating = SlotDieCoating.objects.get(
-                        pk=slot_die_coating_instance)
-
-                    # Create a new CoatingParameters instance with the selected Slot Die Coating and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, slot_die_coating=slot_die_coating)
-                    new_layer.coating_parameters = coating_parameters
-
-                elif new_layer.coating_method == 'Doctor Blade Coating':
-
-                    # Get the selected Doctor Blade Coating instance
-                    doctor_blade_coating_instance = request.POST.get(
-                        'doctor_blade_coating')
-                    doctor_blade_coating = DoctorBladeCoating.objects.get(
-                        pk=doctor_blade_coating_instance)
-
-                    # Create a new CoatingParameters instance with the selected Doctor Blade Coating and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, doctor_blade_coating=doctor_blade_coating)
-                    new_layer.coating_parameters = coating_parameters
-
-                elif new_layer.coating_method == 'Spray Pyrolysis':
-
-                    # Get the selected Spray Pyrolysis instance
-                    spray_pyrolysis_instance = request.POST.get(
-                        'spray_pyrolysis')
-                    spray_pyrolysis = SprayPyrolysis.objects.get(
-                        pk=spray_pyrolysis_instance)
-
-                    # Create a new CoatingParameters instance with the selected Spray Pyrolysis and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, spray_pyrolysis=spray_pyrolysis)
-                    new_layer.coating_parameters = coating_parameters
-
                 else:
                     messages.error(
                         request, 'Selected coating method is not supported.')
                     return redirect('layer')
-                new_layer.save()
 
-                # Update experiment status
-                new_layer.stacks.set(form.cleaned_data['stacks'])
-                stack = new_layer.stacks.first()
-                experiment = Experiment.objects.get(pk=stack.experiment.pk)
-                updateExperimentStatus(experiment)
-                messages.success(
-                    request, 'Layer saved as a new instance successfully.')
-                project_id = experiment.project.pk
-                return redirect('project-page', project_id)
-            else:
-                layer = form.save(commit=False)
+            new_layer.save()
+            new_layer.stacks.set(form.cleaned_data['stacks'])
+            updateExperimentStatus(new_layer.stacks.first().experiment)
+            messages.success(
+                request,
+                'Layer saved as a new instance successfully.' if request.POST.get(
+                    'save_as_new') else 'Layer updated successfully.'
+            )
+            return redirect_to_project_page(new_layer.stacks.first(), request)
 
-                if layer.layer_type == 'Surface Treatment':
-                    layer.coating_parameters = None
-
-                if layer.coating_method == 'Spin Coating':
-
-                    # Get the selected spin coating instance
-                    spin_coating_instance = request.POST.get('spin_coating')
-                    spin_coating = SpinCoating.objects.get(
-                        pk=spin_coating_instance)
-
-                    # Create a new CoatingParameters instance with the selected spin coating and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, spin_coating=spin_coating)
-                    layer.coating_parameters = coating_parameters
-
-                elif layer.coating_method == 'Thermal Evaporation':
-                    # Get the selected thermal evaporation instance
-                    thermal_evaporation_instance = request.POST.get(
-                        'thermal_evaporation')
-                    # if user selects a non thermal evaporation settings then show error
-                    thermal_evaporation = ThermalEvaporation.objects.get(
-                        pk=thermal_evaporation_instance)
-
-                    # Create a new CoatingParameters instance with the selected thermal evaporation and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, thermal_evaporation=thermal_evaporation)
-                    layer.coating_parameters = coating_parameters
-
-                elif layer.coating_method == 'Infiltration':
-                    # Get the selected Infiltration instance
-                    infiltration_instance = request.POST.get('infiltration')
-                    infiltration = Infiltration.objects.get(
-                        pk=infiltration_instance)
-
-                    # Create a new CoatingParameters instance with the selected Infiltration and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-
-                        author=request.user, infiltration=infiltration)
-                    layer.coating_parameters = coating_parameters
-
-                elif layer.coating_method == 'Screen Printing':
-                    # Get the selected Screen Printing instance
-                    screen_printing_instance = request.POST.get(
-                        'screen_printing')
-                    screen_printing = ScreenPrinting.objects.get(
-                        pk=screen_printing_instance)
-
-                    # Create a new CoatingParameters instance with the selected Screen Printing and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, screen_printing=screen_printing)
-                    layer.coating_parameters = coating_parameters
-
-                elif layer.coating_method == 'Slot Die Coating':
-
-                    # Get the selected Slot Die Coating instance
-                    slot_die_coating_instance = request.POST.get(
-                        'slot_die_coating')
-                    slot_die_coating = SlotDieCoating.objects.get(
-                        pk=slot_die_coating_instance)
-
-                    # Create a new CoatingParameters instance with the selected Slot Die Coating and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, slot_die_coating=slot_die_coating)
-                    layer.coating_parameters = coating_parameters
-
-                elif layer.coating_method == 'Doctor Blade Coating':
-
-                    # Get the selected Doctor Blade Coating instance
-                    doctor_blade_coating_instance = request.POST.get(
-                        'doctor_blade_coating')
-                    doctor_blade_coating = DoctorBladeCoating.objects.get(
-                        pk=doctor_blade_coating_instance)
-
-                    # Create a new CoatingParameters instance with the selected Doctor Blade Coating and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, doctor_blade_coating=doctor_blade_coating)
-                    layer.coating_parameters = coating_parameters
-
-                elif layer.coating_method == 'Spray Pyrolysis':
-
-                    # Get the selected Spray Pyrolysis instance
-                    spray_pyrolysis_instance = request.POST.get(
-                        'spray_pyrolysis')
-
-                    # Create a new CoatingParameters instance with the selected Spray Pyrolysis and add it to the layer
-                    coating_parameters, created = CoatingParameters.objects.get_or_create(
-                        author=request.user, spray_pyrolysis=spray_pyrolysis_instance)
-                    layer.coating_parameters = coating_parameters
-
-                else:
-                    messages.error(
-                        request, 'Selected coating method is not supported.')
-                    return redirect('layer')
-                layer.save()
-                layer.stacks.set(form.cleaned_data['stacks'])
-                stack = layer.stacks.first()
-                experiment = Experiment.objects.get(pk=stack.experiment.pk)
-                updateExperimentStatus(experiment)
-                messages.success(request, 'Layer updated successfully.')
-                project_id = experiment.project.pk
-                return redirect('project-page', project_id)
     else:
         form = LayerForm(instance=layer, author=request.user)
 
-    context = {'form': form, 'coating_parameters_form': CoatingParametersForm(
-        instance=layer.coating_parameters), 'layer_id': layer_id, 'action': 'update'}
+    context = {
+        'form': form,
+        'coating_parameters_form': CoatingParametersForm(instance=layer.coating_parameters),
+        'layer_id': layer_id,
+        'action': 'update',
+    }
     return render(request, 'update-layer.html', context)
 
 

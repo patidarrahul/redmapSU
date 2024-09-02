@@ -4,8 +4,8 @@
     {{ form.name }}
   </div>
   <div class="col-md-3 form-group">
-    <label for="{{ form.stack.id_for_label }}">{{ form.stack.label }}</label>
-    {{ form.stack }}
+    <label for="{{ form.stack.id_for_label }}">{{ form.stacks.label }}</label>
+    {{ form.stacks }}
   </div>
   <div class="col-md-2 form-group">
     <label for="{{ form.sequence.id_for_label }}">Layer Sequence</label>
@@ -34,10 +34,7 @@
     {{ form.treatment_power }}
   </div>
   <script>
-    $("#id_stack").select2({
-      theme: "classic",
-    });
-    $("#id_formulation").select2({
+    $("#id_stacks").select2({
       theme: "classic",
     });
   </script>

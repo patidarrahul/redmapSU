@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django.urls import reverse
 from django.http import request
+from django.apps import apps
 
 
 class UserForm(UserCreationForm):
@@ -352,41 +353,78 @@ class SprayPyrolysisForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
+# getting the global coating methods from coating_method_choices defined in Layer model
+
+
+coating_method_choices = Layer.coating_method_choices
+coating_methods = {
+    key: (key.lower().replace(' ', '_'),
+          apps.get_model('app', key.replace(' ', '')))
+    for key, _ in coating_method_choices
+}
+
 
 class CoatingParametersForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Retrieve the user from kwargs
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if user:
-            # Filter the queryset based on the current user
-            self.fields['spin_coating'].queryset = SpinCoating.objects.filter(
-                author=user)
-            self.fields['thermal_evaporation'].queryset = ThermalEvaporation.objects.filter(
-                author=user)
-            self.fields['infiltration'].queryset = Infiltration.objects.filter(
-                author=user)
-            self.fields['screen_printing'].queryset = ScreenPrinting.objects.filter(
-                author=user)
-            self.fields['slot_die_coating'].queryset = SlotDieCoating.objects.filter(
-                author=user)
-            self.fields['doctor_blade_coating'].queryset = DoctorBladeCoating.objects.filter(
-                author=user)
-            self.fields['spray_pyrolysis'].queryset = SprayPyrolysis.objects.filter(
-                author=user)
+            # Filter querysets dynamically based on the coating methods
+            for key, (field_name, model) in coating_methods.items():
+                self.fields[field_name].queryset = model.objects.filter(
+                    author=user)
+                # self.fields['spin_coating'].queryset = SpinCoating.objects.filter(author=user)
 
     class Meta:
         model = CoatingParameters
         fields = '__all__'
 
+        # Dynamically create widget attributes
         widgets = {
-            'spin_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
-            'thermal_evaporation': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
-            'infiltration': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
-            'screen_printing': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
-            'slot_die_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
-            'doctor_blade_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
-            'spray_pyrolysis': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+            field_name: forms.Select(
+                attrs={'class': 'form-select', 'required': 'required'})
+            for _, (field_name, _) in coating_methods.items()
         }
+
+
+# class CoatingParametersForm(forms.ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         user = kwargs.pop('user', None)  # Retrieve the user from kwargs
+#         super().__init__(*args, **kwargs)
+#         if user:
+#             # Filter the queryset based on the current user
+#             for coating_method in coating_methods:
+#                 model = coating_methods[coating_method][1]
+#                 print(model)
+
+#             self.fields['spin_coating'].queryset = SpinCoating.objects.filter(
+#                 author=user)
+#             self.fields['thermal_evaporation'].queryset = ThermalEvaporation.objects.filter(
+#                 author=user)
+#             self.fields['infiltration'].queryset = Infiltration.objects.filter(
+#                 author=user)
+#             self.fields['screen_printing'].queryset = ScreenPrinting.objects.filter(
+#                 author=user)
+#             self.fields['slot_die_coating'].queryset = SlotDieCoating.objects.filter(
+#                 author=user)
+#             self.fields['doctor_blade_coating'].queryset = DoctorBladeCoating.objects.filter(
+#                 author=user)
+#             self.fields['spray_pyrolysis'].queryset = SprayPyrolysis.objects.filter(
+#                 author=user)
+
+#     class Meta:
+#         model = CoatingParameters
+#         fields = '__all__'
+
+#         widgets = {
+#             'spin_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+#             'thermal_evaporation': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+#             'infiltration': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+#             'screen_printing': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+#             'slot_die_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+#             'doctor_blade_coating': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+#             'spray_pyrolysis': forms.Select(attrs={'class': 'form-select', 'required': 'required'}),
+#         }
 
 
 class FormulationForm(forms.ModelForm):
