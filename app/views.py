@@ -155,6 +155,15 @@ def profileView(request):
     context = {'projects': projects}
     return render(request, 'profile.html', context)
 
+@login_required(login_url='sign_in')
+def profilePageView(request, user_id):
+
+    user = get_object_or_404(User, id=user_id)
+    projects = Project.objects.filter(Q(author=user) | Q(collaborators=user))
+    experiments = Experiment.objects.filter(Q(author=user))
+
+    context = {'projects': projects, 'user': user, 'experiments': experiments}
+    return render(request, 'profile-page.html', context)
 
 @login_required(login_url='sign_in')
 def categoryView(request):

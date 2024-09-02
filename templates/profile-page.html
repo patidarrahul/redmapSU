@@ -1,0 +1,60 @@
+{% extends 'base.html' %} {% load static %} {% block extrastyle %}
+<style>
+  a {
+    text-decoration: none;
+    color: #c94890;
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+
+<div class="container w-90 mt-5">
+  <div class="row card card-body border shadow-sm p-3 d-flex align-items-center" style="height: 100px">
+    <div class="col-auto">
+      {% if user.userprofile.photo %}
+      <img src="{{user.userprofile.photo.url }}" alt="Profile Photo" width="50" height="50" class="rounded-circle" />
+      {% else %}
+      <img src="{% static 'images/redmap-light.png' %}" alt="Profile Photo" width="50" height="50" class="rounded-circle" />
+      {% endif %}
+    </div>
+    <div class="col">
+      <h5 class="mb-1">{{user.first_name}} {{user.last_name}}</h5>
+      <p class="mb-0" style="color: rgb(141, 140, 140)">{{user.userprofile.role}}</p>
+    </div>
+  </div>
+  <div class="row mt-5">
+    <div class="col-md-5">
+      <h4>Projects</h4>
+      <ul class="list-group">
+        {% for project in projects %}
+        <li class="list-group-item">
+          <p class="text-gradient text-dark mb-2 text-sm">Project ID: {{project.id}}</p>
+          <a href="{% url 'project-page' project.id %}" style="color: rgb(0, 0, 0)">
+            <h5>{{project.title}}</h5>
+          </a>
+          <p class="mb-4 text-sm" style="color: rgb(141, 140, 140); font-size: 14px">{{project.description|truncatechars:200}}</p>
+          <p style="color: rgb(141, 140, 140); font-size: 14px">Total Experiments: {{project.experiment_set.all.count}}</p>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-md-7">
+      <h4>Experiments</h4>
+      <ul class="list-group">
+        {% for experiment in experiments %}
+        <li class="list-group-item">
+          <span class="row d-flex w-100 justify-content-between">
+            <span class="col-md-10">
+              <a href="{% url 'experiment_page' experiment.id %}" style="text-decoration: none"> <h6>{{experiment.objective}}</h6></a>
+              <p class="mb-4 text-sm" style="color: rgb(141, 140, 140); font-size: 14px">{{experiment.notes|truncatechars:200}}</p>
+            </span>
+
+            <p class="col-md-2 text-gradient" style="color: rgb(141, 140, 140); font-size: 14px">{{experiment.created |date:"d M Y"}}</p>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

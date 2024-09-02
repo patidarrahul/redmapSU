@@ -34,6 +34,7 @@ urlpatterns = [
 
     # profile
     path('profile/', views.profileView, name='profile'),
+    path('profile/<int:user_id>/', views.profilePageView, name='profile_page'),
     path('profile/update', views.userProfileView, name='update_profile'),
 
     # supplier
