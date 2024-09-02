@@ -1,17 +1,20 @@
 {% extends 'base.html' %} {% load static %} {% block extrastyle %}
 <style>
-  /* add text decoration none to all the anchor tags */
+  /* Global styles for anchor tags */
   a {
     text-decoration: none;
     color: #c94890;
   }
+
+  /* Stack container styles */
   .stack-container {
     border-radius: 20px;
     box-shadow: inset 0 0 5px #a29f9f;
     padding: 10px;
-    margin-bottom: 10px;
-    margin-top: 10px;
+    margin: 10px 0;
   }
+
+  /* Layer container styles */
   .layer-container {
     position: relative;
     display: flex;
@@ -19,35 +22,37 @@
     justify-content: center;
   }
 
+  /* Layer styles */
   .layer {
     border: 1px solid #cac9c9;
     border-radius: 5px;
     width: 100%;
     padding: 10px;
-
-    background-color: #f0f0f0; /* Set background color of the layer */
+    background-color: #f0f0f0;
   }
 
+  /* Treatment layer styles */
   .treatment {
     border: 1px solid #e3ff55;
     border-radius: 5px;
     width: 100%;
-
     height: 14px;
-    background-color: #e3ff55; /* Set background color of the layer */
+    background-color: #e3ff55;
   }
 
   .treatment label {
     font-size: 10px;
     text-align: center;
   }
+
+  /* Layer name styles */
   .layer-name {
-    text-decoration: none; /* Remove default hyperlink styling */
-    color: #333; /* Set text color */
+    color: #333;
     display: flex;
     justify-content: center;
   }
 
+  /* Dropdown menu styles */
   .dropdown-menu {
     display: none;
     position: absolute;
@@ -62,9 +67,10 @@
     display: block;
   }
 
+  /* Reverse stacking for layer containers */
   .layer-containers-container {
     display: flex;
-    flex-direction: column-reverse; /* Stack the containers in reverse order */
+    flex-direction: column-reverse;
   }
 </style>
 {% endblock extrastyle %} {% block content %}
@@ -72,49 +78,47 @@
   <div class="row">
     <div class="col-md-12 mx-auto">
       <div class="row">
-        <div class="col-12 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+        <div class="col-12 py-2 border rounded">
           <h4 class="card-title text-center">{% if experiment.title %} {{ experiment.title }} {% else %} No Title was added {% endif %}</h4>
           <p class="card-text mb-2">{{ experiment.description }}</p>
-          <p class="card-text">{{ experiment.author.first_name }}{{ experiment.author.last_name }} {{ experiment.created | date }}</p>
-          <p class="card-text mb-0"><a href="{% url 'project-page' experiment.project.id %}">View all experiments within the project</a></p>
+          <p class="card-text mb-0">
+            <a href="{% url 'profile_page' experiment.author.id %}"> {{ experiment.author.first_name }} {{ experiment.author.last_name }} </a>
+          </p>
+          <span class="d-flex justify-content-between">
+            <p class="card-text mb-0 text-muted" style="font-size: 14px">{{ experiment.created | date }}</p>
+            <p class="card-text mb-0">
+              <a href="{% url 'project-page' experiment.project.id %}" class="text-muted" style="font-size: 14px; text-decoration: underline"> View all experiments within the project </a>
+            </p>
+          </span>
         </div>
 
-        <div class="col-12 mt-4 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+        <div class="col-12 mt-4 py-2 border rounded">
           <div class="row">
             {% for stack in experiment.stack_set.all %}
             <div class="stack-container col-md-4 d-flex justify-content-center mx-auto">
               <div style="width: 80%">
-                <a
-                  class="mb-4 d-flex justify-content-center"
-                  href="{% url 'update_stack' stack.id %}"
-                  style="text-decoration: None; color: #000; font-weight: bold; font-size: 20px; text-align: center; margin-bottom: 10px"
-                  >{{ stack.name }}</a
-                >
+                <a href="{% url 'update_stack' stack.id %}" class="mb-4 d-flex justify-content-center font-weight-bold text-center" style="font-size: 20px"> {{ stack.name }} </a>
+
                 <div class="layer-containers-container">
                   {% for layer in stack.layers.all %}
                   <div class="layer-container">
                     {% if layer.layer_type == 'Surface Treatment' %}
                     <div class="treatment">
-                      <label class="d-flex justify-content-center">{{ layer.treatment }}</label>
+                      <label>{{ layer.treatment }}</label>
                     </div>
                     {% else %}
-
                     <div class="layer">
-                      <a href="" class="layer-name" data-bs-toggle="dropdown" aria-expanded="false"> {{ layer.name }} </a>
+                      <a href="#" class="layer-name" data-bs-toggle="dropdown" aria-expanded="false"> {{ layer.name }} </a>
                       <div class="dropdown-menu" aria-labelledby="dropdownLayer">
                         <a class="dropdown-item" href="{% url 'update_layer' layer.id %}">Update</a>
                         {% if layer.coating_parameters %} {% if layer.coating_method == 'Spin Coating' %}
                         <a class="dropdown-item" href="{% url 'update_spin_coating' layer.id %}">Update Coating Condition</a>
                         {% endif %} {% else %}
-                        <a class="dropdown-item" href="">Add Coating Condition</a>
+                        <a class="dropdown-item" href="#">Add Coating Condition</a>
                         {% endif %} {% if layer.formulation %}
-
                         <a class="dropdown-item" href="{% url 'update_formulation' layer.formulation.id %}">Update Formulation</a>
-
                         {% else %}
-
                         <a class="dropdown-item" href="{% url 'formulation' %}">Add Formulation</a>
-
                         {% endif %}
                       </div>
                     </div>
@@ -122,22 +126,22 @@
                   </div>
                   {% endfor %}
                 </div>
+
                 <div class="layer-container">
                   <div class="layer">
-                    <a class="layer-name">{{stack.substrate}}</a>
+                    <a class="layer-name">{{ stack.substrate }}</a>
                   </div>
                 </div>
 
-                <p class="card-text mt-4 d-flex justify-content-center" style="color: #c94890; font-weight: bold; font-size: 15px; text-align: center">Best PCE: {{ stack.hero_device_pce }}</p>
-                <br />
+                <p class="card-text mt-4 text-center" style="color: #c94890; font-weight: bold; font-size: 15px">Best PCE: {{ stack.hero_device_pce }}</p>
               </div>
             </div>
-
             {% endfor %}
           </div>
         </div>
+
         <!-- Result Section -->
-        <div class="col-12 mt-4 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+        <div class="col-12 mt-4 py-2 border rounded">
           <h2 class="card-title text-start">Results</h2>
           <hr class="mt-4" />
           <h4>JV Data</h4>
@@ -150,39 +154,36 @@
         </div>
 
         <!-- Method Section -->
-        <div class="col-12 mt-4 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+        <div class="col-12 mt-4 py-2 border rounded">
           <h2 class="card-title text-start">Methods</h2>
-
           <p class="card-text mb-2">Methods Used</p>
           <div class="row justify-content-center">
             <div class="col-12 d-flex justify-content-center">
               <table class="table col-12">
                 <thead>
                   <tr>
-                    <th scope="col">Stack</th>
-                    <th scope="col">Layer</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Thickness</th>
-                    <th scope="col">WFT</th>
-                    <th scope="col">RT</th>
-                    <th scope="col">RH</th>
-                    <th scope="col">Volume</th>
-                    <th scope="col">Drying Method</th>
-                    <th scope="col">Temperature</th>
-                    <th scope="col">Time</th>
-                    <th scope="col">Atmosphere</th>
-                    <th scope="col">Coating Method</th>
-                    <th scope="col">Coating Parameters</th>
+                    <th>Stack</th>
+                    <th>Layer</th>
+                    <th>Type</th>
+                    <th>Thickness</th>
+                    <th>WFT</th>
+                    <th>RT</th>
+                    <th>RH</th>
+                    <th>Volume</th>
+                    <th>Drying Method</th>
+                    <th>Temperature</th>
+                    <th>Time</th>
+                    <th>Atmosphere</th>
+                    <th>Coating Method</th>
+                    <th>Coating Parameters</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for stack in experiment.stack_set.all %} {% for layer in stack.layers.all %}
                   <tr>
                     {% if forloop.first %}
-                    <!-- Display stack name only once for the first layer -->
                     <td rowspan="{{ stack.layers.count }}">{{ stack.name }}</td>
                     {% endif %}
-                    <!-- Display layer details for each layer -->
                     <td>{{ layer.name }}</td>
                     <td>{{ layer.layer_type }}</td>
                     <td>{{ layer.dry_film_thickness }}</td>
@@ -196,49 +197,27 @@
                     <td>{{ layer.atmosphere }}</td>
                     <td>{{ layer.coating_method }}</td>
                     <td>
-                      {% if layer.coating_parameters %}
-                      <!-- Add link to coating condition if spin coating exists -->
-                      {% if layer.coating_method == 'Spin Coating' %} {% for step in layer.coating_parameters.spin_coating.steps.all %}
-                      <!--  -->
-                      Step {{forloop.counter}}. Spin Speed: {{step.spin_speed}}
-                      <br />
-                      <!--  -->
-                      Spin Acc: {{step.spin_acceleration}}
-                      <br />
-                      <!--  -->
-                      Spin Time: {{step.spin_time}}
-                      <br />
-                      {% endfor %} {% elif layer.coating_method == 'Thermal Evaporation' %}
-                      <!--  -->
-                      {{ layer.coating_parameters.thermal_evaporation }} {% for step in layer.coating_parameters.thermal_evaporation.steps.all %}
-                      <!--  -->
-                      Step {{forloop.counter}}. Evap Rate: {{step.rate}}
-                      <br />
-                      <!--  -->
-                      Evap Time: {{step.time}}
-                      <br />
-                      <!--  -->
-                      {% endfor %} {% endif %}
-                      <!-- Add link to coating condition if thermal evaporation exists -->
-                      <!--  -->
-
-                      <!--  -->
-                      {% elif not layer.coating_parameters %}
-                      <!-- Add link to add coating condition if no spin coating exists -->
-                      <a href="{% url 'spin_coating' %}" style="text-decoration: None">Add</a>
+                      {% if layer.coating_parameters %} {% if layer.coating_method == 'Spin Coating' %} {% for step in layer.coating_parameters.spin_coating.steps.all %} Step {{ forloop.counter }}.
+                      Spin Speed: {{ step.spin_speed }}<br />
+                      Spin Acc: {{ step.spin_acceleration }}<br />
+                      Spin Time: {{ step.spin_time }}<br />
+                      {% endfor %} {% elif layer.coating_method == 'Thermal Evaporation' %} {% for step in layer.coating_parameters.thermal_evaporation.steps.all %} Step {{ forloop.counter }}. Evap
+                      Rate: {{ step.rate }}<br />
+                      Evap Time: {{ step.time }}<br />
+                      {% endfor %} {% endif %} {% else %}
+                      <a href="{% url 'spin_coating' %}">Add</a>
                       {% endif %}
                     </td>
                   </tr>
                   {% endfor %} {% endfor %}
                 </tbody>
               </table>
-
-              <br />
             </div>
           </div>
         </div>
+
         <!-- Material Section -->
-        <div class="col-12 mt-4 py-2" style="border: 1px solid rgb(208, 208, 208); border-radius: 10px">
+        <div class="col-12 mt-4 py-2 border rounded">
           <h2 class="card-title text-start">Materials</h2>
           <p class="card-text mb-2">Materials Used</p>
           <div class="row justify-content-center">
@@ -246,9 +225,9 @@
               <table class="table col-12">
                 <thead>
                   <tr>
-                    <th scope="col">Formulation</th>
-                    <th scope="col">Ingredient</th>
-                    <th scope="col">Quantity</th>
+                    <th>Formulation</th>
+                    <th>Ingredient</th>
+                    <th>Quantity</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -263,8 +242,6 @@
                   {% endfor %} {% endfor %} {% endfor %}
                 </tbody>
               </table>
-
-              <br />
             </div>
           </div>
         </div>
