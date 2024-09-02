@@ -24,6 +24,11 @@ from .models import (
     SpinCoating,
     ThermalEvaporationStep,
     ThermalEvaporation,
+    Infiltration,
+    ScreenPrinting,
+    SlotDieCoating,
+    DoctorBladeCoating,
+    SprayPyrolysis,
     CoatingParameters,
     DryingProgramStep,
     DryingProgram,
@@ -299,7 +304,7 @@ def inventory_view(request):
     """View function to render the inventory page with the InventoryForm."""
 
     form = InventoryForm(request.POST or None)
-    if form.is_valid():
+    if request.method == 'POST' and form.is_valid():
         inventory = form.save(commit=False)
         inventory.author = request.user
         try:
@@ -308,8 +313,7 @@ def inventory_view(request):
         except Exception as e:
             messages.error(request, f'Failed to add inventory: {str(e)}')
     else:
-        messages.error(
-            request, 'Form is invalid. Please check the entered data.')
+        form = InventoryForm( )
 
     inventories = Inventory.objects.all()
     if request.GET.get('q'):
@@ -406,7 +410,7 @@ def projectView(request):
             # You might want to log the exception for debugging purposes
 
     else:
-        form = ProjectForm()
+        form = ProjectForm(initial={'created': datetime.now()})
     context = {'form': form}
     return render(request, 'project.html', context)
 
@@ -497,7 +501,7 @@ def experimentView(request, project_id):
                 messages.error(request, str(e))
     else:
         form = ExperimentForm(
-            initial={'project': project, 'serial_number': next_experiment_number})
+            initial={'project': project, 'serial_number': next_experiment_number, 'created': datetime.now()})
 
     context = {'form': form}
     return render(request, 'experiment.html', context)
@@ -635,9 +639,9 @@ def stackView(request):
     if request.GET.get('experiment'):
         experiment_id = request.GET.get('experiment')
         experiment = get_object_or_404(Experiment, pk=experiment_id)
-        form = StackForm(initial={'experiment': experiment})
+        form = StackForm(initial={'experiment': experiment, 'created': datetime.now()})
     else:
-        form = StackForm()
+        form = StackForm(initial={'created': datetime.now()})
 
     if request.method == 'POST':
         form = StackForm(request.POST)
@@ -858,11 +862,16 @@ def removeLayerFromStackView(request):
 @ login_required(login_url='sign_in')
 def layerTypeView(request):
     layer_type = request.POST.get('layer_type')
+    stack_id = request.POST.get('stack_id')
+    form_initial = {'stacks': [get_object_or_404(
+        Stack, pk=stack_id)]} if stack_id else {}
+    form_initial['created'] = datetime.now()
+    
     if layer_type == 'Surface Treatment':
-        return render(request, 'partials/surface-treatment.html', {'form': LayerForm(author=request.user)})
+        return render(request, 'partials/surface-treatment.html', {'form': LayerForm(initial = form_initial, author=request.user )})
     elif layer_type == 'Coating Layer':
         return render(request, 'partials/coating-layer.html',
-                      {'form': LayerForm(author=request.user), 'coating_parameters_form': CoatingParametersForm()})
+                      {'form': LayerForm(initial = form_initial, author=request.user), 'coating_parameters_form': CoatingParametersForm()})
 
 
 # defining global coating methods
@@ -880,9 +889,11 @@ def layerView(request):
     stack_id = request.GET.get('stack')
     form_initial = {'stacks': [get_object_or_404(
         Stack, pk=stack_id)]} if stack_id else {}
-
+    form_initial['created'] = datetime.now()
+    
     form = LayerForm(request.POST or None,
                      initial=form_initial, author=request.user)
+    
     coating_parameters_form = CoatingParametersForm()
 
     if request.method == 'POST' and form.is_valid():
@@ -914,17 +925,11 @@ def layerView(request):
                 request, 'Selected coating method is not supported.')
             return redirect('layer')
 
-    form.fields['stacks'].queryset = Stack.objects.filter(author=request.user)
-    form.fields['formulation'].queryset = Formulation.objects.filter(
-        author=request.user)
-    coating_parameters_form['thermal_evaporation'].queryset = ThermalEvaporation.objects.filter(
-        author=request.user)
-    coating_parameters_form['spin_coating'].queryset = SpinCoating.objects.filter(
-        author=request.user)
 
     return render(request, 'layer.html', {
         'form': form,
         'coating_parameters_form': coating_parameters_form,
+        'stack_id': stack_id
     })
 
 
@@ -1303,7 +1308,7 @@ def formulationView(request):
         inventory_list = Inventory.objects.filter(
             completed=False, category__name='Chemical')
         measurement_units = MeasurementUnit.objects.all()
-        form = FormulationForm()
+        form = FormulationForm(initial={'created': datetime.now()})
     context = {'form': form, 'inventory_list': inventory_list,
                'measurement_units': measurement_units}
     return render(request, 'formulation.html', context)

@@ -147,7 +147,7 @@ class LayerForm(forms.ModelForm):
                 author=author)
             self.fields['drying_program'].queryset = DryingProgram.objects.filter(
                 author=author)
-
+        
     class Meta:
         model = Layer
 

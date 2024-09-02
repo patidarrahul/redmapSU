@@ -21,7 +21,8 @@
       <div class="row">
         <div class="col-md-3 form-group">
           <label for="{{ form.layer_type.id_for_label }}">{{ form.layer_type.label }}</label>
-          {% render_field form.layer_type hx-post="layer_type" hx-target="#layerType" hx-trigger="change, load" %}
+          <input type="hidden" name="stack_id" value="{{ stack_id }}" />
+          {% render_field form.layer_type hx-post="layer_type/" hx-target="#layerType" hx-trigger="change, load" %}
         </div>
       </div>
       <div class="row" id="layerType"></div>
