@@ -51,3 +51,48 @@ input[type="text"],
     height: 3rem;
     margin-top: 5px;
   }
+
+/* Target the outer container */
+.select2-container {
+  height: 3rem; /* Adjust this value as needed */
+}
+
+/* Target the selection box */
+.select2-container--classic .select2-selection--multiple {
+  height: 100%; /* Ensures that the selection box takes the full height of the container */
+  min-height: 3rem; /* Set a minimum height */
+  display: flex;
+  align-items: center; /* Center content vertically */
+  border: 1px solid #dee2e6 !important;  /* Change border color as needed */
+  border-radius: 0.375rem;
+}
+
+/* Keep the existing border intact and apply additional styles */
+.select2-container--classic .select2-selection--multiple {
+  border: 1px solid #dee2e6; /* Keep the existing border */
+  box-shadow: none; /* Ensure no shadow by default */
+  transition: box-shadow 0.2s ease-in-out; /* Smooth transition for the glow */
+}
+
+/* Add focus (click) effect using box-shadow */
+.select2-container--classic .select2-selection--multiple:focus,
+.select2-container--classic .select2-selection--multiple:focus-within {
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap-like glow */
+}
+
+/* Optional: Adjust the focus state for the search field inside the selection */
+.select2-container--classic .select2-search__field:focus {
+  outline: none; /* Remove default outline */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Same glow effect for the search input */
+}
+
+/* Ensure choices within the selection box maintain consistent styling */
+.select2-container--classic .select2-selection__choice {
+  border: 1px solid #dee2e6; /* Keep the existing border */
+  box-shadow: none; /* Ensure no shadow by default */
+}
+
+/* Optional: Add a hover effect on choices for better UX */
+.select2-container--classic .select2-selection__choice:hover {
+  background-color: rgba(0, 123, 255, 0.2); /* Darker tint on hover */
+}
