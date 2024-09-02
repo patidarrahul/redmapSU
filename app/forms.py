@@ -6,7 +6,7 @@ from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django.urls import reverse
 from django.http import request
 from django.apps import apps
-
+import datetime
 
 class UserForm(UserCreationForm):
     class Meta:
@@ -77,7 +77,7 @@ class InventoryForm(forms.ModelForm):
 class ProjectForm(forms.ModelForm):
 
     collaborators = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all())
+        queryset=User.objects.all()) 
 
     class Meta:
         model = Project
@@ -90,7 +90,6 @@ class ProjectForm(forms.ModelForm):
             'created': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
 
-        # You can customize the form field widgets, labels, and more here if needed
 
 
 class ExperimentForm(forms.ModelForm):
