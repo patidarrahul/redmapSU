@@ -863,9 +863,12 @@ def removeLayerFromStackView(request):
 def layerTypeView(request):
     layer_type = request.POST.get('layer_type')
     stack_id = request.POST.get('stack_id')
-    form_initial = {'stacks': [get_object_or_404(
-        Stack, pk=stack_id)]} if stack_id else {}
-    form_initial['created'] = datetime.now()
+    if stack_id != 'None':
+        form_initial = {'stacks': [get_object_or_404(
+            Stack, pk=stack_id)]} if stack_id else {}
+        form_initial['created'] = datetime.now()
+    else:
+        form_initial = {'created': datetime.now()}
     
     if layer_type == 'Surface Treatment':
         return render(request, 'partials/surface-treatment.html', {'form': LayerForm(initial = form_initial, author=request.user )})
@@ -887,9 +890,12 @@ coating_methods = {
 @ login_required(login_url='sign_in')
 def layerView(request):
     stack_id = request.GET.get('stack')
-    form_initial = {'stacks': [get_object_or_404(
-        Stack, pk=stack_id)]} if stack_id else {}
-    form_initial['created'] = datetime.now()
+    if stack_id:
+        form_initial = {'stacks': [get_object_or_404(
+            Stack, pk=stack_id)]} if stack_id else {}
+        form_initial['created'] = datetime.now()
+    else:
+        form_initial = {'created': datetime.now()}
     
     form = LayerForm(request.POST or None,
                      initial=form_initial, author=request.user)
