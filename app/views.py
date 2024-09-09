@@ -432,8 +432,10 @@ def updateProjectView(request, project_id):
 @ login_required(login_url='sign_in')
 def experimentPageView(request, experiment_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
+
+    update_jv_summary = request.GET.get('update_jv_summary')
     try:
-        figures = jvBoxPlot(experiment_id)       # defined in utils.py
+        figures = jvBoxPlot(experiment_id, update_jv_summary)       # defined in utils.py
 
     except Exception as e:
         messages.error(request, f'Failed to generate charts: {str(e)}')

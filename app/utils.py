@@ -198,7 +198,7 @@ def dataframe_new(dir):
     return df
 
 
-def jvBoxPlot(experiment_id):
+def jvBoxPlot(experiment_id, update_jv_summary):
     stacks = Stack.objects.filter(experiment_id=experiment_id)
     jv_software = ''
     # check which jv_software to use
@@ -216,13 +216,12 @@ def jvBoxPlot(experiment_id):
 
     df_list = []
     # Check if all 'summary_jv.csv' files exist
-    if all([os.path.exists(os.path.join(jv_dir, 'summary_jv.csv')) for _, jv_dir in all_jv_dirs]):
+    if all([os.path.exists(os.path.join(jv_dir, 'summary_jv.csv')) for _, jv_dir in all_jv_dirs]) and update_jv_summary != 'true':
         for stack_name, jv_dir in all_jv_dirs:
             df = pd.read_csv(os.path.join(jv_dir, 'summary_jv.csv'))
             df_list.append((stack_name, df))
 
     else:
-
         for stack_name, jv_dir in all_jv_dirs:
             if jv_software == 'default':
                 df = dataframe(jv_dir)

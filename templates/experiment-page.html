@@ -142,8 +142,11 @@
 
         <!-- Result Section -->
         <div class="col-12 mt-4 py-2 border rounded">
-          <h2 class="card-title text-start">Results</h2>
-          <hr class="mt-4" />
+          <!-- a tag at the right corner -->
+          <a href="{% url 'experiment_page' experiment.id %}?update_jv_summary=true" class="d-flex justify-content-end font-weight-bold text-center" title="Force Update" style="font-size: 20px">
+            <i class="bi bi-arrow-clockwise" title="Force Update"></i
+          ></a>
+          <hr class="mt-2" />
           <h4>JV Data</h4>
           <div class="row justify-content-center mx-auto">
             <div class="col-md-6 d-flex justify-content-center">{{ pce_chart|safe }}</div>
