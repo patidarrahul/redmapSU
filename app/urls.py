@@ -142,7 +142,7 @@ urlpatterns = [
 
 
     # home
-    path('home/', views.homeView, name='home'),
+    path('feed/', views.feedView, name='feed'),
 
 ]
 

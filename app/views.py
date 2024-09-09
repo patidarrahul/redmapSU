@@ -1491,8 +1491,22 @@ def get_stacks(request):
 ########################### Home Start############################
 
 
-def homeView(request):
-    return render(request, 'home.html')
+def feedView(request):
+
+    experiments = Experiment.objects.all().order_by('-created')
+
+    # FILTER via query
+    if request.GET.get('q'):
+        experiments = experiments.filter(
+            Q(objective__icontains=request.GET.get('q')) |
+            Q(notes__icontains=request.GET.get('q')) |
+            Q(author__first_name__icontains=request.GET.get('q')) |
+            Q(author__last_name__icontains=request.GET.get('q')) 
+        )
+
+    context = {'experiments': experiments}
+
+    return render(request, 'feed.html', context)
 
 
 ########################### Home End############################

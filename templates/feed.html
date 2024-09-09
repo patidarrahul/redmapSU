@@ -1,0 +1,128 @@
+{% extends 'base.html' %} {% load static %} {% block extrastyle %}
+<style>
+  body {
+    background-color: #f0f2f5;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .post-card {
+    margin-bottom: 30px;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #ffffff;
+    overflow: hidden;
+  }
+
+  .post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-body {
+    padding: 20px;
+  }
+
+  .card-title {
+    font-weight: 500;
+    font-size: 1.5em;
+    color: #343a40;
+  }
+
+  .card-subtitle {
+    font-size: 0.9em;
+    color: #6c757d;
+  }
+
+  .card-text {
+    font-size: 1em;
+    color: #555;
+    margin-top: 10px;
+  }
+
+  .card-link {
+    color: #86888a;
+    text-decoration: none;
+    font-weight: 500;
+    margin-right: 15px;
+  }
+
+  .card-link:hover {
+    text-decoration: underline;
+  }
+
+  .feed-title {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    color: #212529;
+    font-size: 2.2em;
+    font-weight: bold;
+  }
+
+  .container {
+    max-width: 800px;
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      max-width: 1000px;
+    }
+  }
+
+  .search-bar {
+    width: 100%; /* Make the search bar container take the full width of the parent */
+    margin: 0 auto 30px auto;
+  }
+
+  .search-bar input {
+    width: 100%; /* Make the input element fill the entire width of the container */
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    outline: none;
+    transition: all 0.3s;
+  }
+
+  .search-bar input:focus {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    border-color: #c94890;
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+<div class="container mt-5">
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <form method="GET" action="#">
+      <input type="text" name="q" placeholder="Search for experiments..." value="{{ request.GET.q|default:'' }}" />
+    </form>
+  </div>
+
+  <!-- Feed posts -->
+  {% for experiment in experiments %}
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="post-card">
+        <div class="card-body">
+          <h5 class="card-title mb-2">{{ experiment.objective }}</h5>
+          <p class="card-subtitle mb-2 text-muted">
+            Added by <a class="card-link" href="{% url 'profile_page' experiment.author.id %}">{{ experiment.author.first_name }} {{ experiment.author.last_name }}</a>
+          </p>
+          <p class="card-text">{{ experiment.notes|truncatewords:40 }}</p>
+
+          <span class="d-flex justify-content-between">
+            <span>
+              <a href="{% url 'experiment_page' experiment.id %}" class="card-link">Read more</a>
+              <a href="#" class="card-link">Comments</a></span
+            >
+            <p class="card-subtitle text-muted">{{ experiment.created | date }}</p>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
