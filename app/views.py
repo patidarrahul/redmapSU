@@ -618,8 +618,7 @@ def updateExperimentStatus(instance):
             else:
                 experiment.experimentstatus.has_jv_files = False
                 break 
-        else: 
-            raise Exception('No Summary JV file found for experiment {} please check update experiment and update stack'.format(experiment.id) )
+
         
 
     experiment.experimentstatus.save()
