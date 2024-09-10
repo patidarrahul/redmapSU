@@ -194,7 +194,7 @@ def sign_in_view(request):
 
             if user is not None:
                 login(request, user)
-                return redirect('dashboard')
+                return redirect('feed')
 
             sign_in_form.add_error(None, 'Invalid username or password')
     else:
