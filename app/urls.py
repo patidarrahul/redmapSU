@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/dashboard_data/', views.dashboard_data_view, name='dashboard_data'),
     path('api/get_experiments_by_user/', views.get_experiments_by_user,
          name='get_experiments_by_user'),
+     path('api/get_total_experiments/', views.get_total_experiments, name='get_total_experiments'),
 
 
 

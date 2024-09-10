@@ -144,3 +144,53 @@ function plotExperimentsByUser(users, experimentsCounts) {
 
 // Call the fetch function when the page loads
 window.onload = fetchExperimentsByUser;
+
+// Cummulative Experiments Chart
+
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const options = { month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}
+
+async function plotChart() {
+    const response = await fetch('/api/get_total_experiments/');
+    const data = await response.json();
+    const dates = data.map(item => formatDate(item.date));  // Reformat each date
+    const experiments = data.map(item => item.experiments);
+    const cumulative = experiments.map((sum => value => sum += value)(0));
+
+
+    const ctx = document.getElementById('totalExperimentsChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Daily Experiments',
+                data: experiments,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }, {
+                label: 'Cumulative Experiments',
+                data: cumulative,
+                type: 'line',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true, // Ensures responsiveness
+            maintainAspectRatio: false, // Prevents aspect ratio maintenance to fill container
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+plotChart();

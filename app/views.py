@@ -11,6 +11,8 @@ from django.urls import reverse
 from django.db.models import Q
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 from .models import (
     UserProfile,
     Supplier,
@@ -1446,6 +1448,14 @@ def get_experiments_by_user(request):
 
     return JsonResponse(experiments_by_user, safe=False)
 
+def get_total_experiments(request):
+    data = (Experiment.objects
+            .annotate(date=TruncDate('created'))  # Extracts the date from a DateTimeField
+            .values('date')                       # Groups by the newly created 'date' field
+            .annotate(experiments=Count('id'))    # Counts experiments per day
+            .order_by('date'))                    # Orders the results by date
+    response = list(data)
+    return JsonResponse(response, safe=False)
 
 def get_stacks(request):
 
