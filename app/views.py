@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+import json
 from django.apps import apps
 import os
 import shutil
@@ -13,6 +14,8 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import TruncDate
+
+from redmap.settings import BASE_DIR
 from .models import (
     UserProfile,
     Supplier,
@@ -71,8 +74,9 @@ import logging
 import zipfile
 from io import BytesIO
 import mimetypes
-import plotly.express as px
-import plotly.graph_objects as go
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 from .utils import *
@@ -620,15 +624,51 @@ def updateExperimentStatus(instance):
 
     experiment.experimentstatus.save()
 
-def sendNotificationView(request, experiment):
-    experiment = get_object_or_404(Experiment, pk=experiment)
+def sendNotificationView(request, experiment_id):
+    experiment = get_object_or_404(Experiment, pk=experiment_id)
     if experiment.notified:
         messages.error(request, 'You have already shared this experiment with userss.')
         return
     else:
-        pass
+        print('inisde send notification')
+        CONFIG_PATH = os.path.join(BASE_DIR, 'config.json')
+        with open(CONFIG_PATH) as config_file:
+            config = json.load(config_file)
 
-    return
+
+        sender_email = config["EMAIL_HOST_USER"]
+        password = config["EMAIL_HOST_PASSWORD"]
+        smtp_server = "smtp.gmail.com"
+        port = config["EMAIL_PORT"]
+
+        # get emails of all users
+        receiver_emails = list(User.objects.all().values_list('email', flat=True))
+
+        # Create server object
+        server = smtplib.SMTP(smtp_server, port)
+        server.starttls()  # Secure the connection
+        server.login(sender_email, password)
+
+        # Send email to each recipient
+        for receiver_email in receiver_emails:
+            message = MIMEMultipart()
+            message["From"] = sender_email
+            message["To"] = receiver_email
+            message["Subject"] = f"{experiment.author.first_name} {experiment.author.last_name} - A new Experiment has been added on Redmap"
+            
+            # Text message with URL
+            body = f"Hello,\n\nA new experiment has been added on Redmap. Please check the experiment details here: https://redmap.xyz/experiment-page/{experiment.id}/"
+            message.attach(MIMEText(body, "plain"))
+
+            try:
+                text = message.as_string()
+                server.sendmail(sender_email, receiver_email, text)
+                experiment.notified = True
+                experiment.save()
+            except Exception as e:
+                messages.error(request, f'Failed to send email to {receiver_email}. Error: {str(e)}')
+        server.quit()
+    return redirect('experiment_page', experiment_id)
 
 @ login_required(login_url='sign_in')
 def stackView(request):

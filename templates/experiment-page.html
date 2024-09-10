@@ -267,7 +267,7 @@
 <div class="modal fade" id="sharepostModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="post" action="" enctype="multipart/form-data">
+      <form method="post" action="{% url 'send_notification' experiment.id %}" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="modal-body">
