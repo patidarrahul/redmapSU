@@ -560,70 +560,39 @@ def updateExperimentView(request, experiment_id):
 
 def updateExperimentStatus(instance):
     """
-    Updates the status of an experiment based on the given referrer and instance.
+    Updates the status of an experiment based on the given instance.
 
     Args:
-        referrer (str): The source of the update. Something like 'stack' or 'layer'.
         instance (Experiment): The experiment instance to update.
 
     Returns:
         None
 
-    Raises:
-        ValueError: If the referrer is not 'stack' or 'layer'.
-
-    This function updates the status of an experiment based on the given referrer and instance.
-    If the referrer is 'stack', the 'stacks' field of the experiment's ExperimentStatus is set to True and saved.
-    If the referrer is 'layer', the 'layers' field of the experiment's ExperimentStatus is set to True if all stacks in the experiment have the same number of layers as specified.
-    If the referrer is neither 'stack' nor 'layer', a ValueError is raised.
+    This function updates the status of an experiment based on the given instance.
+    If the experiment has the same number of stacks as the number of variables, the 'stacks' field of the experiment's ExperimentStatus is set to True and saved.
+    If the experiment has the same number of layers in all stacks, the 'layers' field of the experiment's ExperimentStatus is set to True and saved.
+    If the experiment has formulation and coating parameters for all layers, the 'formulations' and 'coating_parameters' fields of the experiment's ExperimentStatus are set to True and saved.
     """
 
-    # get the experment instance
     experiment = instance
 
-    # update satck status
-
-    if experiment.stack_set.count() == experiment.number_of_variables:
-
-        experiment.experimentstatus.stacks = True
-        experiment.experimentstatus.save()
-    else:
-
-        experiment.experimentstatus.stacks = False
+    # update stack status
+    experiment.experimentstatus.stacks = experiment.stack_set.count() == experiment.number_of_variables
+    experiment.experimentstatus.save()
 
     # update layer status
-
-    if all(stack.layers.count() == stack.number_of_layers for stack in experiment.stack_set.all()):
-
-        experiment.experimentstatus.layers = True
-        experiment.experimentstatus.save()
-    else:
-
-        experiment.experimentstatus.layers = False
-        experiment.experimentstatus.save()
+    experiment.experimentstatus.layers = all(stack.layers.count() == stack.number_of_layers for stack in experiment.stack_set.all())
+    experiment.experimentstatus.save()
 
     # update coating parameters status
-
-    # Initially assuming all layers have coating parameters
-    coating_parameters_status = True
-
-    for stack in experiment.stack_set.all():
-        for layer in stack.layers.all():
-            if not layer.coating_parameters:
-                # As soon as we find a layer without coating parameters, set status to False and break
-                coating_parameters_status = False
-                break
-            else:
-                continue
-
-    if coating_parameters_status:
-        experiment.experimentstatus.coating_parameters = True
-        experiment.experimentstatus.save()
-    else:
-        experiment.experimentstatus.coating_parameters = False
-        experiment.experimentstatus.save()
+    coating_parameters_status = all(layer.coating_parameters for stack in experiment.stack_set.all() for layer in stack.layers.all()) if experiment.experimentstatus.layers else False
+    experiment.experimentstatus.coating_parameters = coating_parameters_status
+    experiment.experimentstatus.save()
 
     # update formulation status
+    formulation_status = all(layer.formulation for stack in experiment.stack_set.all() for layer in stack.layers.all()) if experiment.experimentstatus.layers else False
+    experiment.experimentstatus.formulations = formulation_status
+    experiment.experimentstatus.save()
 
 
 @ login_required(login_url='sign_in')

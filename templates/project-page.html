@@ -129,6 +129,13 @@
                   <span class="dot" style="background-color: red"></span>
                   Coating Parameters {% endif %}
                 </label>
+                <label>
+                  {% if experiment.experimentstatus.formulations %}
+                  <span class="dot" style="background-color: green"></span>
+                  Formulations {% else %}
+                  <span class="dot" style="background-color: red"></span>
+                  Formulations {% endif %}
+                </label>
               </div>
             </div>
           </div>
