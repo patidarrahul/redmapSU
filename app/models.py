@@ -152,7 +152,13 @@ class ExperimentStatus(models.Model):
     coating_parameters = models.BooleanField(default=False)
     formulations = models.BooleanField(default=False)
 
+class ExperimentPost(models.Model):
+    experiment = models.OneToOneField(Experiment, on_delete=models.CASCADE)
 
+class ExperimentComment(models.Model):
+    post = models.ForeignKey(ExperimentPost, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.TextField()
 class Stack(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
     author = models.ForeignKey(
