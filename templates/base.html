@@ -105,9 +105,9 @@
                         <!-- What if there is no photo -->
 
                         {% if request.user.userprofile.photo %}
-                        <img src="{{ request.user.userprofile.photo.url }}" alt="mdo" width="32" height="32" class="rounded-circle" />
+                        <img src="{{ request.user.userprofile.photo.url }}" alt="mdo" width="45" height="45" class="rounded-circle" />
                         {% else %}
-                        <img src="{% static 'images/redmap-light.png' %}" alt="mdo" width="32" height="32" class="rounded-circle" />
+                        <img src="{% static 'images/no-photo.png' %}" alt="mdo" width="45" height="45" class="rounded-circle" />
                         {% endif %}
                       </a>
                       <ul class="dropdown-menu text-small dropdown-menu-end">

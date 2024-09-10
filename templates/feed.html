@@ -106,10 +106,20 @@
     <div class="col-md-8">
       <div class="post-card">
         <div class="card-body">
-          <h5 class="card-title mb-2">{{ experiment.objective }}</h5>
           <p class="card-subtitle mb-2 text-muted">
-            Added by <a class="card-link" href="{% url 'profile_page' experiment.author.id %}">{{ experiment.author.first_name }} {{ experiment.author.last_name }}</a>
+            <!-- Conditional image display with clearer separation of logic and presentation -->
+            {% if experiment.author.userprofile.photo %}
+            <img src="{{ experiment.author.userprofile.photo.url }}" alt="{{ experiment.author.first_name }}'s Profile Photo" width="45" height="45" class="rounded-circle" />
+            {% else %}
+            <img src="{% static 'images/no-photo.png' %}" alt="Default Profile Photo" width="45" height="45" class="rounded-circle" />
+            {% endif %}
+
+            <!-- Link to the author's profile page -->
+            <a class="card-link mx-2 justify-content-center" href="{% url 'profile_page' experiment.author.id %}"> {{ experiment.author.first_name }} {{ experiment.author.last_name }} </a>
           </p>
+
+          <h5 class="card-title mb-2">{{ experiment.objective }}</h5>
+
           <p class="card-text">{{ experiment.notes|truncatewords:40 }}</p>
 
           <span class="d-flex justify-content-between">
