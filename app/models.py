@@ -134,6 +134,7 @@ class Experiment(models.Model):
     created = models.DateTimeField()
     serial_number = models.IntegerField(null=True, blank=True)
     data_dir = models.CharField(max_length=1000, null=True, blank=True)
+    notified = models.BooleanField(default=False)
 
     updated = models.DateTimeField(auto_now=True)
 
@@ -151,12 +152,10 @@ class ExperimentStatus(models.Model):
     layers = models.BooleanField(default=False)
     coating_parameters = models.BooleanField(default=False)
     formulations = models.BooleanField(default=False)
+    has_jv_files = models.BooleanField(default=False)
 
-class ExperimentPost(models.Model):
-    experiment = models.OneToOneField(Experiment, on_delete=models.CASCADE)
-
-class ExperimentComment(models.Model):
-    post = models.ForeignKey(ExperimentPost, on_delete=models.CASCADE)
+class Comment(models.Model):
+    Experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
 class Stack(models.Model):

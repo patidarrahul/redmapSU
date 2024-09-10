@@ -67,6 +67,7 @@ urlpatterns = [
     # experiment page
     path('experiment-page/<int:experiment_id>/',
          views.experimentPageView, name='experiment_page'),
+     path('send_notification/<int:experiment_id>/', views.sendNotificationView, name='send_notification'),
 
     # stack
     path('stack/', views.stackView, name='stack'),

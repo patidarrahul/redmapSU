@@ -436,6 +436,7 @@ def experimentPageView(request, experiment_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
 
     update_jv_summary = request.GET.get('update_jv_summary')
+    updateExperimentStatus(experiment) # update the experiment status if missed somewhere
     try:
         figures = jvBoxPlot(experiment_id, update_jv_summary)       # defined in utils.py
 
@@ -596,6 +597,38 @@ def updateExperimentStatus(instance):
     experiment.experimentstatus.formulations = formulation_status
     experiment.experimentstatus.save()
 
+    #update has_jv_files status
+
+    if all(stack.jv_dir for stack in experiment.stack_set.all()):
+        all_jv_summary_files = [os.path.join(
+            settings.MEDIA_ROOT, stack.jv_dir, 'summary_jv.csv') for stack in experiment.stack_set.all()]
+    else :
+        raise Exception('address to stack JV Dir not found for experiment {} please check update experiment and update stack'.format(experiment.id) )
+
+    for file in all_jv_summary_files:
+        if os.path.exists(file):
+            df = pd.read_csv(file)
+            if df.shape[0] > 0:
+                experiment.experimentstatus.has_jv_files = True
+
+            else:
+                experiment.experimentstatus.has_jv_files = False
+                break 
+        else: 
+            raise Exception('No Summary JV file found for experiment {} please check update experiment and update stack'.format(experiment.id) )
+        
+
+    experiment.experimentstatus.save()
+
+def sendNotificationView(request, experiment):
+    experiment = get_object_or_404(Experiment, pk=experiment)
+    if experiment.notified:
+        messages.error(request, 'You have already shared this experiment with userss.')
+        return
+    else:
+        pass
+
+    return
 
 @ login_required(login_url='sign_in')
 def stackView(request):
