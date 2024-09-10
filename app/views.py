@@ -630,7 +630,6 @@ def sendNotificationView(request, experiment_id):
         messages.error(request, 'You have already shared this experiment with userss.')
         return
     else:
-        print('inisde send notification')
         CONFIG_PATH = os.path.join(BASE_DIR, 'config.json')
         with open(CONFIG_PATH) as config_file:
             config = json.load(config_file)
@@ -700,7 +699,6 @@ def stackView(request):
                 # Create stack directory inside JV directory
                 stack_jv_dir = os.path.join(
                     settings.MEDIA_ROOT, experiment_dir, 'JV', stack.name)
-                print(stack_jv_dir)
                 if not os.path.exists(stack_jv_dir):
                     os.makedirs(stack_jv_dir)
                 else:
@@ -953,7 +951,6 @@ def layerView(request):
         layer.author = request.user
 
         if layer.layer_type == 'Surface Treatment':
-            print('in surface treatment')
             layer.coating_parameters = None
             layer.save()
             layer.stacks.set(form.cleaned_data['stacks'])
