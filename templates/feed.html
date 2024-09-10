@@ -90,6 +90,10 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     border-color: #c94890;
   }
+
+  .rounded-circle {
+    border: 2px solid #c94890; /* Optional: Add a border around the image to make it stand out */
+  }
 </style>
 {% endblock extrastyle %} {% block content %}
 <div class="container mt-5">
@@ -106,27 +110,33 @@
     <div class="col-md-8">
       <div class="post-card">
         <div class="card-body">
-          <p class="card-subtitle mb-2 text-muted">
-            <!-- Conditional image display with clearer separation of logic and presentation -->
-            {% if experiment.author.userprofile.photo %}
-            <img src="{{ experiment.author.userprofile.photo.url }}" alt="{{ experiment.author.first_name }}'s Profile Photo" width="45" height="45" class="rounded-circle" />
-            {% else %}
-            <img src="{% static 'images/no-photo.png' %}" alt="Default Profile Photo" width="45" height="45" class="rounded-circle" />
-            {% endif %}
+          <div class="row d-flex align-items-center mb-2">
+            <!-- Profile photo and author info section -->
+            <div class="col-auto">
+              {% if experiment.author.userprofile.photo %}
+              <img src="{{ experiment.author.userprofile.photo.url }}" alt="{{ experiment.author.first_name }}'s Profile Photo" width="50" height="50" class="rounded-circle" />
+              {% else %}
+              <img src="{% static 'images/no-photo.png' %}" alt="Default Profile Photo" width="50" height="50" class="rounded-circle" />
+              {% endif %}
+            </div>
+            <div class="col">
+              <h5 class="mb-1">
+                <a class="card-link" href="{% url 'profile_page' experiment.author.id %}"> {{ experiment.author.first_name }} {{ experiment.author.last_name }} </a>
+              </h5>
+              <p class="mb-0 text-muted" style="color: rgb(141, 140, 140)">{{ experiment.author.userprofile.role }}</p>
+            </div>
+          </div>
 
-            <!-- Link to the author's profile page -->
-            <a class="card-link mx-2 justify-content-center" href="{% url 'profile_page' experiment.author.id %}"> {{ experiment.author.first_name }} {{ experiment.author.last_name }} </a>
-          </p>
-
+          <!-- Experiment title and notes -->
           <h5 class="card-title mb-2">{{ experiment.objective }}</h5>
-
           <p class="card-text">{{ experiment.notes|truncatewords:40 }}</p>
 
+          <!-- Links and date -->
           <span class="d-flex justify-content-between">
             <span>
               <a href="{% url 'experiment_page' experiment.id %}" class="card-link">Read more</a>
-              <a href="#" class="card-link">Comments</a></span
-            >
+              <a href="#" class="card-link">Comments</a>
+            </span>
             <p class="card-subtitle text-muted">{{ experiment.created | date }}</p>
           </span>
         </div>

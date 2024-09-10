@@ -13,7 +13,7 @@
       {% if user.userprofile.photo %}
       <img src="{{user.userprofile.photo.url }}" alt="Profile Photo" width="50" height="50" class="rounded-circle" />
       {% else %}
-      <img src="{% static 'images/redmap-light.png' %}" alt="Profile Photo" width="50" height="50" class="rounded-circle" />
+      <img src="{% static 'images/no-photo.png' %}" alt="Profile Photo" width="50" height="50" class="rounded-circle" />
       {% endif %}
     </div>
     <div class="col">
