@@ -1387,23 +1387,26 @@ def dashboardView(request):
         pass
 
     users = User.objects.all()
+    projects = Project.objects.all()
     experiments = Experiment.objects.all()
     my_experiments = Experiment.objects.filter(author=request.user)
 
     # experiment added in last 24 hours last week and last month
-    last_24_hours = datetime.now() - timedelta(hours=24)
-    last_week = datetime.now() - timedelta(days=7)
-    last_month = datetime.now() - timedelta(days=30)
-    experiment_24_hours = Experiment.objects.filter(
-        created__gte=last_24_hours)
-    experiment_week = Experiment.objects.filter(created__gte=last_week)
-    experiment_month = Experiment.objects.filter(created__gte=last_month)
+    # last_24_hours = datetime.now() - timedelta(hours=24)
+    # last_week = datetime.now() - timedelta(days=7)
+    # last_month = datetime.now() - timedelta(days=30)
+    # experiment_24_hours = Experiment.objects.filter(
+    #     created__gte=last_24_hours)
+    # experiment_week = Experiment.objects.filter(created__gte=last_week)
+    # experiment_month = Experiment.objects.filter(created__gte=last_month)
 
     context = {'users': users, 'experiments': experiments,
                'my_experiments': my_experiments,
-               'experiment_24_hours': experiment_24_hours,
-               'experiment_week': experiment_week,
-               'experiment_month': experiment_month}
+               'projects': projects
+            #    'experiment_24_hours': experiment_24_hours,
+            #    'experiment_week': experiment_week,
+            #    'experiment_month': experiment_month
+            }
     return render(request, 'dashboard.html', context)
 
 
