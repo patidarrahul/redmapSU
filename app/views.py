@@ -656,7 +656,10 @@ def sendNotificationView(request, experiment_id):
             message["Subject"] = f"{experiment.author.first_name} {experiment.author.last_name} - A new Experiment has been added on Redmap"
             
             # Text message with URL
-            body = f"Hello,\n\nA new experiment has been added on Redmap. Please check the experiment details here: https://redmap.xyz/experiment-page/{experiment.id}/"
+            body = f"Hello,\n\nA new experiment has been added on Redmap. 
+            Follow the link to see what amazing work {experiment.author.first_name} {experiment.author.last_name} 
+            has done with the experiment details here: https://redmap.xyz/experiment-page/{experiment.id}/ 
+            \n\nBest regards,\nReadmap Team\n All HAIL REDMAP!!!!!" 
             message.attach(MIMEText(body, "plain"))
 
             try:
