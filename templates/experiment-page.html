@@ -79,7 +79,7 @@
     <div class="col-md-12 mx-auto">
       <div class="row">
         <div class="col-12 py-2 border rounded">
-          <h4 class="card-title text-center">{% if experiment.title %} {{ experiment.title }} {% else %} No Title was added {% endif %}</h4>
+          <h4 class="card-title text-center">{% if experiment.objective %} {{ experiment.objective }} {% else %} No Title was added {% endif %}</h4>
           <p class="card-text mb-2">{{ experiment.description }}</p>
           <p class="card-text mb-0">
             <a href="{% url 'profile_page' experiment.author.id %}"> {{ experiment.author.first_name }} {{ experiment.author.last_name }} </a>
