@@ -42,7 +42,7 @@
 {% endblock extrastyle %}
 <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
-<div class="card px-4 py-4" style="max-width: 100%; height: auto; overflow: hidden">
+<div class="card px-4 py-4" style="max-width: 100%; min-width: 650px; height: auto; overflow: hidden">
   <!-- Comment Input Section -->
   <div class="mb-3">
     <form hx-post="{% url 'add_comment' experiment.id %}" hx-target="#comments_list">
