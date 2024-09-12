@@ -1575,6 +1575,73 @@ def add_comment(request, experiment_id):
             comment=comment
         )
         new_comment.save()
+
+        # notify the author
+        CONFIG_PATH = os.path.join(BASE_DIR, 'config.json')
+        with open(CONFIG_PATH) as config_file:
+            config = json.load(config_file)
+
+
+        sender_email = config["EMAIL_HOST_USER"]
+        password = config["EMAIL_HOST_PASSWORD"]
+        smtp_server = "smtp.gmail.com"
+        port = config["EMAIL_PORT"]
+
+        # get emails of all users
+        receiver_emails = list(set(comment.author.email for comment in comments))# people who have commnented on this experiment before
+        
+        # remove the author of the experiment if it is in the list
+        if experiment.author.email in receiver_emails:
+            receiver_emails.remove(experiment.author.email)
+
+        # remove the author of the comment
+        if new_comment.author.email in receiver_emails:
+            receiver_emails.remove(new_comment.author.email)
+
+        # Create server object
+        server = smtplib.SMTP(smtp_server, port)
+        server.starttls()  # Secure the connection
+        server.login(sender_email, password)
+
+        # Send email to each recipient
+        if receiver_emails:
+            for receiver_email in receiver_emails:
+                message = MIMEMultipart()
+                message["From"] = sender_email
+                message["To"] = receiver_email
+                message["Subject"] = f"{new_comment.author.first_name} {new_comment.author.last_name} - Added a Comment on experiment {experiment.objective}"
+                
+                # Text message with URL
+                body = f"Hello,\n\n {new_comment.author.first_name} {new_comment.author.last_name} also commented on experiment {experiment.objective}. You can view the comment here: https://redmap.xyz/experiment-page/{experiment.id}/  \n\nBest regards,\nReadmap Team\n All HAIL REDMAP!!!!!" 
+                message.attach(MIMEText(body, "plain"))
+
+                try:
+                    text = message.as_string()
+                    server.sendmail(sender_email, receiver_email, text)
+                except Exception as e:
+                    messages.error(request, f'Failed to send email to {receiver_email}. Error: {str(e)}')
+        
+        # also send an email to the author of the experiment that there is a new comment on their experiment
+        if experiment.author.email != new_comment.author.email:
+            message = MIMEMultipart()
+            message["From"] = sender_email 
+            message["To"] = experiment.author.email
+            message["Subject"] = f"{new_comment.author.first_name} {new_comment.author.last_name} - Added a Comment on experiment {experiment.objective}"
+
+            # Text message with URL
+            body = f"Hello, \n\n There is a new comment on your experiment {experiment.objective}. You can view the comment here: https://redmap.xyz/experiment-page/{experiment.id}/  \n\nBest regards,\nReadmap Team\n All HAIL REDMAP!!!!!"
+            message.attach(MIMEText(body, "plain"))
+
+            try:
+                text = message.as_string()
+                server.sendmail(sender_email, experiment.author.email, text)
+            except Exception as e:
+                messages.error(request, f'Failed to send email to {receiver_email}. Error: {str(e)}')
+
+
+        server.quit()
+
+
     return render(request ,'partials/comments_list.html', {'experiment': experiment, 'comments': comments})    
 ########################### Home End############################
 @ login_required(login_url='sign_in')
