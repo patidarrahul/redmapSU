@@ -74,7 +74,7 @@
   }
 </style>
 {% endblock extrastyle %} {% block content %}
-<div class="container mt-5">
+<div class="container mt-5" x-data="{ showModal: false}">
   <div class="row">
     <div class="col-md-12 mx-auto">
       <div class="row">
@@ -99,7 +99,16 @@
           <span class="d-flex justify-content-between">
             <p class="card-text mb-0 text-muted" style="font-size: 14px">{{ experiment.created | date }}</p>
             <p class="card-text mb-0">
-              <a href="{% url 'project-page' experiment.project.id %}" class="text-muted" style="font-size: 14px; text-decoration: underline"> View all experiments within the project </a>
+              <a
+                href="#"
+                hx-get="{% url 'fetch_comment' experiment.id %}"
+                hx-target="#commentbox"
+                class="text-muted"
+                @click="showModal = true; experiment = {{ experiment.id }}"
+                style="font-size: 14px; text-decoration: underline"
+                >comments</a
+              >
+              <a href="{% url 'project-page' experiment.project.id %}" class="text-muted" style="font-size: 14px; text-decoration: underline"> experiments within the project </a>
             </p>
           </span>
         </div>
@@ -263,6 +272,7 @@
       </div>
     </div>
   </div>
+  <div class="px-4 py-4" id="commentbox" x-show="showModal" @click.away="showModal = false" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999"></div>
 </div>
 <div class="modal fade" id="sharepostModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
