@@ -92,7 +92,7 @@
   }
 </style>
 {% endblock extrastyle %} {% block content %}
-<div class="container mt-5">
+<div class="container mt-5" x-data="{ showModal: true}">
   <!-- Search Bar -->
   <div class="search-bar">
     <form method="GET" action="#">
@@ -131,7 +131,8 @@
           <span class="d-flex justify-content-between">
             <span>
               <a href="{% url 'experiment_page' experiment.id %}" class="card-link">Read more</a>
-              <a href="#" class="card-link">Comments</a>
+
+              <a href="#" hx-get="{% url 'fetch_comment' experiment.id %}" hx-target="#commentbox" class="card-link" @click="showModal = true; experiment = {{ experiment.id }}">Comments</a>
             </span>
             <p class="card-subtitle text-muted">{{ experiment.created | date }}</p>
           </span>
@@ -140,5 +141,8 @@
     </div>
   </div>
   {% endfor %}
+
+  <div class="px-4 py-4" id="commentbox" x-show="showModal" @click.away="showModal = false" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999"></div>
 </div>
+
 {% endblock %}

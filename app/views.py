@@ -1559,7 +1559,23 @@ def feedView(request):
 
     return render(request, 'feed.html', context)
 
-
+def fetch_comment(request, experiment_id):
+    experiment = Experiment.objects.get(id=experiment_id)
+    comments = Comment.objects.filter(Experiment=experiment).order_by('-created')
+    
+    return render(request, 'partials/comment_box.html', {'experiment': experiment, 'comments': comments})
+def add_comment(request, experiment_id):
+    experiment = Experiment.objects.get(id=experiment_id)
+    comments = Comment.objects.filter(Experiment=experiment).order_by('-created')
+    if request.method == 'POST':
+        comment = request.POST.get('comment')
+        new_comment = Comment.objects.create(
+            Experiment=experiment,
+            author=request.user,
+            comment=comment
+        )
+        new_comment.save()
+    return render(request ,'partials/comments_list.html', {'experiment': experiment, 'comments': comments})    
 ########################### Home End############################
 @ login_required(login_url='sign_in')
 def fileManager(request, path=''):

@@ -155,6 +155,8 @@ htmx_urlpatterns = [
     path('formulation-ingredient/', views.formulationIngredient,
          name='formulation_ingredient'),
 
+path('fetch_comment/<int:experiment_id>/', views.fetch_comment, name='fetch_comment'),
+path('add_comment/<int:experiment_id>/', views.add_comment, name='add_comment'),
 ]
 
 urlpatterns += htmx_urlpatterns

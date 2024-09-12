@@ -1,4 +1,5 @@
-from datetime import timezone
+import datetime
+from django.utils import timezone
 import os
 from django.conf import settings
 from django.db import models
@@ -158,6 +159,8 @@ class Comment(models.Model):
     Experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
+    created = models.DateTimeField(auto_now_add=True, blank = True, null = True)
+    updated = models.DateTimeField(auto_now=True, blank = True, null = True)
 class Stack(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
     author = models.ForeignKey(
