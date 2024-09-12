@@ -1569,6 +1569,9 @@ def add_comment(request, experiment_id):
     comments = Comment.objects.filter(Experiment=experiment).order_by('-created')
     if request.method == 'POST':
         comment = request.POST.get('comment')
+        if comment == '':
+            return render(request ,'partials/comments_list.html', {'experiment': experiment, 'comments': comments})    
+
         new_comment = Comment.objects.create(
             Experiment=experiment,
             author=request.user,
