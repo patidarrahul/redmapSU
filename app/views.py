@@ -490,7 +490,7 @@ def jv_curve_view(request):
         forward_voltage_points = data[:, 5] if np.isnan(data[0][4]) else data[:, 4]
         forward_current_points = data[:, 6] if np.isnan(data[0][4]) else data[:, 5]
         reverse_voltage_points = data[:, 0]
-        reverse_current_points = data[:, 2] if np.isnan(data[0][2]) else data[:, 1]
+        reverse_current_points = data[:, 1] if np.isnan(data[0][2]) else data[:, 2]
     
     except Exception as e:
         return HttpResponse(f"Error reading file: {e}", status=500)
