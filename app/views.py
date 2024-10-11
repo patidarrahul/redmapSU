@@ -14,6 +14,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import TruncDate
+import numpy as np
 
 from redmap.settings import BASE_DIR
 from .models import (
@@ -448,15 +449,132 @@ def experimentPageView(request, experiment_id):
         messages.error(request, f'Failed to generate charts: {str(e)}')
         return redirect(request.META.get('HTTP_REFERER'))
 
-    jv_chart = figures['fig_jv']
+    jsc_chart = figures['fig_jsc']
     voc_chart = figures['fig_voc']
     ff_chart = figures['fig_ff']
     pce_chart = figures['fig_pce']
 
-    context = {'experiment': experiment, 'jv_chart': jv_chart,
+    context = {'experiment': experiment, 'jsc_chart': jsc_chart,
                'voc_chart': voc_chart, 'ff_chart': ff_chart, 'pce_chart': pce_chart}
     return render(request, 'experiment-page.html', context)
 
+@ login_required(login_url='sign_in')
+def jv_curve_view(request):
+
+    # Option B: Using encoded file_path
+    encoded_file_path = request.GET.get('file_path')
+    if encoded_file_path:
+        rel_file_path = urllib.parse.unquote(encoded_file_path)
+    else:
+        return HttpResponse("No file specified", status=400)
+    file_path = os.path.join(settings.MEDIA_ROOT, rel_file_path)
+
+    # Validate and sanitize the file_path
+    if not os.path.exists(file_path):
+        return HttpResponse("Invalid file path", status=400)
+
+    
+    
+    # Read the data from the file
+    try:
+        # Open the file with 'latin-1' encoding and load it with np.genfromtxt
+        with open(file_path, 'r', encoding='latin-1') as f:
+            data = np.genfromtxt(f, skip_header=35, dtype=float, delimiter='\t')  # loading txt file
+            split_file = []
+
+            
+           
+                
+        
+        # Extract the voltage and current points
+        forward_voltage_points = data[:, 5] if np.isnan(data[0][4]) else data[:, 4]
+        forward_current_points = data[:, 6] if np.isnan(data[0][4]) else data[:, 5]
+        reverse_voltage_points = data[:, 0]
+        reverse_current_points = data[:, 2] if np.isnan(data[0][2]) else data[:, 1]
+    
+    except Exception as e:
+        return HttpResponse(f"Error reading file: {e}", status=500)
+    
+    try:
+        if file_path.endswith('.SEQ'):
+            df = dataframe(file_path)
+        elif file_path.endswith('.txt'):
+            df = dataframe_new(file_path)
+        else:
+            return HttpResponse("Invalid file type", status=400)
+        print(df)
+        jsc_rev = df['Jsc Rev'][0]
+        jsc_fwd = df['Jsc Fwd'][0]
+        voc_rev = df['Voc Rev'][0]
+        voc_fwd = df['Voc Fwd'][0]
+        ff_rev = df['FF Rev'][0]
+        ff_fwd = df['FF Fwd'][0]
+        pce_rev = df['PCE Rev'][0]
+        pce_fwd = df['PCE Fwd'][0]
+        shunt_rev = df['Shunt Resistance Rev'][0]
+        shunt_fwd = df['Shunt Resistance Fwd'][0]
+        series_rev = df['Series Resistance Rev'][0]
+        series_fwd = df['Series Resistance Fwd'][0]
+        
+    except Exception as e:
+        return HttpResponse(f"Error parsing file: {e}", status=500)
+    
+        # Generate the JV curve plot using Plotly
+    fig = go.Figure()
+
+    # Plot the forward scan
+    fig.add_trace(go.Scatter(x=forward_voltage_points, y=forward_current_points, mode='lines+markers', name='Forward Scan'))
+
+    # Plot the reverse scan
+    fig.add_trace(go.Scatter(x=reverse_voltage_points, y=reverse_current_points, mode='lines+markers', name='Reverse Scan'))
+
+    # Update plot layout
+    fig.update_layout(
+        title={
+            'text': 'JV Curve',
+            'x': 0.5,  # Center the title
+            'xanchor': 'center',
+            'yanchor': 'top'
+        },
+        xaxis_title='Voltage (V)',
+        yaxis_title='Current Density (mA/cm²)',
+        template='plotly_white',
+        xaxis=dict(
+            range=[0, None],  # Set x-axis minimum to 0
+            showline=True,  # Show the bottom and top x-axis lines
+            linewidth=1,  # Increase line thickness
+            linecolor='black',  # Set line color
+            mirror=True  # Show axis lines on both bottom and top
+        ),
+        yaxis=dict(
+            range=[0, None],  # Set y-axis minimum to 0
+            showline=True,  # Show the left and right y-axis lines
+            linewidth=1,  # Increase line thickness
+            linecolor='black',  # Set line color
+            mirror=True  # Show axis lines on both left and right
+        ),
+        legend=dict(
+            x=0.99,  # Position the legend at the top-right inside the plot
+            y=0.98,
+            xanchor='right',
+            yanchor='top',
+            bgcolor='rgba(255, 255, 255, 0.5)',  # Slightly transparent background for better readability
+            bordercolor='Black',
+            borderwidth=0.5
+        ),
+        width=800,  # Set the width of the chart
+        height=600  # Set the height of the chart
+    )
+
+    # Convert the plot to HTML
+    plot_html = fig.to_html(full_html=False)
+
+    # Pass the plot HTML to the template
+    return render(request, 'jv-curve.html', {
+        'plot_html': plot_html,
+        'jsc_rev': jsc_rev, 'voc_rev': voc_rev, 'ff_rev': ff_rev, 'pce_rev': pce_rev, 'series_rev': series_rev, 'shunt_rev': shunt_rev,
+        'jsc_fwd': jsc_fwd, 'voc_fwd': voc_fwd, 'ff_fwd': ff_fwd, 'pce_fwd': pce_fwd, 'series_fwd': series_fwd, 'shunt_fwd': shunt_fwd
+    })    
 
 @ login_required(login_url='sign_in')
 def experimentView(request, project_id):

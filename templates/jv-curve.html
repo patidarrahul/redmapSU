@@ -1,0 +1,94 @@
+{% extends 'base.html' %} {% load static %} {% block extrastyle %}
+<style>
+  body {
+    background-color: #f8f9fa;
+  }
+
+  h2 {
+    color: #007bff;
+  }
+
+  .card {
+    border-radius: 12px;
+    background-color: #ffffff;
+    max-width: 900px;
+    margin: auto;
+  }
+
+  .card-body {
+    padding: 5px;
+  }
+
+  #jv-curve-plot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .table {
+    margin-top: 20px;
+  }
+
+  .table th,
+  .table td {
+    text-align: center;
+  }
+</style>
+{% endblock extrastyle %} {% block content %}
+<div class="container mt-2 d-flex justify-content-center">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card shadow-sm p-4">
+        <div class="card-body">
+          <!-- Render the JV Curve plot here -->
+          <div id="jv-curve-plot">{{ plot_html|safe }}</div>
+
+          <!-- Add table for Forward and Reverse Scan values -->
+          <table class="table table-bordered mt-4">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Reverse Scan</th>
+                <th>Forward Scan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Power Conversion Efficiency (PCE %)</td>
+                <td>{{ pce_rev }}</td>
+                <td>{{ pce_fwd }}</td>
+              </tr>
+              <tr>
+                <td>Jsc (mA/cm²)</td>
+                <td>{{ jsc_rev }}</td>
+                <td>{{ jsc_fwd }}</td>
+              </tr>
+              <tr>
+                <td>Voc (V)</td>
+                <td>{{ voc_rev }}</td>
+                <td>{{ voc_fwd }}</td>
+              </tr>
+              <tr>
+                <td>Fill Factor (FF)</td>
+                <td>{{ ff_rev }}</td>
+                <td>{{ ff_fwd }}</td>
+              </tr>
+
+              <tr>
+                <td>Series Resistance (Ohms)</td>
+                <td>{{ series_rev }}</td>
+                <td>{{ series_fwd }}</td>
+              </tr>
+              <tr>
+                <td>Shunt Resistance (Ohms)</td>
+                <td>{{ shunt_rev }}</td>
+                <td>{{ shunt_fwd }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

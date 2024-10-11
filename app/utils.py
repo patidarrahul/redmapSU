@@ -6,10 +6,15 @@ import plotly.graph_objects as go
 from .models import *
 from django.conf import settings
 import re
-
+import urllib.parse
 
 def dataframe(dir):
-    files = glob.glob(f'{dir}/*.SEQ')
+  
+    if os.path.isdir(dir):
+        files = glob.glob(f'{dir}/*.SEQ')  # All SEQ files in the directory
+    elif os.path.isfile(dir):
+        files = [dir]  # Single file case
+   
     file_location = []
     cell_id = []
     pce_rev = []
@@ -56,7 +61,7 @@ def dataframe(dir):
                     shunt_rev.append(abs(float(split_file[28][14])))
                     shunt_fwd.append(abs(float(split_file[29][14])))
 
-                elif split_file[29][3] == 'Light':
+                elif split_file[30][3] == 'Light':
                     file_location.append(file)
                     # increase the row number by 1
                     cell_id.append(split_file[23][1])
@@ -131,52 +136,56 @@ def dataframe_new(dir):
         'Forward Scan Series Resistance (Ohms)': r'Forward Scan Series Resistance \(Ohms\):\s*([\d.]+)',
         'Forward Scan Shunt Resistance (Ohms)': r'Forward Scan Shunt Resistance \(Ohms\):\s*([\d.]+)'
     }
+    if os.path.isdir(dir):
+        files = [os.path.join(dir, filename) for filename in os.listdir(dir) if filename.endswith(".txt")]
+    elif os.path.isfile(dir):
+        files = [dir]  # Single file case
+    else:
+        raise ValueError("Provided path is neither a file nor a directory.")
+    for filepath in files:
+        
+        with open(filepath, 'rb') as file:
+            raw_data = file.read()
+            result = chardet.detect(raw_data)
+            encoding = result['encoding']
+            content = raw_data.decode(encoding)
 
-    for filename in os.listdir(dir):
-        if filename.endswith(".txt"):
-            filepath = os.path.join(dir, filename)
-            with open(filepath, 'rb') as file:
-                raw_data = file.read()
-                result = chardet.detect(raw_data)
-                encoding = result['encoding']
-                content = raw_data.decode(encoding)
+            if (re.search(patterns['Dark Measurement'], content) and
+                re.search(patterns['Dark Measurement'], content).group(1) == 'False' and
+                re.search(patterns['Scan Direction'], content) and
+                    re.search(patterns['Scan Direction'], content).group(1) == 'Both'):
 
-                if (re.search(patterns['Dark Measurement'], content) and
-                    re.search(patterns['Dark Measurement'], content).group(1) == 'False' and
-                    re.search(patterns['Scan Direction'], content) and
-                        re.search(patterns['Scan Direction'], content).group(1) == 'Both'):
+                file_location.append(filepath)
+                cell_id.append(re.search(patterns['Device Name'], content).group(1) + ' ' +
+                                re.search(patterns['Pixel'], content).group(1))
 
-                    file_location.append(filepath)
-                    cell_id.append(re.search(patterns['Device Name'], content).group(1) + ' ' +
-                                   re.search(patterns['Pixel'], content).group(1))
+                # Append values to the respective lists
+                jsc_rev.append(
+                    re.search(patterns['Reverse Scan Jsc (mA/cm²)'], content).group(1))
 
-                    # Append values to the respective lists
-                    jsc_rev.append(
-                        re.search(patterns['Reverse Scan Jsc (mA/cm²)'], content).group(1))
+                voc_rev.append(
+                    re.search(patterns['Reverse Scan Voc (V)'], content).group(1))
 
-                    voc_rev.append(
-                        re.search(patterns['Reverse Scan Voc (V)'], content).group(1))
-
-                    ff_rev.append(
-                        re.search(patterns['Reverse Scan FF'], content).group(1))
-                    pce_rev.append(
-                        re.search(patterns['Reverse Scan PCE (%)'], content).group(1))
-                    series_rev.append(
-                        re.search(patterns['Reverse Scan Series Resistance (Ohms)'], content).group(1))
-                    shunt_rev.append(
-                        re.search(patterns['Reverse Scan Shunt Resistance (Ohms)'], content).group(1))
-                    jsc_fwd.append(
-                        re.search(patterns['Forward Scan Jsc (mA/cm²)'], content).group(1))
-                    voc_fwd.append(
-                        re.search(patterns['Forward Scan Voc (V)'], content).group(1))
-                    ff_fwd.append(
-                        re.search(patterns['Forward Scan FF'], content).group(1))
-                    pce_fwd.append(
-                        re.search(patterns['Forward Scan PCE (%)'], content).group(1))
-                    series_fwd.append(
-                        re.search(patterns['Forward Scan Series Resistance (Ohms)'], content).group(1))
-                    shunt_fwd.append(
-                        re.search(patterns['Forward Scan Shunt Resistance (Ohms)'], content).group(1))
+                ff_rev.append(
+                    re.search(patterns['Reverse Scan FF'], content).group(1))
+                pce_rev.append(
+                    re.search(patterns['Reverse Scan PCE (%)'], content).group(1))
+                series_rev.append(
+                    re.search(patterns['Reverse Scan Series Resistance (Ohms)'], content).group(1))
+                shunt_rev.append(
+                    re.search(patterns['Reverse Scan Shunt Resistance (Ohms)'], content).group(1))
+                jsc_fwd.append(
+                    re.search(patterns['Forward Scan Jsc (mA/cm²)'], content).group(1))
+                voc_fwd.append(
+                    re.search(patterns['Forward Scan Voc (V)'], content).group(1))
+                ff_fwd.append(
+                    re.search(patterns['Forward Scan FF'], content).group(1))
+                pce_fwd.append(
+                    re.search(patterns['Forward Scan PCE (%)'], content).group(1))
+                series_fwd.append(
+                    re.search(patterns['Forward Scan Series Resistance (Ohms)'], content).group(1))
+                shunt_fwd.append(
+                    re.search(patterns['Forward Scan Shunt Resistance (Ohms)'], content).group(1))
 
     df = pd.DataFrame({
         'File Location': file_location,
@@ -235,16 +244,23 @@ def jvBoxPlot(experiment_id, update_jv_summary):
         # find hero PCE
         heroJV(experiment_id)
 
-    fig_jv = go.Figure()
+    fig_jsc = go.Figure()
     fig_voc = go.Figure()
     fig_ff = go.Figure()
     fig_pce = go.Figure()
     for stack_name, df in df_list:
-        fig_jv.add_trace(go.Box(y=df.iloc[:, 2], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
+        file_paths = df.iloc[:, 0]  # Use the first column as the URLs
+        relative_file_paths = file_paths.apply(lambda x: os.path.relpath(x, settings.MEDIA_ROOT))
+        encoded_paths = relative_file_paths.apply(lambda x: urllib.parse.quote(x))
+
+        urls = encoded_paths.apply(lambda x: f"/jv_curve/?file_path={x}")
+        fig_jsc.add_trace(go.Box(y=df.iloc[:, 2], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
                                 jitter=0.3,  # add some jitter for a better separation between points
                                 pointpos=-1.8,
                                 showlegend=False,  # remove legend
-                                name=stack_name
+                                name=stack_name,
+                                customdata=urls  # Attach URLs directly
+
 
                                 ))  # relative position of points wrt box))
 
@@ -253,7 +269,9 @@ def jvBoxPlot(experiment_id, update_jv_summary):
                                  jitter=0.3,  # add some jitter for a better separation between points
                                  pointpos=-1.8,
                                  showlegend=False,  # remove legend
-                                 name=stack_name
+                                 name=stack_name,
+                                customdata=urls  # Attach URLs directly
+
 
                                  ))  # relative position of points wrt box))
     for stack_name, df in df_list:
@@ -261,7 +279,9 @@ def jvBoxPlot(experiment_id, update_jv_summary):
                                 jitter=0.3,  # add some jitter for a better separation between points
                                 pointpos=-1.8,
                                 showlegend=False,  # remove legend
-                                name=stack_name
+                                name=stack_name,
+                                customdata=urls  # Attach URLs directly
+                               
                                 ))  # relative position of points wrt box))
 
     for stack_name, df in df_list:
@@ -269,10 +289,12 @@ def jvBoxPlot(experiment_id, update_jv_summary):
                                  jitter=0.3,  # add some jitter for a better separation between points
                                  pointpos=-1.8,
                                  showlegend=False,  # remove legend
-                                 name=stack_name
+                                 name=stack_name,
+                                 customdata=urls  # Attach URLs directly
+
                                  ))  # relative position of points wrt box))
 
-    fig_jv.update_layout(
+    fig_jsc.update_layout(
         yaxis_title='Current Density (mA/cm<sup>2</sup>)', width=600)
     fig_voc.update_layout(
         yaxis_title='Open Circuit Voltage (Volts)', width=600)
@@ -282,11 +304,10 @@ def jvBoxPlot(experiment_id, update_jv_summary):
 
     # add
     figures = {
-        'fig_jv': fig_jv.to_html(),
-        'fig_voc': fig_voc.to_html(),
-        'fig_ff': fig_ff.to_html(),
-        'fig_pce': fig_pce.to_html(),
-
+        'fig_jsc': fig_jsc.to_html(full_html=False, div_id='fig_jsc_div', include_plotlyjs='cdn'),
+        'fig_voc': fig_voc.to_html( full_html=False, div_id='fig_voc_div', include_plotlyjs='cdn'),
+        'fig_ff': fig_ff.to_html( full_html=False, div_id='fig_ff_div', include_plotlyjs='cdn'),
+        'fig_pce': fig_pce.to_html( full_html=False, div_id='fig_pce_div', include_plotlyjs='cdn'),
     }
     return figures
 

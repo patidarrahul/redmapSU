@@ -69,6 +69,8 @@ urlpatterns = [
          views.experimentPageView, name='experiment_page'),
      path('send_notification/<int:experiment_id>/', views.sendNotificationView, name='send_notification'),
 
+     path('jv_curve/', views.jv_curve_view, name='plot_jv_curve'),
+
     # stack
     path('stack/', views.stackView, name='stack'),
     path('stack/<int:stack_id>/', views.updateStackView, name='update_stack'),

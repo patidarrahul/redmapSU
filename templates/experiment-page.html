@@ -171,7 +171,7 @@
           <h4>JV Data</h4>
           <div class="row justify-content-center mx-auto">
             <div class="col-md-6 d-flex justify-content-center">{{ pce_chart|safe }}</div>
-            <div class="col-md-6 d-flex justify-content-center">{{ jv_chart|safe }}</div>
+            <div class="col-md-6 d-flex justify-content-center">{{ jsc_chart|safe }}</div>
             <div class="col-md-6 d-flex justify-content-center">{{ voc_chart|safe }}</div>
             <div class="col-md-6 d-flex justify-content-center">{{ ff_chart|safe }}</div>
           </div>
@@ -291,4 +291,31 @@
     </div>
   </div>
 </div>
-{% endblock content %}
+{% endblock content %} {% block extrascripts %}
+<script>
+  var plotDiv = document.getElementById("fig_jsc_div");
+  plotDiv.on("plotly_click", function (data) {
+    var pointData = data.points[0];
+    var url = pointData.customdata;
+    window.open(url, "_blank"); // Open the URL in a new window
+  });
+  var plotDiv = document.getElementById("fig_voc_div");
+  plotDiv.on("plotly_click", function (data) {
+    var pointData = data.points[0];
+    var url = pointData.customdata;
+    window.open(url, "_blank"); // Open the URL in a new window
+  });
+  var plotDiv = document.getElementById("fig_ff_div");
+  plotDiv.on("plotly_click", function (data) {
+    var pointData = data.points[0];
+    var url = pointData.customdata;
+    window.open(url, "_blank"); // Open the URL in a new window
+  });
+  var plotDiv = document.getElementById("fig_pce_div");
+  plotDiv.on("plotly_click", function (data) {
+    var pointData = data.points[0];
+    var url = pointData.customdata;
+    window.open(url, "_blank"); // Open the URL in a new window
+  });
+</script>
+{% endblock extrascripts %}
