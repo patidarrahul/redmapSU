@@ -7,6 +7,8 @@ from .models import *
 from django.conf import settings
 import re
 import urllib.parse
+from plotly.colors import qualitative
+
 
 def dataframe(dir):
   
@@ -207,108 +209,115 @@ def dataframe_new(dir):
     return df
 
 
+
 def jvBoxPlot(experiment_id, update_jv_summary):
     stacks = Stack.objects.filter(experiment_id=experiment_id)
     jv_software = ''
-    # check which jv_software to use
 
     if all([stack.jv_software == 'new' for stack in stacks]):
         jv_software = 'new'
-
     elif all([stack.jv_software == 'default' for stack in stacks]):
         jv_software = 'default'
-
     else:
         raise ValueError('All stacks must have the same jv_software')
-    all_jv_dirs = [(stack.name, os.path.join(
-        settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
-
+    
+    all_jv_dirs = [(stack.name, os.path.join(settings.MEDIA_ROOT, stack.jv_dir)) for stack in stacks]
     df_list = []
-    # Check if all 'summary_jv.csv' files exist
+
+    # Load data from 'summary_jv.csv' or generate it
     if all([os.path.exists(os.path.join(jv_dir, 'summary_jv.csv')) for _, jv_dir in all_jv_dirs]) and update_jv_summary != 'true':
         for stack_name, jv_dir in all_jv_dirs:
             df = pd.read_csv(os.path.join(jv_dir, 'summary_jv.csv'))
             df_list.append((stack_name, df))
-
     else:
         for stack_name, jv_dir in all_jv_dirs:
             if jv_software == 'default':
                 df = dataframe(jv_dir)
-                df_list.append((stack_name, df))
-                df.to_csv(os.path.join(jv_dir, 'summary_jv.csv'), index=False)
             elif jv_software == 'new':
                 df = dataframe_new(jv_dir)
-                df_list.append((stack_name, df))
-                df.to_csv(os.path.join(jv_dir, 'summary_jv.csv'), index=False)
+            df_list.append((stack_name, df))
+            df.to_csv(os.path.join(jv_dir, 'summary_jv.csv'), index=False)
 
-        # find hero PCE
-        heroJV(experiment_id)
+    # Define the figures dictionary to store each metric's plot
+    figures = {}
+    for metric, fwd_col, rev_col, yaxis_title in [
+        ('JSc', 'Jsc Fwd', 'Jsc Rev', 'Current Density (mA/cm<sup>2</sup>)'),
+        ('Voc', 'Voc Fwd', 'Voc Rev', 'Open Circuit Voltage (Volts)'),
+        ('FF', 'FF Fwd', 'FF Rev', 'Fill Factor (%)'),
+        ('PCE', 'PCE Fwd', 'PCE Rev', 'Power Conversion Efficiency (%)')
+    ]:
+        fig_fwd = go.Figure()
+        fig_rev = go.Figure()
+        fig_combined = go.Figure()
 
-    fig_jsc = go.Figure()
-    fig_voc = go.Figure()
-    fig_ff = go.Figure()
-    fig_pce = go.Figure()
-    for stack_name, df in df_list:
-        file_paths = df.iloc[:, 0]  # Use the first column as the URLs
-        relative_file_paths = file_paths.apply(lambda x: os.path.relpath(x, settings.MEDIA_ROOT))
-        encoded_paths = relative_file_paths.apply(lambda x: urllib.parse.quote(x))
+        color_palette = qualitative.Plotly  # A palette with several distinct colors
 
-        urls = encoded_paths.apply(lambda x: f"/jv_curve/?file_path={x}")
-        fig_jsc.add_trace(go.Box(y=df.iloc[:, 2], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
-                                jitter=0.3,  # add some jitter for a better separation between points
-                                pointpos=-1.8,
-                                showlegend=False,  # remove legend
-                                name=stack_name,
-                                customdata=urls  # Attach URLs directly
+        # Select a color based on the index of the trace in the palette
+        color_index = 0  # Adjust this index as needed for each trace
+
+        for stack_name, df in df_list:
+            # Forward scan box plot (individual)
+            fig_fwd.add_trace(go.Box(
+                y=df[fwd_col], name=stack_name,
+                boxpoints='all', jitter=0.3, pointpos=-1.8
+            ))
+
+            # Reverse scan box plot (individual)
+            fig_rev.add_trace(go.Box(
+                y=df[rev_col], name=stack_name,
+                boxpoints='all', jitter=0.3, pointpos=-1.8
+            ))
+
+# Combined box plot: Forward as filled, Reverse as outline only
+            fig_combined.add_trace(go.Box(
+                y=df[fwd_col], name=stack_name,
+                marker=dict(color=color_palette[color_index]),  # Use color from the palette
+                fillcolor=color_palette[color_index],  # Fill color for forward scan
+                showlegend=False,
+
+                ))
+
+# Add reverse scan with the same color outline but transparent fill
+            fig_combined.add_trace(go.Box(
+                y=df[rev_col], name=stack_name,
+
+                marker=dict(color=color_palette[color_index]),  # Same color for reverse outline
+                fillcolor='rgba(0,0,0,0)',  # Transparent fill for reverse scan
+                 showlegend=False,
+
+            ))
+
+            # Update color_index for the next pair of traces, if needed
+            color_index += 1  # Move to the next color in the palette
 
 
-                                ))  # relative position of points wrt box))
-
-    for stack_name, df in df_list:
-        fig_voc.add_trace(go.Box(y=df.iloc[:, 4], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
-                                 jitter=0.3,  # add some jitter for a better separation between points
-                                 pointpos=-1.8,
-                                 showlegend=False,  # remove legend
-                                 name=stack_name,
-                                customdata=urls  # Attach URLs directly
 
 
-                                 ))  # relative position of points wrt box))
-    for stack_name, df in df_list:
-        fig_ff.add_trace(go.Box(y=df.iloc[:, 6], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
-                                jitter=0.3,  # add some jitter for a better separation between points
-                                pointpos=-1.8,
-                                showlegend=False,  # remove legend
-                                name=stack_name,
-                                customdata=urls  # Attach URLs directly
-                               
-                                ))  # relative position of points wrt box))
+        fig_combined.add_trace(go.Box(
+            y=[None], name="Forward", marker_color='grey', fillcolor='grey',
+            boxpoints=False, showlegend=True, opacity=0.6  # Filled grey box for "Forward"
+        ))
+        fig_combined.add_trace(go.Box(
+            y=[None], name="Reverse", marker_color='grey', fillcolor='rgba(0,0,0,0)',
+            line=dict(color='grey'), boxpoints=False, showlegend=True, opacity=0.6  # Outline grey box for "Reverse"
+        ))
+        # Layout for forward and reverse plots (no styling changes)
+        fig_fwd.update_layout(yaxis_title=yaxis_title, width=600)
+        fig_rev.update_layout(yaxis_title=yaxis_title, width=600)
 
-    for stack_name, df in df_list:
-        fig_pce.add_trace(go.Box(y=df.iloc[:, 8], boxpoints='all',  # can also be outliers, or suspectedoutliers, or False
-                                 jitter=0.3,  # add some jitter for a better separation between points
-                                 pointpos=-1.8,
-                                 showlegend=False,  # remove legend
-                                 name=stack_name,
-                                 customdata=urls  # Attach URLs directly
+        # Layout for combined plot with grouped box mode
+        fig_combined.update_layout(
+            yaxis_title=yaxis_title,
+            width=600,
+            boxmode = 'group'
+            
+        )
 
-                                 ))  # relative position of points wrt box))
+        # Store each plot in the figures dictionary
+        figures[f'fig_{metric.lower()}_fwd'] = fig_fwd.to_html(full_html=False, div_id=f'fig_{metric.lower()}_fwd_div', include_plotlyjs='cdn')
+        figures[f'fig_{metric.lower()}_rev'] = fig_rev.to_html(full_html=False, div_id=f'fig_{metric.lower()}_rev_div', include_plotlyjs='cdn')
+        figures[f'fig_{metric.lower()}_combined'] = fig_combined.to_html(full_html=False, div_id=f'fig_{metric.lower()}_combined_div', include_plotlyjs='cdn')
 
-    fig_jsc.update_layout(
-        yaxis_title='Current Density (mA/cm<sup>2</sup>)', width=600)
-    fig_voc.update_layout(
-        yaxis_title='Open Circuit Voltage (Volts)', width=600)
-    fig_ff.update_layout(yaxis_title='Fill Factor (%)', width=600)
-    fig_pce.update_layout(
-        yaxis_title='Power Conversion Efficiency (%)', width=600)
-
-    # add
-    figures = {
-        'fig_jsc': fig_jsc.to_html(full_html=False, div_id='fig_jsc_div', include_plotlyjs='cdn'),
-        'fig_voc': fig_voc.to_html( full_html=False, div_id='fig_voc_div', include_plotlyjs='cdn'),
-        'fig_ff': fig_ff.to_html( full_html=False, div_id='fig_ff_div', include_plotlyjs='cdn'),
-        'fig_pce': fig_pce.to_html( full_html=False, div_id='fig_pce_div', include_plotlyjs='cdn'),
-    }
     return figures
 
 

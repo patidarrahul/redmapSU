@@ -163,17 +163,59 @@
 
         <!-- Result Section -->
         <div class="col-12 mt-4 py-2 border rounded">
-          <!-- a tag at the right corner -->
+          <!-- Force Update Icon -->
           <a href="{% url 'experiment_page' experiment.id %}?update_jv_summary=true" class="d-flex justify-content-end font-weight-bold text-center" title="Force Update" style="font-size: 20px">
-            <i class="bi bi-arrow-clockwise" title="Force Update"></i
-          ></a>
+            <i class="bi bi-arrow-clockwise" title="Force Update"></i>
+          </a>
           <hr class="mt-2" />
           <h4>JV Data</h4>
-          <div class="row justify-content-center mx-auto">
-            <div class="col-md-6 d-flex justify-content-center">{{ pce_chart|safe }}</div>
-            <div class="col-md-6 d-flex justify-content-center">{{ jsc_chart|safe }}</div>
-            <div class="col-md-6 d-flex justify-content-center">{{ voc_chart|safe }}</div>
-            <div class="col-md-6 d-flex justify-content-center">{{ ff_chart|safe }}</div>
+
+          <!-- Tabbed Layout for JV Data -->
+          <ul class="nav nav-tabs" id="jvTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="combined-tab" data-bs-toggle="tab" data-bs-target="#combined" type="button" role="tab" aria-controls="combined" aria-selected="true">Combined</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="forward-tab" data-bs-toggle="tab" data-bs-target="#forward" type="button" role="tab" aria-controls="forward" aria-selected="false">Forward</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="reverse-tab" data-bs-toggle="tab" data-bs-target="#reverse" type="button" role="tab" aria-controls="reverse" aria-selected="false">Reverse</button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="jvTabContent">
+            <!-- Combined Plot Content -->
+            <div class="tab-pane fade show active" id="combined" role="tabpanel" aria-labelledby="combined-tab">
+              <h5 class="mt-3">Combined JV Metrics</h5>
+              <div class="row">
+                <div class="col-md-6 d-flex justify-content-center">{{ jsc_combined_chart|safe }}</div>
+                <div class="col-md-6 d-flex justify-content-center">{{ voc_combined_chart|safe }}</div>
+                <div class="col-md-6 d-flex justify-content-center">{{ ff_combined_chart|safe }}</div>
+                <div class="col-md-6 d-flex justify-content-center">{{ pce_combined_chart|safe }}</div>
+              </div>
+            </div>
+
+            <!-- Forward Plot Content -->
+            <div class="tab-pane fade" id="forward" role="tabpanel" aria-labelledby="forward-tab">
+              <h5 class="mt-3">Forward JV Metrics</h5>
+              <div class="row">
+                <div class="col-md-6 d-flex justify-content-center">{{ jsc_fwd_chart|safe }}</div>
+                <div class="col-md-6 d-flex justify-content-center">{{ voc_fwd_chart|safe }}</div>
+                <div class="col-md-6 d-flex justify-content-center">{{ ff_fwd_chart|safe }}</div>
+                <div class="col-md-6 d-flex justify-content-center">{{ pce_fwd_chart|safe }}</div>
+              </div>
+            </div>
+
+            <!-- Reverse Plot Content -->
+            <div class="tab-pane fade" id="reverse" role="tabpanel" aria-labelledby="reverse-tab">
+              <h5 class="mt-3">Reverse JV Metrics</h5>
+              <div class="row">
+                <div class="col-md-6 d-flex justify-content-center">{{ jsc_rev_chart|safe }}</div>
+                <div class="col-md-6 d-flex justify-content-center">{{ voc_rev_chart|safe }}</div>
+                <div class="col-md-6 d-flex justify-content-center">{{ ff_rev_chart|safe }}</div>
+                <div class="col-md-6 d-flex justify-content-center">{{ pce_rev_chart|safe }}</div>
+              </div>
+            </div>
           </div>
         </div>
 

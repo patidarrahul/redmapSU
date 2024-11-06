@@ -439,24 +439,33 @@ def updateProjectView(request, project_id):
 @ login_required(login_url='sign_in')
 def experimentPageView(request, experiment_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
-
     update_jv_summary = request.GET.get('update_jv_summary')
-    updateExperimentStatus(experiment) # update the experiment status if missed somewhere
-    try:
-        figures = jvBoxPlot(experiment_id, update_jv_summary)       # defined in utils.py
+    updateExperimentStatus(experiment)
+    figures = jvBoxPlot(experiment_id, update_jv_summary)
 
-    except Exception as e:
-        messages.error(request, f'Failed to generate charts: {str(e)}')
-        return redirect(request.META.get('HTTP_REFERER'))
+    # try:
+    #     figures = jvBoxPlot(experiment_id, update_jv_summary)
+    # except Exception as e:
+    #     messages.error(request, f'Failed to generate charts: {str(e)}')
+    #     return redirect(request.META.get('HTTP_REFERER'))
 
-    jsc_chart = figures['fig_jsc']
-    voc_chart = figures['fig_voc']
-    ff_chart = figures['fig_ff']
-    pce_chart = figures['fig_pce']
-
-    context = {'experiment': experiment, 'jsc_chart': jsc_chart,
-               'voc_chart': voc_chart, 'ff_chart': ff_chart, 'pce_chart': pce_chart}
+    context = {
+        'experiment': experiment,
+        'jsc_fwd_chart': figures['fig_jsc_fwd'],
+        'jsc_rev_chart': figures['fig_jsc_rev'],
+        'jsc_combined_chart': figures['fig_jsc_combined'],
+        'voc_fwd_chart': figures['fig_voc_fwd'],
+        'voc_rev_chart': figures['fig_voc_rev'],
+        'voc_combined_chart': figures['fig_voc_combined'],
+        'ff_fwd_chart': figures['fig_ff_fwd'],
+        'ff_rev_chart': figures['fig_ff_rev'],
+        'ff_combined_chart': figures['fig_ff_combined'],
+        'pce_fwd_chart': figures['fig_pce_fwd'],
+        'pce_rev_chart': figures['fig_pce_rev'],
+        'pce_combined_chart': figures['fig_pce_combined']
+    }
     return render(request, 'experiment-page.html', context)
+
 
 @ login_required(login_url='sign_in')
 def jv_curve_view(request):
