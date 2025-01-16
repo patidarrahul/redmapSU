@@ -1,0 +1,68 @@
+{% extends 'base.html' %} {% block title %} Visco-Capillary Model {% endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <!-- Left Column: Form -->
+    <div class="col-md-3">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-1">
+          <label for="name" class="form-label">Name:</label>
+          <input type="text" step="any" name="name" class="form-control" required />
+        </div>
+        <div class="mb-1">
+          <label for="mu" class="form-label">Viscosity [mPa.s]:</label>
+          <input type="number" step="any" name="mu" class="form-control" required />
+        </div>
+        <div class="mb-1">
+          <label for="v" class="form-label">Deposition Speed [m/min]:</label>
+          <input type="number" step="any" name="v" class="form-control" required />
+        </div>
+        <div class="mb-1">
+          <label for="sigma" class="form-label">Ink Surface Tension [mN/m]:</label>
+          <input type="number" step="any" name="sigma" class="form-control" required />
+        </div>
+        <!-- <div class="mb-1">
+          <label for="q" class="form-label">Flow Rate [mL/min]:</label>
+          <input type="number" step="any" name="q" class="form-control" required />
+        </div> -->
+        <!-- <div class="mb-1">
+          <label for="w" class="form-label">Coating Width [cm]:</label>
+          <input type="number" step="any" name="w" class="form-control" required />
+        </div> -->
+        <div class="mb-1">
+          <label for="w" class="form-label">WFT [um]:</label>
+          <input type="number" step="any" name="wft" class="form-control" required />
+        </div>
+        <div class="mb-1">
+          <label for="gap" class="form-label">Gap [um]:</label>
+          <input type="number" step="any" name="gap" class="form-control" required />
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <button type="submit" class="btn btn-primary w-100 me-1">Calculate</button>
+          <a href="{% url 'reset_graph' %}" class="btn btn-secondary w-100 ms-1">Reset Graph</a>
+        </div>
+      </form>
+
+      {% if capillary_number %}
+      <div class="alert alert-info mt-4">
+        <p><strong>Capillary Number:</strong> {{ capillary_number }}</p>
+        <p><strong>Wet Thickness:</strong> {{ wet_thickness }} cm</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column: Graph -->
+    <div class="col-md-9">
+      <div class="card">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0">Visco-Capillary Model for Slot Die Coating</h5>
+        </div>
+        <div class="card-body">
+          <div>{{ plot_div|safe }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
