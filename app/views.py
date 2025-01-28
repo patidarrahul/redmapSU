@@ -103,24 +103,26 @@ def signUpView(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
-        form = UserForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            if User.objects.filter(Q(username=user.username) | Q(email=user.email)).exists():
-                messages.error(
-                    request, 'Username or email already exists. Please choose another.')
-                return render(request, 'sign-up.html', {'form': form})
 
-            user_dir_path = Path(settings.MEDIA_ROOT) / 'users' / user.username
-            user_dir_path.mkdir(parents=True, exist_ok=True)
+        """ Uncomment the following lines to keep signup open for everyone """
+        # form = UserForm(request.POST)
+        # if form.is_valid():
+        #     user = form.save(commit=False)
+        #     if User.objects.filter(Q(username=user.username) | Q(email=user.email)).exists():
+        #         messages.error(
+        #             request, 'Username or email already exists. Please choose another.')
+        #         return render(request, 'sign-up.html', {'form': form})
 
-            user.save()
-            UserProfile.objects.create(user=user, user_dir=str(user_dir_path))
-            login(request, user)
-            messages.success(request, 'User created successfully.')
-            return redirect('dashboard')
+        #     user_dir_path = Path(settings.MEDIA_ROOT) / 'users' / user.username
+        #     user_dir_path.mkdir(parents=True, exist_ok=True)
 
-        messages.error(request, 'Please correct the errors below.')
+        #     user.save()
+        #     UserProfile.objects.create(user=user, user_dir=str(user_dir_path))
+        #     login(request, user)
+        #     messages.success(request, 'User created successfully.')
+        #     return redirect('dashboard')
+
+        # messages.error(request, 'Please correct the errors below.')
 
     else:
         form = UserForm()
