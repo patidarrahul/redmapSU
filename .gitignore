@@ -5,4 +5,3 @@ media
 config.json
 .vscode
 __pycache__/
-db_backup_original.sqlite3

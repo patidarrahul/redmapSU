@@ -148,10 +148,6 @@ urlpatterns = [
     # home
     path('feed/', views.feedView, name='feed'),
 
-    # visco-capillary mdoel
-    path('visco-capillary-model/', views.calculate_ca, name='calculate_ca'),
-    path('visco-capillary-model/reset/', views.reset_graph, name='reset_graph'),
-
 ]
 
 htmx_urlpatterns = [
