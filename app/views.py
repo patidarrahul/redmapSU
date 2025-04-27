@@ -99,33 +99,34 @@ def signUpView(request):
     HttpResponse: A redirect to the dashboard if the user is already authenticated or if the sign-up is successful.
     HttpResponse: A render of the sign-up page with error messages if the sign-up form is invalid or if the username or email already exists.
     """
-    if request.user.is_authenticated:
-        return redirect('dashboard')
+    # if request.user.is_authenticated:
+    #     return redirect('dashboard')
 
-    if request.method == 'POST':
-        form = UserForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            if User.objects.filter(Q(username=user.username) | Q(email=user.email)).exists():
-                messages.error(
-                    request, 'Username or email already exists. Please choose another.')
-                return render(request, 'sign-up.html', {'form': form})
+    # if request.method == 'POST':
+    #     form = UserForm(request.POST)
+    #     if form.is_valid():
+    #         user = form.save(commit=False)
+    #         if User.objects.filter(Q(username=user.username) | Q(email=user.email)).exists():
+    #             messages.error(
+    #                 request, 'Username or email already exists. Please choose another.')
+    #             return render(request, 'sign-up.html', {'form': form})
 
-            user_dir_path = Path(settings.MEDIA_ROOT) / 'users' / user.username
-            user_dir_path.mkdir(parents=True, exist_ok=True)
+    #         user_dir_path = Path(settings.MEDIA_ROOT) / 'users' / user.username
+    #         user_dir_path.mkdir(parents=True, exist_ok=True)
 
-            user.save()
-            UserProfile.objects.create(user=user, user_dir=str(user_dir_path))
-            login(request, user)
-            messages.success(request, 'User created successfully.')
-            return redirect('dashboard')
+    #         user.save()
+    #         UserProfile.objects.create(user=user, user_dir=str(user_dir_path))
+    #         login(request, user)
+    #         messages.success(request, 'User created successfully.')
+    #         return redirect('dashboard')
 
-        messages.error(request, 'Please correct the errors below.')
+    #     messages.error(request, 'Please correct the errors below.')
 
-    else:
-        form = UserForm()
+    # else:
+    #     form = UserForm()
 
-    return render(request, 'sign-up.html', {'form': form})
+    # return render(request, 'sign-up.html', {'form': form})
+    return render(request, 'sign-up.html')
 
 
 @login_required(login_url='sign_in')
@@ -320,7 +321,7 @@ def inventory_view(request):
         except Exception as e:
             messages.error(request, f'Failed to add inventory: {str(e)}')
     else:
-        form = InventoryForm( )
+        form = InventoryForm()
 
     inventories = Inventory.objects.all()
     if request.GET.get('q'):
@@ -436,14 +437,16 @@ def updateProjectView(request, project_id):
     return render(request, 'project.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def experimentPageView(request, experiment_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
 
     update_jv_summary = request.GET.get('update_jv_summary')
-    updateExperimentStatus(experiment) # update the experiment status if missed somewhere
+    # update the experiment status if missed somewhere
+    updateExperimentStatus(experiment)
     try:
-        figures = jvBoxPlot(experiment_id, update_jv_summary)       # defined in utils.py
+        # defined in utils.py
+        figures = jvBoxPlot(experiment_id, update_jv_summary)
 
     except Exception as e:
         messages.error(request, f'Failed to generate charts: {str(e)}')
@@ -458,7 +461,8 @@ def experimentPageView(request, experiment_id):
                'voc_chart': voc_chart, 'ff_chart': ff_chart, 'pce_chart': pce_chart}
     return render(request, 'experiment-page.html', context)
 
-@ login_required(login_url='sign_in')
+
+@login_required(login_url='sign_in')
 def jv_curve_view(request):
 
     # Option B: Using encoded file_path
@@ -473,28 +477,26 @@ def jv_curve_view(request):
     if not os.path.exists(file_path):
         return HttpResponse("Invalid file path", status=400)
 
-    
-    
     # Read the data from the file
     try:
         # Open the file with 'latin-1' encoding and load it with np.genfromtxt
         with open(file_path, 'r', encoding='latin-1') as f:
-            data = np.genfromtxt(f, skip_header=35, dtype=float, delimiter='\t')  # loading txt file
+            data = np.genfromtxt(f, skip_header=35, dtype=float,
+                                 delimiter='\t')  # loading txt file
             split_file = []
 
-            
-           
-                
-        
         # Extract the voltage and current points
-        forward_voltage_points = data[:, 5] if np.isnan(data[0][4]) else data[:, 4]
-        forward_current_points = data[:, 6] if np.isnan(data[0][4]) else data[:, 5]
+        forward_voltage_points = data[:, 5] if np.isnan(
+            data[0][4]) else data[:, 4]
+        forward_current_points = data[:, 6] if np.isnan(
+            data[0][4]) else data[:, 5]
         reverse_voltage_points = data[:, 0]
-        reverse_current_points = data[:, 1] if np.isnan(data[0][2]) else data[:, 2]
-    
+        reverse_current_points = data[:, 1] if np.isnan(
+            data[0][2]) else data[:, 2]
+
     except Exception as e:
         return HttpResponse(f"Error reading file: {e}", status=500)
-    
+
     try:
         if file_path.endswith('.SEQ'):
             df = dataframe(file_path)
@@ -515,18 +517,20 @@ def jv_curve_view(request):
         shunt_fwd = df['Shunt Resistance Fwd'][0]
         series_rev = df['Series Resistance Rev'][0]
         series_fwd = df['Series Resistance Fwd'][0]
-        
+
     except Exception as e:
         return HttpResponse(f"Error parsing file: {e}", status=500)
-    
+
         # Generate the JV curve plot using Plotly
     fig = go.Figure()
 
     # Plot the forward scan
-    fig.add_trace(go.Scatter(x=forward_voltage_points, y=forward_current_points, mode='lines+markers', name='Forward Scan'))
+    fig.add_trace(go.Scatter(x=forward_voltage_points,
+                  y=forward_current_points, mode='lines+markers', name='Forward Scan'))
 
     # Plot the reverse scan
-    fig.add_trace(go.Scatter(x=reverse_voltage_points, y=reverse_current_points, mode='lines+markers', name='Reverse Scan'))
+    fig.add_trace(go.Scatter(x=reverse_voltage_points,
+                  y=reverse_current_points, mode='lines+markers', name='Reverse Scan'))
 
     # Update plot layout
     fig.update_layout(
@@ -558,7 +562,8 @@ def jv_curve_view(request):
             y=0.98,
             xanchor='right',
             yanchor='top',
-            bgcolor='rgba(255, 255, 255, 0.5)',  # Slightly transparent background for better readability
+            # Slightly transparent background for better readability
+            bgcolor='rgba(255, 255, 255, 0.5)',
             bordercolor='Black',
             borderwidth=0.5
         ),
@@ -574,9 +579,10 @@ def jv_curve_view(request):
         'plot_html': plot_html,
         'jsc_rev': jsc_rev, 'voc_rev': voc_rev, 'ff_rev': ff_rev, 'pce_rev': pce_rev, 'series_rev': series_rev, 'shunt_rev': shunt_rev,
         'jsc_fwd': jsc_fwd, 'voc_fwd': voc_fwd, 'ff_fwd': ff_fwd, 'pce_fwd': pce_fwd, 'series_fwd': series_fwd, 'shunt_fwd': shunt_fwd
-    })    
+    })
 
-@ login_required(login_url='sign_in')
+
+@login_required(login_url='sign_in')
 def experimentView(request, project_id):
     """
     View function for adding a new experiment to a project.
@@ -634,7 +640,7 @@ def experimentView(request, project_id):
     return render(request, 'experiment.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def updateExperimentView(request, experiment_id):
     """
     Updates an experiment with the given experiment_id using the provided form data.
@@ -702,30 +708,35 @@ def updateExperimentStatus(instance):
     experiment = instance
 
     # update stack status
-    experiment.experimentstatus.stacks = experiment.stack_set.count() == experiment.number_of_variables
+    experiment.experimentstatus.stacks = experiment.stack_set.count(
+    ) == experiment.number_of_variables
     experiment.experimentstatus.save()
 
     # update layer status
-    experiment.experimentstatus.layers = all(stack.layers.count() == stack.number_of_layers for stack in experiment.stack_set.all())
+    experiment.experimentstatus.layers = all(stack.layers.count(
+    ) == stack.number_of_layers for stack in experiment.stack_set.all())
     experiment.experimentstatus.save()
 
     # update coating parameters status
-    coating_parameters_status = all(layer.coating_parameters for stack in experiment.stack_set.all() for layer in stack.layers.all()) if experiment.experimentstatus.layers else False
+    coating_parameters_status = all(layer.coating_parameters for stack in experiment.stack_set.all(
+    ) for layer in stack.layers.all()) if experiment.experimentstatus.layers else False
     experiment.experimentstatus.coating_parameters = coating_parameters_status
     experiment.experimentstatus.save()
 
     # update formulation status
-    formulation_status = all(layer.formulation for stack in experiment.stack_set.all() for layer in stack.layers.all()) if experiment.experimentstatus.layers else False
+    formulation_status = all(layer.formulation for stack in experiment.stack_set.all(
+    ) for layer in stack.layers.all()) if experiment.experimentstatus.layers else False
     experiment.experimentstatus.formulations = formulation_status
     experiment.experimentstatus.save()
 
-    #update has_jv_files status
+    # update has_jv_files status
 
     if all(stack.jv_dir for stack in experiment.stack_set.all()):
         all_jv_summary_files = [os.path.join(
             settings.MEDIA_ROOT, stack.jv_dir, 'summary_jv.csv') for stack in experiment.stack_set.all()]
-    else :
-        raise Exception('address to stack JV Dir not found for experiment {} please check update experiment and update stack'.format(experiment.id) )
+    else:
+        raise Exception(
+            'address to stack JV Dir not found for experiment {} please check update experiment and update stack'.format(experiment.id))
 
     for file in all_jv_summary_files:
         if os.path.exists(file):
@@ -735,22 +746,21 @@ def updateExperimentStatus(instance):
 
             else:
                 experiment.experimentstatus.has_jv_files = False
-                break 
-
-        
+                break
 
     experiment.experimentstatus.save()
+
 
 def sendNotificationView(request, experiment_id):
     experiment = get_object_or_404(Experiment, pk=experiment_id)
     if experiment.notified:
-        messages.error(request, 'You have already shared this experiment with userss.')
+        messages.error(
+            request, 'You have already shared this experiment with userss.')
         return
     else:
         CONFIG_PATH = os.path.join(BASE_DIR, 'config.json')
         with open(CONFIG_PATH) as config_file:
             config = json.load(config_file)
-
 
         sender_email = config["EMAIL_HOST_USER"]
         password = config["EMAIL_HOST_PASSWORD"]
@@ -758,7 +768,8 @@ def sendNotificationView(request, experiment_id):
         port = config["EMAIL_PORT"]
 
         # get emails of all users
-        receiver_emails = list(User.objects.all().values_list('email', flat=True))
+        receiver_emails = list(
+            User.objects.all().values_list('email', flat=True))
 
         # Create server object
         server = smtplib.SMTP(smtp_server, port)
@@ -771,9 +782,9 @@ def sendNotificationView(request, experiment_id):
             message["From"] = sender_email
             message["To"] = receiver_email
             message["Subject"] = f"{experiment.author.first_name} {experiment.author.last_name} - A new Experiment has been added on Redmap"
-            
+
             # Text message with URL
-            body = f"Hello,\n\nA new experiment has been added on Redmap. Follow the link to see what amazing work {experiment.author.first_name} {experiment.author.last_name} has done with the experiment details here: https://redmap.xyz/experiment-page/{experiment.id}/  \n\nBest regards,\nReadmap Team\n All HAIL REDMAP!!!!!" 
+            body = f"Hello,\n\nA new experiment has been added on Redmap. Follow the link to see what amazing work {experiment.author.first_name} {experiment.author.last_name} has done with the experiment details here: https://redmap.xyz/experiment-page/{experiment.id}/  \n\nBest regards,\nReadmap Team\n All HAIL REDMAP!!!!!"
             message.attach(MIMEText(body, "plain"))
 
             try:
@@ -782,11 +793,13 @@ def sendNotificationView(request, experiment_id):
                 experiment.notified = True
                 experiment.save()
             except Exception as e:
-                messages.error(request, f'Failed to send email to {receiver_email}. Error: {str(e)}')
+                messages.error(
+                    request, f'Failed to send email to {receiver_email}. Error: {str(e)}')
         server.quit()
     return redirect('experiment_page', experiment_id)
 
-@ login_required(login_url='sign_in')
+
+@login_required(login_url='sign_in')
 def stackView(request):
     """
     View function for displaying and handling the creation of Stack objects.
@@ -801,7 +814,8 @@ def stackView(request):
     if request.GET.get('experiment'):
         experiment_id = request.GET.get('experiment')
         experiment = get_object_or_404(Experiment, pk=experiment_id)
-        form = StackForm(initial={'experiment': experiment, 'created': datetime.now()})
+        form = StackForm(
+            initial={'experiment': experiment, 'created': datetime.now()})
     else:
         form = StackForm(initial={'created': datetime.now()})
 
@@ -933,7 +947,7 @@ def updateStackView(request, stack_id):
     return render(request, 'stack.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def delete_stack_view(request, stack_id):
     """
     View function to handle the deletion of a Stack object.
@@ -972,7 +986,7 @@ def delete_stack_view(request, stack_id):
     return redirect('project-page', project_id=project_id)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def duplicateStackView(request, stack_id):
     stack = get_object_or_404(Stack, pk=stack_id)
     # duplicate stack with new name and add all the layers associated with the stack to the new stack
@@ -1008,7 +1022,7 @@ def duplicateStackView(request, stack_id):
     return redirect('project-page', project_id=experiment.project.pk)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def removeLayerFromStackView(request):
     stack_id = request.GET.get('stack')
     layer_id = request.GET.get('layer')
@@ -1020,7 +1034,7 @@ def removeLayerFromStackView(request):
     return redirect('project-page', project_id=experiment.project.pk)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def layerTypeView(request):
     layer_type = request.POST.get('layer_type')
     stack_id = request.POST.get('stack_id')
@@ -1030,12 +1044,12 @@ def layerTypeView(request):
         form_initial['created'] = datetime.now()
     else:
         form_initial = {'created': datetime.now()}
-    
+
     if layer_type == 'Surface Treatment':
-        return render(request, 'partials/surface-treatment.html', {'form': LayerForm(initial = form_initial, author=request.user )})
+        return render(request, 'partials/surface-treatment.html', {'form': LayerForm(initial=form_initial, author=request.user)})
     elif layer_type == 'Coating Layer':
         return render(request, 'partials/coating-layer.html',
-                      {'form': LayerForm(initial = form_initial, author=request.user), 'coating_parameters_form': CoatingParametersForm()})
+                      {'form': LayerForm(initial=form_initial, author=request.user), 'coating_parameters_form': CoatingParametersForm()})
 
 
 # defining global coating methods
@@ -1048,7 +1062,7 @@ coating_methods = {
 }
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def layerView(request):
     stack_id = request.GET.get('stack')
     if stack_id:
@@ -1057,10 +1071,10 @@ def layerView(request):
         form_initial['created'] = datetime.now()
     else:
         form_initial = {'created': datetime.now()}
-    
+
     form = LayerForm(request.POST or None,
                      initial=form_initial, author=request.user)
-    
+
     coating_parameters_form = CoatingParametersForm()
 
     if request.method == 'POST' and form.is_valid():
@@ -1091,7 +1105,6 @@ def layerView(request):
                 request, 'Selected coating method is not supported.')
             return redirect('layer')
 
-
     return render(request, 'layer.html', {
         'form': form,
         'coating_parameters_form': coating_parameters_form,
@@ -1105,7 +1118,7 @@ def redirect_to_project_page(stack, request):
     return redirect('project-page', project_id)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def updateLayerTypeView(request, layer_id):
     layer = get_object_or_404(Layer, pk=layer_id)
     layer_type = request.POST.get('layer_type')
@@ -1120,7 +1133,7 @@ def updateLayerTypeView(request, layer_id):
                       {'form': LayerForm(author=request.user, instance=layer), 'coating_parameters_form': CoatingParametersForm(instance=coating_parameters)})
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def updateLayerView(request, layer_id):
     layer = get_object_or_404(Layer, pk=layer_id)
 
@@ -1173,7 +1186,7 @@ def updateLayerView(request, layer_id):
     return render(request, 'update-layer.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def dryingProgramView(request):
     if request.method == 'POST':
         form = DryingProgramForm(request.POST)
@@ -1195,7 +1208,7 @@ def dryingProgramView(request):
     return render(request, 'drying-program.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def layerCompositionView(request):
 
     if request.method == 'POST':
@@ -1220,7 +1233,7 @@ def layerCompositionView(request):
     return render(request, 'layer-composition.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def dryingProgramStepView(request):
 
     form = DryingProgramStepForm(request.POST)
@@ -1241,7 +1254,7 @@ def dryingProgramStepView(request):
     return render(request, 'partials/drying-step-selection-field copy.html', {'form': DryingProgramForm(), 'message': message})
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def spinStep(request):
     form = SpinStepForm(request.POST)
     if form.is_valid():
@@ -1261,7 +1274,7 @@ def spinStep(request):
     return render(request, 'partials/spin-step-selection-field.html', {'form': form, 'message': message})
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def spinCoatingView(request):
 
     if request.method == 'POST':
@@ -1282,7 +1295,7 @@ def spinCoatingView(request):
     return render(request, 'spin-coating.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def updateSpinCoatingView(request, layer_id):
 
     layer = get_object_or_404(Layer, pk=layer_id)
@@ -1346,7 +1359,7 @@ def thermalEvaporationView(request):
     return render(request, 'thermal-evaporation.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def updateThermalEvaporationView(request, layer_id):
     layer = get_object_or_404(Layer, pk=layer_id)
     thermal_evaporation = layer.coatingparameters.thermal_evaporation.id
@@ -1362,7 +1375,7 @@ def updateThermalEvaporationView(request, layer_id):
     return render(request, 'thermal-evaporation.html', {'form': form, 'action': 'update'})
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def screenPrintingView(request):
 
     if request.method == 'POST':
@@ -1380,7 +1393,7 @@ def screenPrintingView(request):
     return render(request, 'screen-printing.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def infiltrationView(request):
 
     if request.method == 'POST':
@@ -1396,7 +1409,7 @@ def infiltrationView(request):
     return render(request, 'infiltration.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def slotDieCoatingView(request):
 
     if request.method == 'POST':
@@ -1412,7 +1425,7 @@ def slotDieCoatingView(request):
     return render(request, 'slot-die-coating.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def doctorBladeCoatingView(request):
 
     if request.method == 'POST':
@@ -1429,7 +1442,7 @@ def doctorBladeCoatingView(request):
     return render(request, 'doctor-blade-coating.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def sprayPyrolysisView(request):
 
     if request.method == 'POST':
@@ -1446,7 +1459,7 @@ def sprayPyrolysisView(request):
     return render(request, 'spray-pyrolysis.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def formulationView(request):
 
     if request.method == 'POST':
@@ -1480,7 +1493,7 @@ def formulationView(request):
     return render(request, 'formulation.html', context)
 
 
-@ login_required(login_url='sign-in')
+@login_required(login_url='sign-in')
 def updateFormulationView(request, formulation_id):
     formulation = Formulation.objects.get(id=formulation_id)
     formulation_components = FormulationComponent.objects.filter(
@@ -1567,7 +1580,7 @@ def updateFormulationView(request, formulation_id):
 
 ########################### Dashboard Start############################
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def dashboardView(request):
 
     if request.method == 'POST':
@@ -1590,10 +1603,10 @@ def dashboardView(request):
     context = {'users': users, 'experiments': experiments,
                'my_experiments': my_experiments,
                'projects': projects
-            #    'experiment_24_hours': experiment_24_hours,
-            #    'experiment_week': experiment_week,
-            #    'experiment_month': experiment_month
-            }
+               #    'experiment_24_hours': experiment_24_hours,
+               #    'experiment_week': experiment_week,
+               #    'experiment_month': experiment_month
+               }
     return render(request, 'dashboard.html', context)
 
 
@@ -1638,14 +1651,18 @@ def get_experiments_by_user(request):
 
     return JsonResponse(experiments_by_user, safe=False)
 
+
 def get_total_experiments(request):
     data = (Experiment.objects
-            .annotate(date=TruncDate('created'))  # Extracts the date from a DateTimeField
-            .values('date')                       # Groups by the newly created 'date' field
+            # Extracts the date from a DateTimeField
+            .annotate(date=TruncDate('created'))
+            # Groups by the newly created 'date' field
+            .values('date')
             .annotate(experiments=Count('id'))    # Counts experiments per day
             .order_by('date'))                    # Orders the results by date
     response = list(data)
     return JsonResponse(response, safe=False)
+
 
 def get_stacks(request):
 
@@ -1670,25 +1687,30 @@ def feedView(request):
             Q(objective__icontains=request.GET.get('q')) |
             Q(notes__icontains=request.GET.get('q')) |
             Q(author__first_name__icontains=request.GET.get('q')) |
-            Q(author__last_name__icontains=request.GET.get('q')) 
+            Q(author__last_name__icontains=request.GET.get('q'))
         )
 
     context = {'experiments': experiments}
 
     return render(request, 'feed.html', context)
 
+
 def fetch_comment(request, experiment_id):
     experiment = Experiment.objects.get(id=experiment_id)
-    comments = Comment.objects.filter(Experiment=experiment).order_by('-created')
-    
+    comments = Comment.objects.filter(
+        Experiment=experiment).order_by('-created')
+
     return render(request, 'partials/comment_box.html', {'experiment': experiment, 'comments': comments})
+
+
 def add_comment(request, experiment_id):
     experiment = Experiment.objects.get(id=experiment_id)
-    comments = Comment.objects.filter(Experiment=experiment).order_by('-created')
+    comments = Comment.objects.filter(
+        Experiment=experiment).order_by('-created')
     if request.method == 'POST':
         comment = request.POST.get('comment')
         if comment == '':
-            return render(request ,'partials/comments_list.html', {'experiment': experiment, 'comments': comments})    
+            return render(request, 'partials/comments_list.html', {'experiment': experiment, 'comments': comments})
 
         new_comment = Comment.objects.create(
             Experiment=experiment,
@@ -1702,15 +1724,16 @@ def add_comment(request, experiment_id):
         with open(CONFIG_PATH) as config_file:
             config = json.load(config_file)
 
-
         sender_email = config["EMAIL_HOST_USER"]
         password = config["EMAIL_HOST_PASSWORD"]
         smtp_server = "smtp.gmail.com"
         port = config["EMAIL_PORT"]
 
         # get emails of all users
-        receiver_emails = list(set(comment.author.email for comment in comments))# people who have commnented on this experiment before
-        
+        # people who have commnented on this experiment before
+        receiver_emails = list(
+            set(comment.author.email for comment in comments))
+
         # remove the author of the experiment if it is in the list
         if experiment.author.email in receiver_emails:
             receiver_emails.remove(experiment.author.email)
@@ -1731,21 +1754,22 @@ def add_comment(request, experiment_id):
                 message["From"] = sender_email
                 message["To"] = receiver_email
                 message["Subject"] = f"{new_comment.author.first_name} {new_comment.author.last_name} - Added a Comment on experiment {experiment.objective}"
-                
+
                 # Text message with URL
-                body = f"Hello,\n\n {new_comment.author.first_name} {new_comment.author.last_name} also commented on experiment {experiment.objective}. You can view the comment here: https://redmap.xyz/experiment-page/{experiment.id}/  \n\nBest regards,\nReadmap Team\n All HAIL REDMAP!!!!!" 
+                body = f"Hello,\n\n {new_comment.author.first_name} {new_comment.author.last_name} also commented on experiment {experiment.objective}. You can view the comment here: https://redmap.xyz/experiment-page/{experiment.id}/  \n\nBest regards,\nReadmap Team\n All HAIL REDMAP!!!!!"
                 message.attach(MIMEText(body, "plain"))
 
                 try:
                     text = message.as_string()
                     server.sendmail(sender_email, receiver_email, text)
                 except Exception as e:
-                    messages.error(request, f'Failed to send email to {receiver_email}. Error: {str(e)}')
-        
+                    messages.error(
+                        request, f'Failed to send email to {receiver_email}. Error: {str(e)}')
+
         # also send an email to the author of the experiment that there is a new comment on their experiment
         if experiment.author.email != new_comment.author.email:
             message = MIMEMultipart()
-            message["From"] = sender_email 
+            message["From"] = sender_email
             message["To"] = experiment.author.email
             message["Subject"] = f"{new_comment.author.first_name} {new_comment.author.last_name} - Added a Comment on experiment {experiment.objective}"
 
@@ -1757,15 +1781,16 @@ def add_comment(request, experiment_id):
                 text = message.as_string()
                 server.sendmail(sender_email, experiment.author.email, text)
             except Exception as e:
-                messages.error(request, f'Failed to send email to {receiver_email}. Error: {str(e)}')
-
+                messages.error(
+                    request, f'Failed to send email to {receiver_email}. Error: {str(e)}')
 
         server.quit()
 
-
-    return render(request ,'partials/comments_list.html', {'experiment': experiment, 'comments': comments})    
+    return render(request, 'partials/comments_list.html', {'experiment': experiment, 'comments': comments})
 ########################### Home End############################
-@ login_required(login_url='sign_in')
+
+
+@login_required(login_url='sign_in')
 def fileManager(request, path=''):
     if path == '':
         return redirect('file_manager', path='users/' + request.user.username)
@@ -1803,7 +1828,7 @@ def fileManager(request, path=''):
     return render(request, 'file-manager.html', context)
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def rename(request):
     if request.method == 'POST':
         selected_items = request.POST.getlist('selected_items_rename')
@@ -1825,7 +1850,7 @@ def rename(request):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def uploadFiles(request):
     if request.method == 'POST':
 
@@ -1850,7 +1875,7 @@ def uploadFiles(request):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def newFolder(request):
     if request.method == 'POST':
         current_directory = request.POST.get('current_directory')
@@ -1866,7 +1891,7 @@ def newFolder(request):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def deleteFiles(request):
     if request.method == 'POST':
         selected_items = request.POST.get('selected_items')
@@ -1892,7 +1917,7 @@ def deleteFiles(request):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@ login_required(login_url='sign_in')
+@login_required(login_url='sign_in')
 def downloadFiles(request):
     if request.method == 'POST':
         selected_items = request.POST.get('selected_items')
